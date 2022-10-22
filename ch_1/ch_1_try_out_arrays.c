@@ -186,29 +186,39 @@ int main() {
 
 	// populate array with zeros, with size check
 	cur_len = SMALL;
-	for (i=0; i<SMALL; i++) {
+	for (i = 0; i < SMALL; i++) {
 		sdigit[i] = 'a';
 	}
 
 	// print all values in array
 	printf("sdigits array:");
-	for (i=0; i<SMALL; i++) {
+	for (i = 0; i < SMALL; i++) {
 		printf(" %d", sdigit[i]);
 	}
 
 	copy(sdigit, SMALL);
-}
-/*
-	// print all values in array
-	printf("bdigits array:");
-	for (i=0; i<BIG; i++) {
-		printf(" %d", bdigit[i]);
+
+	printf("\narray after copy:");
+	for (i = 0; i < SMALL * 2; i++) {
+		printf(" %d", sdigit[i]);
 	}
 }
-*/
+
 
 void copy(char from[], int len) {
+	int i;
+	int new_len;
 
-	//for (int i = 0; i < len; i++)
-		//to[i] = from[i];
+	new_len = len * 2;
+	char temp[new_len];
+
+	for (i = 0; i < len; i++)
+		temp[i] = from[i];
+
+	printf("\ntemp array:");
+	for (i = 0; i < new_len; i++) {
+		printf(" %d", temp[i]);
+	}
+
+	from = temp;
 }
