@@ -177,15 +177,15 @@ int resize(int ndigit[], int cur_len) {
 #define SMALL 10
 #define BIG 12
 
-void copy(char to[], char from[], int len);
+void copy(char from[], int len);
 
 int main() {
 
-	int i;
+	int i, cur_len;
 	char sdigit[SMALL];
-	char bdigit[BIG];
 
 	// populate array with zeros, with size check
+	cur_len = SMALL;
 	for (i=0; i<SMALL; i++) {
 		sdigit[i] = 'a';
 	}
@@ -196,17 +196,19 @@ int main() {
 		printf(" %d", sdigit[i]);
 	}
 
-	copy(bdigit, sdigit, SMALL);
-
+	copy(sdigit, SMALL);
+}
+/*
 	// print all values in array
 	printf("bdigits array:");
 	for (i=0; i<BIG; i++) {
 		printf(" %d", bdigit[i]);
 	}
 }
+*/
 
-void copy(char to[], char from[], int len) {
+void copy(char from[], int len) {
 
-	for (int i = 0; i < len; i++)
-		to[i] = from[i];
+	//for (int i = 0; i < len; i++)
+		//to[i] = from[i];
 }
