@@ -656,11 +656,6 @@ int main() {
 	max = 0;
 	// getaline() as side effect creates 'line' by assigning characters from getchar()
 	while ((len = getaline(line, MAXLINE)) > 0) {
-		// check if line was longer than allowed size
-		if ((len == MAXLINE) && (line[MAXLINE] != '\0')) {
-			char line[MAXLINE*2];
-
-		}
 		// check and handle if line is the new longest
 		if (len > max) {
 			max = len;
@@ -703,13 +698,6 @@ void copy(char to[], char from[]) {
 }
 
 //////////////// END DONE 10/16/22 ////////////////
-
-/****************************************
-experiments with arrays and resizing, related to 1-16
-*/
-
-
-
 
 
 /****************************************
