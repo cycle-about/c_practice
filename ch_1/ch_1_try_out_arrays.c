@@ -171,13 +171,87 @@ int resize(int ndigit[], int cur_len) {
 // make a pointer to be the variable 'in use' and just make new arrays for it to point to
 // question though: pointers are not introduced until chapter 5, should there be a way to do this without them, shit
 
+/*
+6. try using copy() method on p29 to handle the transfer to temp
+ this works in some ways
+	
+strange finding with this setup 
+	before copy: 97 97 97 97 97 97 97 97 97 97
+	temp array: 97 97 97 97 97 97 97 97 97 97 98 98 98 98 98 98 98 98 98 98
+	after copy: 97 97 97 97 97 97 97 97 97 97 0 58 30 46 82 125 -100 -93 1 0
 
-// 6. try using copy() method on p29 to handle the transfer to temp
+Assessment of what happened here: not erroring out, but not doing as expected
+
 #include <stdio.h>
 #define SMALL 10
 #define BIG 12
 
-void copy(char from[], int len);
+int copy(char from[], int len);
+
+int main() {
+
+	int i, cur_len;
+	char sdigit[SMALL];
+
+	// populate array with zeros, with size check
+	cur_len = SMALL;
+	for (i = 0; i < SMALL; i++) {
+		sdigit[i] = 'a';
+	}
+
+	cur_len = copy(sdigit, SMALL);
+
+	printf("\nafter copy:");
+	for (i = 0; i < cur_len; i++) {
+		printf(" %d", sdigit[i]);
+	}
+}
+
+
+int copy(char from[], int len) {
+	int i;
+	int new_len;
+
+	// print all values in array
+	printf("before copy:");
+	for (i = 0; i < len; i++) {
+		printf(" %d", from[i]);
+	}
+
+	new_len = len * 2;
+	char temp[new_len];
+
+	for (i = 0; i < new_len; i++)
+		if (i < len)
+			temp[i] = from[i];
+		else
+			temp[i] = 'b';
+
+	printf("\ntemp array:");
+	for (i = 0; i < new_len; i++) {
+		printf(" %d", temp[i]);
+	}
+
+	from = temp;
+	return new_len;
+}
+
+*/
+
+/* 7. Experiments with what happens when array modified by method, other than resize
+Conclusion: yes, if just reassign elements in method, orig array changes
+
+Additional conclusion: seems that yes the original array is only the originally defined size
+
+Can arrays be reassigned (same size) with a '='? ****NO****
+
+*/
+
+#include <stdio.h>
+#define SMALL 10
+#define BIG 12
+
+int copy(char from[], int len);
 
 int main() {
 
@@ -191,29 +265,36 @@ int main() {
 	}
 
 	// print all values in array
-	printf("sdigits array:");
+	printf("before method call:");
 	for (i = 0; i < SMALL; i++) {
 		printf(" %d", sdigit[i]);
 	}
 
-	copy(sdigit, SMALL);
+	cur_len = copy(sdigit, SMALL);
 
-	printf("\narray after copy:");
-	for (i = 0; i < SMALL * 2; i++) {
+	printf("\nafter method call:");
+	for (i = 0; i < SMALL; i++) {
 		printf(" %d", sdigit[i]);
 	}
 }
 
 
-void copy(char from[], int len) {
+int copy(char from[], int len) {
 	int i;
 	int new_len;
 
 	new_len = len * 2;
-	char temp[new_len];
+	char temp[len];
 
-	for (i = 0; i < len; i++)
-		temp[i] = from[i];
+	for (i = 0; i < len; i++) {
+		temp[i] = 'c';
+	}
+
+	//for (i = 0; i < new_len; i++)
+	//	if (i < len)
+	//		temp[i] = from[i];
+	//	else
+	//		temp[i] = 'b';
 
 	printf("\ntemp array:");
 	for (i = 0; i < new_len; i++) {
@@ -221,4 +302,10 @@ void copy(char from[], int len) {
 	}
 
 	from = temp;
+	return len;
 }
+
+/*
+end conclusions: did google 'c how to resize arrays.' Can't. Methods to work around this are calloc, char*, realloc
+reread what the question is looking for. unclear if should be using malloc etc already
+*/

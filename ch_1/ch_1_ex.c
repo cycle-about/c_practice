@@ -639,7 +639,6 @@ void copy(char to[], char from[]) {
 /****************************************
 example page 29 print the longest line of input, up to 1000 char
 version with my comments
-*/
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
@@ -696,9 +695,14 @@ void copy(char to[], char from[]) {
 	while ((to[i] = from[i]) != '\0')
 		++i;
 }
+*/
 
 //////////////// END DONE 10/16/22 ////////////////
 
+//////////////// 10/22/22 ////////////////
+
+// Lot of arrays trying out in separate doc
+// 
 
 /****************************************
 1-16 revise main of longest-line so it will:
@@ -707,13 +711,18 @@ void copy(char to[], char from[]) {
 Function copy() shows how arrays (unlike other vars) are passed by reference not value, and so the originals are changeable within a function: the passed array
 
 Design hint in book: 'by testing the length and the last character returned, main can determine whether the line was too long, and cope as it wishes'
+
+Revised interpretation of this:
+	1. once exceeds maxline, don't copy, ONLY count the length
+	2. unsure what printing means, just print to maxline
 */
 
 #include <stdio.h>
-#define MAXLINE 1000 // maximum chars in a line
+#define MAXLINE 10 // maximum chars in a line
 
 int getaline(char line[], int maxline);
 void copy(char to[], char from[]);
+void copy_safe(char to[], char from[], int lim);
 
 int main() {
 	int len;    // current line length
@@ -722,50 +731,54 @@ int main() {
 	char longest[MAXLINE];    // longest line saved here
 
 	max = 0;
-	// getaline() as side effect creates 'line' by assigning characters from getchar()
 	while ((len = getaline(line, MAXLINE)) > 0) {
-		// check if line was longer than allowed size
-		if ((len == MAXLINE) && (line[MAXLINE] != '\0')) {
-			char line[MAXLINE*2];
-
-		}
-		// check and handle if line is the new longest
+		printf("Line length: %d\n", len);
 		if (len > max) {
+			printf("New longest found\n");
 			max = len;
-			// original arrays are modifiable by the function (unlike other var types)
-			// even though no return value, 'longest' has contents of 'line' copied into it
-			copy(longest, line);
+			if (len < MAXLINE)
+				copy(longest, line);
+			else
+				copy_safe(longest, line, MAXLINE);
 		}
 	}
 	if (max > 0)    // there was a line
+		printf("Length of longest line: %d\n", max);
+		printf("Longest line printed to %d characters\n", MAXLINE);
 		printf("%s", longest);
 	return 0;
 }
 
-// get length of a line, up to length 'lim'
-// it will not copy past the size limit
+// read a line into s, return length
 int getaline(char s[], int lim) {
 	int c, i;
 
-	// add chars to array until hit size limit, EOF or newline
-	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
-		s[i] = c;
-	// if hit newline, add it to array, iterate count
+	// for (i = 0; i<lim-1 && (c=getchar())!=EOF && c !='\n'; ++i)
+	for (i = 0; (c=getchar())!=EOF && c !='\n'; ++i)
+		if (i < lim - 1)
+			s[i] = c;
 	if (c == '\n') {
 		s[i] = c;
 		++i;
 	}
-	// add terminal character to indicate end of line, as used by 'copy()'
 	s[i] = '\0';
 	return i;
 }
 
-// copy 'from' into 'to'
-// user already knows size needed for 'to', so do NOT check size here
+// copy 'from' into 'to', assumes 'to' is big enough
 void copy(char to[], char from[]) {
 	int i;
 
 	i = 0;
 	while ((to[i] = from[i]) != '\0')
+		++i;
+}
+
+// copies array, only to index 'lim'
+void copy_safe(char to[], char from[], int lim) {
+	int i;
+
+	i = 0;
+	while (i < lim && (to[i] = from[i]) != '\0')
 		++i;
 }
