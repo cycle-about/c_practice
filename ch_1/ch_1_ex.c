@@ -697,12 +697,9 @@ void copy(char to[], char from[]) {
 }
 */
 
-//////////////// END DONE 10/16/22 ////////////////
-
 //////////////// 10/22/22 ////////////////
 
-// Lot of arrays trying out in separate doc
-// 
+// Lot of trying out with arrays in separate doc
 
 /****************************************
 1-16 revise main of longest-line so it will:
@@ -715,7 +712,7 @@ Design hint in book: 'by testing the length and the last character returned, mai
 Revised interpretation of this:
 	1. once exceeds maxline, don't copy, ONLY count the length
 	2. unsure what printing means, just print to maxline
-*/
+
 
 #include <stdio.h>
 #define MAXLINE 10 // maximum chars in a line
@@ -781,4 +778,96 @@ void copy_safe(char to[], char from[], int lim) {
 	i = 0;
 	while (i < lim && (to[i] = from[i]) != '\0')
 		++i;
+}
+*/
+
+//////////////// 10/23/22 ////////////////
+
+// more practice in separate doc with array read, write, and print
+
+/****************************************
+1-17 print all input lines longer than 80 characters
+-> making this 20 char for simpler testing
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+#define PRINT_LEN 20
+
+int getaline(char line[], int maxline);
+void copy(char to[], char from[]);
+
+int main() {
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+
+	// getaline() as side effect creates 'line' by assigning characters from getchar()
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		if (len > PRINT_LEN) {
+			printf("%s", line);
+		}
+	}
+	return 0;
+}
+
+// get length of a line, up to length 'lim'
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// if hit newline, add it to array, iterate count
+	if (c == '\n') {
+		s[i] = c;
+		++i;
+	}
+	// add terminal character to indicate end of line, as used by 'copy()'
+	s[i] = '\0';
+	return i;
+}
+*/
+
+/****************************************
+1-18 remove trailing blanks and tabs from input lines, and delete blank lines
+
+Surprising finding: empty character constant '' causes an error
+*/
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+
+int getaline(char line[], int maxline);
+void copy(char to[], char from[]);
+
+int main() {
+	int i;
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+
+	// getaline() as side effect creates 'line' by assigning characters from getchar()
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		printf("Before: %s<END>\n", line);
+		for (i = len-1; i >=0; i--) {
+			if (line[i] == ' ' || line[i] == '\t') {
+				line[i] = '\0';
+				//printf("remove one ");
+			} else {
+				break;
+			}
+		}
+		printf("After: %s<END>\n", line);
+	}
+	return 0;
+}
+
+// removed part of adding newline to end, to better verify line-end printing
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
 }

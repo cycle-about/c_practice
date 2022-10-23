@@ -245,8 +245,6 @@ Additional conclusion: seems that yes the original array is only the originally 
 
 Can arrays be reassigned (same size) with a '='? ****NO****
 
-*/
-
 #include <stdio.h>
 #define SMALL 10
 #define BIG 12
@@ -304,8 +302,102 @@ int copy(char from[], int len) {
 	from = temp;
 	return len;
 }
+*/
 
 /*
 end conclusions: did google 'c how to resize arrays.' Can't. Methods to work around this are calloc, char*, realloc
 reread what the question is looking for. unclear if should be using malloc etc already
 */
+
+/*
+///////////////////////// additional check 10/23/22 /////////////////////////
+confirm impression from yesterday
+	can READ outside of array bounds without error (though is junk),
+	but errors out if try to write out of bounds
+
+
+#include <stdio.h>
+#define SMALL 4
+#define BIG 6
+
+int main() {
+
+	int i;
+	char sdigit[SMALL];
+
+	// populate array up to allowed bounds
+	for (i = 0; i < SMALL; i++) {
+		sdigit[i] = '9';
+	}
+
+	// prints as expected
+	printf("Print to allowed bounds (length %d):\n\t", SMALL);
+	for (i = 0; i < SMALL; i++) {
+		printf(" %d", sdigit[i]);
+	}
+
+	// works but values outside of assigned are garbage
+	printf("\nPrint OUTSIDE of allowed bounds (length %d):\n\t", BIG);
+	for (i = 0; i < BIG; i++) {
+		printf(" %d", sdigit[i]);
+	}
+
+	printf("\nTry to assign OUTSIDE of allowed bounds:\n");
+	// ERRORS OUT BEFORE EXECUTING FIRST PRINT STATEMENT OF THIS LOOP
+	for (i = 0; i < BIG; i++) {
+		printf("\tAbout to assign to index %d", i);
+		sdigit[i] = '2';
+	}
+}
+*/
+
+
+/* additional test: printing char[] elements and whole array
+
+when initialized with 'c'
+	Elements as digits
+		 99 99 99 99 99 99
+	Array as string
+		cccccc
+--------
+
+# when initialized with '2'
+	Elements as digits
+		 50 50 50 50 50 50
+	Array as string
+		222222
+
+%d for a char prints the ASCII decimal value
+%s prints the digit
+
+*/
+
+#include <stdio.h>
+#define SIZE 6
+int main() {
+
+	int i;
+	char sdigit[SIZE];
+
+	// populate array allowed bounds
+	for (i = 0; i < SIZE; i++) {
+		sdigit[i] = '2';
+	}
+
+	// print each element as digit
+	printf("Elements as digits\n\t");
+	for (i = 0; i < SIZE; i++) {
+		printf(" %d", sdigit[i]);
+	}
+
+	// print each element as string
+	// ERRORS OUT: 'Segmentation fault (core dumped)'
+	//printf("\nElements as string\n\t");
+	//for (i = 0; i < SIZE; i++) {
+	//	printf(" %s", sdigit[i]);
+	//}
+
+	// print whole array as string
+	printf("\nArray as string\n\t");
+	printf("%s", sdigit);
+}
