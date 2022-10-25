@@ -635,7 +635,6 @@ void copy(char to[], char from[]) {
 */
 
 
-
 /****************************************
 example page 29 print the longest line of input, up to 1000 char
 version with my comments
@@ -831,7 +830,7 @@ int getaline(char s[], int lim) {
 1-18 remove trailing blanks and tabs from input lines, and delete blank lines
 
 Surprising finding: empty character constant '' causes an error
-*/
+	Instead, use terminal string character '\0'
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
@@ -871,3 +870,121 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
+*/
+
+/****************************************
+1-19 write function reverse(s) that reverses character string: use it to write program that reverses input a line at a time
+
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+
+int getaline(char line[], int maxline);
+
+int main() {
+	int i, j;
+	int len;    // length of input line
+	char line[MAXLINE];    // current input line
+	char reversed[MAXLINE];
+
+	// getaline() as side effect creates 'line' by assigning characters from getchar()
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		for (i = len-1, j=0; i >=  0; i--, j++) {
+			reversed[j] = line[i];
+		}
+		reversed[j] = '\0';
+		printf("Reversed: %s\n", reversed);
+	}
+	return 0;
+}
+
+// removed part of adding newline to end, to better verify line-end printing
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
+}
+*/
+
+/****************************************
+1-20 write program 'detab' that replaces tabs in input with the proper number of blanks to space to the next tab. Assume a fixed set of tab stops, say every n columns. Should 'n' be a variable or a symbolic parameter?
+
+Approach
+	Get a input of input
+	Look for '\t'
+	When find '/t': count chars up until that point, to get its location
+	Have a modulus operation to get remainder to next tab stop (choice: every 4 char is tab stop)
+	Replace the '\t' with that many spaces
+*/
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+#define TAB_STOP 4   // spaces between each tab stop
+
+int getaline(char line[], int maxline);
+void detab(char from[], int len, char to[]);
+void add_space(char to[], int start, int spaces);
+
+int main() {
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+	char detabbed[MAXLINE]; // tab-stop-adjusted version of input line
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		detab(line, len, detabbed);
+		printf("Final string: %s0\n", detabbed);
+	}		
+	return 0;
+}
+
+// removed part of adding newline to end, to better verify line-end printing
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
+}
+
+// change tabs to next tab stop, and write into 'detabbed'
+void detab(char orig[], int len, char detabbed[]) {
+	int i;
+	int j; // index in detabbed array
+	int spaces; // spaces to next tab stop
+
+	spaces = 0;
+	for (i = 0, j = 0; i < len ; i++) {
+		printf("i value: %d\n", i);
+		printf("j value: %d\n", j);
+		printf("char in orig: ");
+		putchar(orig[i]);
+		printf("\n");
+		if (orig[i] == '\t') {
+			spaces = 4 - (i % TAB_STOP);
+			add_space(detabbed, j, spaces);
+			j += spaces;
+		} else
+			printf("adding non-tab char");
+			detabbed[j] = orig[i];
+			j++;
+	}
+	detabbed[j] = '\0';
+}
+
+void add_space(char detabbed[], int start, int spaces) {
+	printf("spaces added to j: %d\n", spaces);
+	int i;
+
+	for (i = 0; i < spaces; i++) {
+		detabbed[start + i] = '+';
+	}
+}
+
