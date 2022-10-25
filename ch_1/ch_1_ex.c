@@ -968,11 +968,13 @@ void detab(char orig[], int len, char detabbed[]) {
 		putchar(orig[i]);
 		printf("\n");
 		if (orig[i] == '\t') {
-			spaces = 4 - (i % TAB_STOP);
+			// spaces = 4 - (i % TAB_STOP);
+			space = 2;
 			add_space(detabbed, j, spaces);
 			j += spaces;
 		} else
 			printf("adding non-tab char");
+
 			detabbed[j] = orig[i];
 			j++;
 	}
