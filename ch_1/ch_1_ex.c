@@ -924,7 +924,7 @@ Approach
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
-#define TAB_STOP 4   // spaces between each tab stop
+#define TAB_STOP 8   // spaces between each tab stop
 
 int getaline(char line[], int maxline);
 void detab(char from[], int len, char to[]);
@@ -937,7 +937,7 @@ int main() {
 
 	while ((len = getaline(line, MAXLINE)) > 0) {
 		detab(line, len, detabbed);
-		printf("Final string: %s\n", detabbed);
+		printf("%s\n", detabbed);
 	}		
 	return 0;
 }
@@ -962,19 +962,17 @@ void detab(char orig[], int len, char detabbed[]) {
 
 	spaces = 0;
 	for (i = 0, j = 0; i < len ; i++) {
-		// printf("i value: %d\n", i);
-		// printf("j value: %d\n", j);
-		// printf("    char in orig ascii: %d\n", orig[i]);
-		// putchar(orig[i]);
-		// printf("\n");
 		if (orig[i] == '\t') {
-			spaces = 4 - (i % TAB_STOP);
+			spaces = TAB_STOP - (i % TAB_STOP);
+			// todo messy but have not come up with another way
+			if (spaces == TAB_STOP)
+				spaces = 0;
 			add_space(detabbed, j, spaces);
 			j += spaces;
 		} else {
-			printf("    added from orig: ");
-			putchar(orig[i]);
-			printf(", at j[%d]\n", j);
+			// printf("    added from orig: ");
+			// putchar(orig[i]);
+			// printf(", at j[%d]\n", j);
 			detabbed[j] = orig[i];
 			j++;
 		}
@@ -987,8 +985,8 @@ void add_space(char detabbed[], int start, int spaces) {
 	int i;
 
 	for (i = 0; i < spaces; i++) {
-		printf("    space added to j[%d]\n", start+i);
-		detabbed[start + i] = '+';
+		// printf("    space added to j[%d]\n", start+i);
+		detabbed[start + i] = ' ';
 	}
 }
 

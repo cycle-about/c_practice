@@ -370,7 +370,7 @@ when initialized with 'c'
 %d for a char prints the ASCII decimal value
 %s prints the digit
 
-*/
+
 
 #include <stdio.h>
 #define SIZE 6
@@ -400,4 +400,20 @@ int main() {
 	// print whole array as string
 	printf("\nArray as string\n\t");
 	printf("%s", sdigit);
+}
+*/
+
+/////////////// test with modulus ///////////////
+
+#include <stdio.h>
+#define TAB_STOP 4
+
+int main() {
+	int mod, i;
+
+	for (i = 0; i < 20; i++) {
+		mod = 4 - (i % TAB_STOP);
+		printf("%d ", mod);
+	}
+	printf("\n");
 }
