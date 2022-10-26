@@ -1020,8 +1020,8 @@ Approach
 
 int getaline(char line[], int maxline);
 void entab(char orig[], int len, char entabbed[]);
+int handle_spaces(char to[], int spaces, int start);
 void add_char(char to[], char c, int num, int start);
-int handle_spaces(char[to], int spaces)
 
 int main() {
 	int len;    // current line length
@@ -1041,9 +1041,7 @@ void entab(char orig[], int len, char entabbed[]) {
 	int i; 				// index in orig array
 	int j; 				// index in entabbed array
 	int spaces; 		// count of spaces in a row in orig array
-	int tab_rep; 		// count of tabs to replace to entabbed array
-	int space_rep;  	// count of spaces to replace to entabbed array
-	int chars_added
+	int chars_added;
 
 	spaces = 0;
 	in_blanks = FALSE;
@@ -1058,25 +1056,17 @@ void entab(char orig[], int len, char entabbed[]) {
 		// first non-blank after blank(s)
 		} else if (orig[i] != ' ' && in_blanks == TRUE) {
 			in_blanks = FALSE;
-			// printf("orig spaces in a row: %d\n", spaces);
-			chars_added = handle_space(entabbed, spaces);
+			chars_added = handle_spaces(entabbed, spaces, j);
 			j += chars_added;
-			// printf("    iterated value of j: %d\n", j);
-			// printf("    non-blank added after spaces: ");
-			// putchar(orig[i]);
-			// printf("\n");
 			entabbed[j] = orig[i]; // add the non-blank char
 			j++;
 		// another non-blank after a non-blank
 		} else if (orig[i] != ' ' && in_blanks == FALSE){
-			printf("    added from orig: ");
-			putchar(orig[i]);
-			printf(", at j[%d]\n", j);
 			entabbed[j] = orig[i];
 			j++;
 		// end of line, with trailing spaces
 		} else if (orig[i] == '\0' && in_blanks == TRUE) {
-			handle_spaces(entabbed, spaces)
+			handle_spaces(entabbed, spaces, j);
 			entabbed[j] = orig[i];
 		// end of line, no trailing spaces
 		} else if (orig[i] == '\0' && in_blanks == FALSE) {
@@ -1086,13 +1076,14 @@ void entab(char orig[], int len, char entabbed[]) {
 }
 
 // returns count of chars added to array
-int handle_spaces(char[to], int spaces) {
+int handle_spaces(char to[], int spaces, int start) {
+	int tab_rep; 		// count of tabs to replace to entabbed array
+	int space_rep;  	// count of spaces to replace to entabbed array
+
 	tab_rep = spaces / TAB_STOP;
 	space_rep = spaces % TAB_STOP;
-	// printf("tabs to add: %d\n", tab_rep);
-	// printf("spaces to add: %d\n", space_rep);
-	add_char(to, '\t', tab_rep, j);
-	add_char(to, ' ', space_rep, (j + tab_rep))s;
+	add_char(to, '\t', tab_rep, start);
+	add_char(to, ' ', space_rep, (start + tab_rep));
 	return tab_rep + space_rep;
 }
 
@@ -1101,7 +1092,6 @@ void add_char(char to[], char c, int num, int start) {
 	int i;
 
 	for (i = 0; i < num; i++) {
-		// printf("    ascii %d added at j[%d]\n", c, start+i);
 		to[start + i] = c;
 	}
 }
