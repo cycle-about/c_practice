@@ -911,6 +911,8 @@ int getaline(char s[], int lim) {
 }
 */
 
+//////////////// 10/25/22 ////////////////
+
 /****************************************
 1-20 write program 'detab' that replaces tabs in input with the proper number of blanks to space to the next tab. Assume a fixed set of tab stops, say every n columns. Should 'n' be a variable or a symbolic parameter?
 
@@ -920,7 +922,7 @@ Approach
 	When find '/t': count chars up until that point, to get its location
 	Have a modulus operation to get remainder to next tab stop (choice: every 4 char is tab stop)
 	Replace the '\t' with that many spaces
-*/
+
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
@@ -981,7 +983,6 @@ void detab(char orig[], int len, char detabbed[]) {
 }
 
 void add_space(char detabbed[], int start, int spaces) {
-	printf("    spaces to add to j: %d\n", spaces);
 	int i;
 
 	for (i = 0; i < spaces; i++) {
@@ -989,4 +990,110 @@ void add_space(char detabbed[], int start, int spaces) {
 		detabbed[start + i] = ' ';
 	}
 }
+*/
 
+//////////////// NEXT ////////////////
+
+
+/****************************************
+1-21 write program 'entab' that replaces strings of blanks by the minimum number of tabs and blanks to achieve the same spacing. Use the same tab stops as for 'detab'. When either a tab or a single blank would suffice to reach a tab stop, which should be given preference?
+
+Approach
+	Get an input line
+	Read input line, copy into other array, and stop and check at each space (' ')
+		Get the number of spaces in a row
+		Floor division by TAB_SPACE to get number of tab replacements
+		Modulo division by TAB_SPACE to get number of space replacements
+		Write that number of spaces and tabs into
+		---- handle array counters ----
+		Increment the 'to' array counter by tabs + spaces added
+		Increment the 'from' counter by the original space found
+	Resume reading the line
+	Print the entabbed line
+*/
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+#define TAB_STOP 8   // spaces between each tab stop
+#define TRUE 1
+#define FALSE 0
+
+int getaline(char line[], int maxline);
+void entab(char orig[], int len, char entabbed[]);
+void add_char(char to[], int start, char c, int num);
+
+int main() {
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+	char entabbed[MAXLINE]; // tab-stop-adjusted version of input line
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		entab(line, len, entabbed);
+		// printf("%s\n", entabbed);
+	}		
+	return 0;
+}
+
+
+// change tabs to next tab stop, and write into 'entabbed'
+void entab(char orig[], int len, char entabbed[]) {
+	int in_blanks; 		// boolean for whether in string of blanks
+	int i; 				// index in orig array
+	int j; 				// index in entabbed array
+	int spaces; 		// count of spaces in a row in orig array
+	// int add_tabs; 		// count of tabs to add to entabbed array
+	// int add_spaces; 	// count of spaces to add to entabbed array
+
+	spaces = 0;
+	in_blanks = FALSE;
+	for (i = 0, j = 0; i < len ; i++) {
+		// prior was non-blank, current is blank
+		if (orig[i] == ' ' && in_blanks == FALSE) {
+			in_blanks = TRUE;
+			spaces = 1;
+		// prior was blank, current is also blank
+		} else if (orig[i] == ' ' && in_blanks == TRUE) {
+			spaces++;
+		// prior was blank, current is NOT blank
+		} else if (orig[i] != ' ' && in_blanks == TRUE) {
+			in_blanks = FALSE;
+			printf("spaces in a row: %d\n", spaces);
+			// spaces = TAB_STOP - (i % TAB_STOP);
+			// todo messy but have not come up with another way
+			// if (spaces == TAB_STOP)
+			// 	spaces = 0;
+			// add_space(entabbed, j, spaces);
+			// j += spaces;
+		// prior was non-blank, and currens is non-blank
+		} else {
+			// printf("    added from orig: ");
+			// putchar(orig[i]);
+			// printf(", at j[%d]\n", j);
+			// entabbed[j] = orig[i];
+			// j++;
+		}
+	}
+	entabbed[j] = '\0';
+}
+
+// add 'num' instances of char 'c' to array 'to[]', beginning at array 'start'
+void add_char(char to[], int start, char c, int num) {
+	int i;
+
+	for (i = 0; i < num; i++) {
+		// printf("    space added to j[%d]\n", start+i);
+		to[start + i] = c;
+	}
+}
+
+// removed step of adding newline to end, to better verify line-end printing
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
+}
