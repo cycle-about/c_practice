@@ -1154,19 +1154,20 @@ int main() {
 }
 
 void fold_line(char line[], int len, char folded[]) {
-	int i, j, k;
+	int i, end, j;
 
 	// check line at each maximum line break
 	for (i = 0; i < len; i += WIDTH) {
 		printf("\nfold_line() handle orig starting at: %d\n", i);
+		
 		// look for space within max line break
-		for (j = (start_from + WIDTH); j > start_from; j--) {
-			printf("checking line back from: %d\n", j);
-			if (from[j] == ' ') {
-				printf("index with space: %d\n", i);
-				printf("copy chars between: %d - %d\n", start_from, (j - start_from));
-				for (k = start_from; k < (k - start_from); k++) {
-					to[k] = from[k];
+		for (end = (i + WIDTH); end > i; end--) {
+			printf("checking line back from: %d\n", end);
+			if (line[end] == ' ') {
+				printf("index with space: %d\n", end);
+				printf("copy chars between: %d - %d\n", i, (end - i));
+				for (j = i; j < (end - i); j++) {
+					folded[j] = line[j];
 				}
 				break;
 			}
