@@ -992,11 +992,12 @@ void add_space(char detabbed[], int start, int spaces) {
 }
 */
 
-//////////////// NEXT ////////////////
-
+//////////////// 10/25/22 ////////////////
 
 /****************************************
 1-21 write program 'entab' that replaces strings of blanks by the minimum number of tabs and blanks to achieve the same spacing. Use the same tab stops as for 'detab'. When either a tab or a single blank would suffice to reach a tab stop, which should be given preference?
+
+After completing this, still not sure about meaning/trade-offs in the decision for which to choose if there is an option.
 
 Approach
 	Get an input line
@@ -1010,7 +1011,7 @@ Approach
 		Increment the 'from' counter by the original space found
 	Resume reading the line
 	Print the entabbed line
-*/
+
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
@@ -1106,4 +1107,92 @@ int getaline(char s[], int lim) {
 	// add terminal character to indicate end of line
 	s[i] = '\0';
 	return i;
+}
+*/
+
+/////////////// NEXT ////////////////
+
+/****************************************
+1-22 Write a program to 'fold' long input lines into two or more shorter lines after the last non-blank character that occurs before the n-th column of input. Make sure your program does something intelligent with very long lines, and if there are no blanks or tabs before the specified column
+
+Approach
+	- Get a line
+	- Check if it is over the width limit
+	- If too long:
+		* Count from its start until the width limit
+		* Go backwards until the next space or tab
+			- If no space or tab in the line
+				Add a '-' and newline at the limit
+			- If is a space or tab in that width
+				Add a newline instead of that space or tab
+		* Go from the newline until the width limit; repeat space find and newline add
+*/
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+#define WIDTH 20	 // width allowed for line printing
+#define TRUE 1
+#define FALSE 0
+
+int getaline(char line[], int maxline);
+void copy(char to[], char from[]);
+void fold_line(char line[], char folded[]);
+void copy_chars(char to[], char from[], int len, int start_to, int start_from);
+
+int main() {
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+	char folded[MAXLINE];  // line breaks in input line
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		if (len > WIDTH) {
+			fold_line(line, folded);
+		}
+		// copy(folded, line);
+		printf("%s\n", folded);
+	}
+	return 0;
+}
+
+void fold_line(char line[], char folded[]) {
+	int i;
+	int space_found;
+
+	printf("to fold\n");
+	space_found = FALSE;
+	for (i = WIDTH; i > 0; i--) {
+		if (line[i] == ' ') {
+			copy_chars(folded, line, i, 0, 0);
+			space_found = TRUE;
+		}
+	}
+}
+
+void copy_chars(char to[], char from[], int len, int start_to, int start_from) {
+	int i;
+
+	for (i = 0; i < len; i++) {
+		to[start_to + i] = from[start_from + i];
+	}
+}
+
+// read a line into s, return length
+int getaline(char s[], int lim) {
+	int c, i;
+
+	// add chars to array until hit size limit, EOF or newline
+	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
+		s[i] = c;
+	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
+}
+
+// copy 'from' into 'to', assumes 'to' is big enough
+void copy(char to[], char from[]) {
+	int i;
+
+	i = 0;
+	while ((to[i] = from[i]) != '\0')
+		++i;
 }
