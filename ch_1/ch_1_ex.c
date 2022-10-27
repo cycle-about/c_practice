@@ -1148,40 +1148,32 @@ int main() {
 		if (len > WIDTH) {
 			fold_line(line, len, folded);
 		}
-		// copy(folded, line);
 		printf("%s\n", folded);
 	}
 	return 0;
 }
 
 void fold_line(char line[], int len, char folded[]) {
-	int i;
+	int i, j, k;
 
-	i = 0;
-	printf("\nfold_line() - handle orig line starting at: %d\n", i);
-	check_segment(folded, line, i);
-
-	//for (i = 0; i < len; i += WIDTH) {
-		//check_segment(folded, line, i, i);
-	//}
-	// todo handle remaining chars
-}
-
-void check_segment(char to[], char from[], int start_from) {
-	int i, j;
-
-	for (i = (start_from + WIDTH); i > start_from; i--) {
-		printf("checking line back from: %d\n", i);
-		if (from[i] == ' ') {
-			printf("index with space: %d\n", i);
-			printf("copy chars between: %d - %d\n", start_from, (i - start_from));
-			for (j = start_from; j < (i - start_from); j++) {
-				to[j] = from[j];
+	// check line at each maximum line break
+	for (i = 0; i < len; i += WIDTH) {
+		printf("\nfold_line() handle orig starting at: %d\n", i);
+		// look for space within max line break
+		for (j = (start_from + WIDTH); j > start_from; j--) {
+			printf("checking line back from: %d\n", j);
+			if (from[j] == ' ') {
+				printf("index with space: %d\n", i);
+				printf("copy chars between: %d - %d\n", start_from, (j - start_from));
+				for (k = start_from; k < (k - start_from); k++) {
+					to[k] = from[k];
+				}
+				break;
 			}
-			break;
 		}
+		// todo handle remaining chars
 	}
-	// todo handle space not found
+	// todo handle space not found	
 }
 
 // read a line into s, return length
