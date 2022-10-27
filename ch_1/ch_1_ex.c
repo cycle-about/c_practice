@@ -1110,7 +1110,7 @@ int getaline(char s[], int lim) {
 }
 */
 
-/////////////// NEXT ////////////////
+/////////////// 10/26/22 and 10/27/22 ////////////////
 
 /****************************************
 1-22 Write a program to 'fold' long input lines into two or more shorter lines after the last non-blank character that occurs before the n-th column of input. Make sure your program does something intelligent with very long lines, and if there are no blanks or tabs before the specified column
@@ -1130,13 +1130,13 @@ Approach
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
-#define WIDTH 20	 // width allowed for line printing
+#define WIDTH 6		 // width allowed for line printing
 #define TRUE 1
 #define FALSE 0
 
 int getaline(char line[], int maxline);
-void copy(char to[], char from[]);
-void fold_line(char line[], char folded[]);
+void fold_line(char line[], int len, char folded[]);
+void check_segment(char to[], char from[], int start_from);
 void copy_chars(char to[], char from[], int len, int start_to, int start_from);
 
 int main() {
@@ -1146,7 +1146,7 @@ int main() {
 
 	while ((len = getaline(line, MAXLINE)) > 0) {
 		if (len > WIDTH) {
-			fold_line(line, folded);
+			fold_line(line, len, folded);
 		}
 		// copy(folded, line);
 		printf("%s\n", folded);
@@ -1154,26 +1154,34 @@ int main() {
 	return 0;
 }
 
-void fold_line(char line[], char folded[]) {
+void fold_line(char line[], int len, char folded[]) {
 	int i;
-	int space_found;
 
-	printf("to fold\n");
-	space_found = FALSE;
-	for (i = WIDTH; i > 0; i--) {
-		if (line[i] == ' ') {
-			copy_chars(folded, line, i, 0, 0);
-			space_found = TRUE;
-		}
-	}
+	i = 0;
+	printf("\nfold_line() - handle orig line starting at: %d\n", i);
+	check_segment(folded, line, i);
+
+	//for (i = 0; i < len; i += WIDTH) {
+		//check_segment(folded, line, i, i);
+	//}
+	// todo handle remaining chars
 }
 
-void copy_chars(char to[], char from[], int len, int start_to, int start_from) {
-	int i;
+void check_segment(char to[], char from[], int start_from) {
+	int i, j;
 
-	for (i = 0; i < len; i++) {
-		to[start_to + i] = from[start_from + i];
+	for (i = (start_from + WIDTH); i > start_from; i--) {
+		printf("checking line back from: %d\n", i);
+		if (from[i] == ' ') {
+			printf("index with space: %d\n", i);
+			printf("copy chars between: %d - %d\n", start_from, (i - start_from));
+			for (j = start_from; j < (i - start_from); j++) {
+				to[j] = from[j];
+			}
+			break;
+		}
 	}
+	// todo handle space not found
 }
 
 // read a line into s, return length
@@ -1186,13 +1194,4 @@ int getaline(char s[], int lim) {
 	// add terminal character to indicate end of line
 	s[i] = '\0';
 	return i;
-}
-
-// copy 'from' into 'to', assumes 'to' is big enough
-void copy(char to[], char from[]) {
-	int i;
-
-	i = 0;
-	while ((to[i] = from[i]) != '\0')
-		++i;
 }
