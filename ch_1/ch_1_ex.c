@@ -1110,7 +1110,7 @@ int getaline(char s[], int lim) {
 }
 */
 
-/////////////// 10/26/22 and 10/27/22 ////////////////
+/////////////// 10/26/22, 10/27/22, 10/28/22 ////////////////
 
 /****************************************
 1-22 Write a program to 'fold' long input lines into two or more shorter lines after the last non-blank character that occurs before the n-th column of input. Make sure your program does something intelligent with very long lines, and if there are no blanks or tabs before the specified column
@@ -1130,14 +1130,10 @@ Approach
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
-#define WIDTH 6		 // width allowed for line printing
-#define TRUE 1
-#define FALSE 0
+#define WIDTH 5		 // width allowed for line printing
 
 int getaline(char line[], int maxline);
 void fold_line(char line[], int len, char folded[]);
-void check_segment(char to[], char from[], int start_from);
-void copy_chars(char to[], char from[], int len, int start_to, int start_from);
 
 int main() {
 	int len;    // current line length
@@ -1148,45 +1144,57 @@ int main() {
 		if (len > WIDTH) {
 			fold_line(line, len, folded);
 		}
-		printf("Result: %s<>\n", folded);
+		printf("Result:\n%s<>\n", folded);
 	}
 	return 0;
 }
 
 void fold_line(char original[], int len, char folded[]) {
-	int start;    // start index of where to examine part of original line
-	int orig_i;   // current index in original line
-	int fold_i;   // current index in folded line
-	int i;        // iterator for copying chars between arrays
-	int copy_len;
+	int start, end;      // start and end indices of orig line segment being searched for spaces
+	int orig_i, fold_i;  // current indices in original and folded lines
+	int copy_len;        // how many chars to copy between arrays
+	int i;
 
 	orig_i = 0;
 	fold_i = 0;
 	copy_len = 0;
+	printf("Total line len: %d\n", len);
+	printf("Fold width: %d\n", WIDTH);
 	// check original line at each maximum line break
-	// note that i is reset during loop
-	for (start = 0; start < len; start += WIDTH) {
-		printf("\nfold_line() handle orig starting at: %d\n", start);
+	for (end = WIDTH; end < len; end += WIDTH) {
+		start = end - WIDTH;
+		printf("\nfold_line() handle orig between: %d - %d\n", start, end);
+		//printf("chars remaining: %d\n", len - orig_i);
 		
 		// look for space within next max line break
-		for (orig_i = (start + WIDTH); orig_i > start; orig_i--) {
-			printf("checking line back from: %d\n", orig_i);
+		for (orig_i = end; orig_i > start; orig_i--) {
+			printf("checking for spaces at orig[%d]\n", orig_i);
 			if (original[orig_i] == ' ') {
-				printf("index with space: %d\n", orig_i);
+				printf("\nindex with space: %d\n", orig_i);
 				copy_len = orig_i - start;
-				printf("len chars copied: %d\n", copy_len);
-				printf("copy chars between: %d - %d\n", start, (start + copy_len));
-				for (i = 0; i <= copy_len; i++, fold_i++, orig_i++) {
-					folded[fold_i] = original[orig_i];
+				printf("copy chars between: %d - %d\n", start, orig_i);
+				for (i = start; i < orig_i; i++, fold_i++) {
+					printf("copy orig[%d] to folded[%d]\n", i, fold_i);
+					folded[fold_i] = original[i];
 				}
-				folded[fold_i] = '\n';
+				folded[fold_i] = '\n'; // replace space with newline
 				fold_i += 1;
+				orig_i += 1;
+				end = orig_i;
+				printf("end, orig_i after space handled: %d, %d\n", end, orig_i);
 				break;
 			}
+			// todo handle space not found
 		}
-		// todo handle remaining chars
 	}
-	// todo handle space not found	
+	// copy leftover characters when less than a full line remains
+	copy_len = len - orig_i;
+	printf("\ncopy leftover %d chars, start at orig[%d] and folded[%d]\n", copy_len, orig_i, fold_i);
+	for (i = 0; i <= copy_len; i++, fold_i++, orig_i++) {
+		folded[fold_i] = original[orig_i];
+	}
+	printf("final orig_i: %d\n", orig_i);
+	printf("final fold_i: %d\n", fold_i);
 }
 
 // read a line into s, return length
