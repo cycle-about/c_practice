@@ -1148,27 +1148,39 @@ int main() {
 		if (len > WIDTH) {
 			fold_line(line, len, folded);
 		}
-		printf("%s\n", folded);
+		printf("Result: %s<>\n", folded);
 	}
 	return 0;
 }
 
-void fold_line(char line[], int len, char folded[]) {
-	int i, end, j;
+void fold_line(char original[], int len, char folded[]) {
+	int start;    // start index of where to examine part of original line
+	int orig_i;   // current index in original line
+	int fold_i;   // current index in folded line
+	int i;        // iterator for copying chars between arrays
+	int copy_len;
 
-	// check line at each maximum line break
-	for (i = 0; i < len; i += WIDTH) {
-		printf("\nfold_line() handle orig starting at: %d\n", i);
+	orig_i = 0;
+	fold_i = 0;
+	copy_len = 0;
+	// check original line at each maximum line break
+	// note that i is reset during loop
+	for (start = 0; start < len; start += WIDTH) {
+		printf("\nfold_line() handle orig starting at: %d\n", start);
 		
-		// look for space within max line break
-		for (end = (i + WIDTH); end > i; end--) {
-			printf("checking line back from: %d\n", end);
-			if (line[end] == ' ') {
-				printf("index with space: %d\n", end);
-				printf("copy chars between: %d - %d\n", i, (end - i));
-				for (j = i; j < (end - i); j++) {
-					folded[j] = line[j];
+		// look for space within next max line break
+		for (orig_i = (start + WIDTH); orig_i > start; orig_i--) {
+			printf("checking line back from: %d\n", orig_i);
+			if (original[orig_i] == ' ') {
+				printf("index with space: %d\n", orig_i);
+				copy_len = orig_i - start;
+				printf("len chars copied: %d\n", copy_len);
+				printf("copy chars between: %d - %d\n", start, (start + copy_len));
+				for (i = 0; i <= copy_len; i++, fold_i++, orig_i++) {
+					folded[fold_i] = original[orig_i];
 				}
+				folded[fold_i] = '\n';
+				fold_i += 1;
 				break;
 			}
 		}
