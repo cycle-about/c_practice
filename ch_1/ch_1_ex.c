@@ -1131,6 +1131,8 @@ Approach
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
 #define WIDTH 5		 // width allowed for line printing
+#define TRUE 1
+#define FALSE 0
 
 int getaline(char line[], int maxline);
 void fold_line(char line[], int len, char folded[]);
@@ -1152,12 +1154,11 @@ int main() {
 void fold_line(char original[], int len, char folded[]) {
 	int start, end;      // start and end indices of orig line segment being searched for spaces
 	int orig_i, fold_i;  // current indices in original and folded lines
-	int copy_len;        // how many chars to copy between arrays
 	int i;
+	int space_found;
 
 	orig_i = 0;
 	fold_i = 0;
-	copy_len = 0;
 	printf("Total line len: %d\n", len);
 	printf("Fold width: %d\n", WIDTH);
 	// check original line at each maximum line break
@@ -1167,11 +1168,12 @@ void fold_line(char original[], int len, char folded[]) {
 		//printf("chars remaining: %d\n", len - orig_i);
 		
 		// look for space within next max line break
+		space_found = FALSE;
 		for (orig_i = end; orig_i > start; orig_i--) {
-			printf("checking for spaces at orig[%d]\n", orig_i);
+			printf("checking for space at orig[%d]\n", orig_i);
 			if (original[orig_i] == ' ') {
+				space_found = TRUE;
 				printf("\nindex with space: %d\n", orig_i);
-				copy_len = orig_i - start;
 				printf("copy chars between: %d - %d\n", start, orig_i);
 				for (i = start; i < orig_i; i++, fold_i++) {
 					printf("copy orig[%d] to folded[%d]\n", i, fold_i);
@@ -1184,13 +1186,21 @@ void fold_line(char original[], int len, char folded[]) {
 				printf("end, orig_i after space handled: %d, %d\n", end, orig_i);
 				break;
 			}
-			// todo handle space not found
+		}
+		if (space_found == FALSE) {
+			printf("no space found in segment");
+			for (i = start; i < end; i++, fold_i++) {
+				printf("copy orig[%d] to folded[%d]\n", i, fold_i);
+				folded[fold_i] = original[i];
+			}
+			folded[fold_i] = '\n'; // add a newline, not replacing anything
+			fold_i += 1;
+			orig_i = end;
 		}
 	}
 	// copy leftover characters when less than a full line remains
-	copy_len = len - orig_i;
-	printf("\ncopy leftover %d chars, start at orig[%d] and folded[%d]\n", copy_len, orig_i, fold_i);
-	for (i = 0; i <= copy_len; i++, fold_i++, orig_i++) {
+	printf("\ncopy leftover chars, start at orig[%d] and folded[%d]\n", orig_i, fold_i);
+	for (i = orig_i; i <= len; i++, fold_i++, orig_i++) {
 		folded[fold_i] = original[orig_i];
 	}
 	printf("final orig_i: %d\n", orig_i);
