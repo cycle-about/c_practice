@@ -1223,11 +1223,10 @@ int getaline(char s[], int lim) {
 /****************************************
 1-23 Write a program to remove all comments from a C program. Don't forget to handle quoted strings and character constants properly. C comments do not nest
 
-Test inputs
-*/	
+Test inputs: replaced with ** to allow commenting out this whole section
 
-//	#include <stdio.h> #define MAXLINE 1000 /* max length of a line */ int main() {}
-// int getaline(char s[], int lim) { int c, i; /* iterators for loops */ for (int i = 0; i < len; i++) {}
+//	#include <stdio.h> #define MAXLINE 1000 ** max length of a line ** int main() {}
+// int getaline(char s[], int lim) { int c, i; ** iterators for loops ** for (int i = 0; i < len; i++) {}
 
 #include <stdio.h>
 
@@ -1260,11 +1259,6 @@ void decomment(char orig[], int len, char dest[]) {
 	for (int i = 0; i <= len; i++) {
 		current = orig[i];
 		next = orig[i+1];
-		/*printf("i = %d\n", i);
-		printf("dest_i = %d\n", dest_i);
-		putchar(current);
-		putchar(next);
-		printf("\n"); */
 		if (current == '/' && next == '*') {
 			in_comment = TRUE;
 			//printf("start comment\n");
@@ -1279,6 +1273,123 @@ void decomment(char orig[], int len, char dest[]) {
 			dest_i++;
 		}
 	}
+}
+
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i=0; i<lim-1 && (c=getchar()) != EOF && c != '\n'; i++) {
+		s[i] = c;
+	}
+	s[i] = '\0';
+	return i;
+}
+*/	
+
+/////////////// 10/29/22 ////////////////
+
+/****************************************
+1-24 write a program to check a C program for rudimentary syntax errors like unbalanced parens, brackets, braces. Don't forget about both single and double quotes, escape sequences, and comments
+
+Presumptions:
+	- A ']' 
+*/
+
+#include <stdio.h>
+
+#define MAXLINE 1000
+#define TRUE 1
+#define FALSE 0
+
+int getaline(char line[], int maxline);
+int check_syntax(char line[], int len);
+int flip(int initial);
+
+int main() {
+	int len, syntax_err;
+	char line[MAXLINE];
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		syntax_err = check_syntax(line, len);
+		if (syntax_err == 0)
+			printf("No syntax errors found\n");
+		else
+			printf("%d syntax errors found\n", syntax_err);
+	}
+	return 0;
+}
+
+int check_syntax(char line[], int len) {
+	char current, next;
+	int open_comment, open_paren, open_bracket, open_brace; // count of unclosed open symbols
+	int in_single, in_double; // T or F for whether unmatched single or double quote
+	int close_first; // times a close symbol found before an open
+
+	close_first = open_comment = open_paren = open_bracket = open_brace = 0;
+	in_single = in_double = FALSE;
+	for (int i = 0; i <= len; i++) {
+		current = line[i];
+		next = line[i+1];
+		
+		// handle comments
+		if (current == '/' && next == '*') {
+			open_comment++;
+		} else if (current == '*' && next == '/') {
+			if (open_comment < 1) {
+				close_first++;
+			} else {
+				open_comment--;
+			}
+		
+		// handle parens
+		} else if (current == '(') {
+			open_paren++;
+		} else if (current == ')') {
+			if (open_paren < 1) {
+				close_first++;
+			} else {
+				open_paren--;
+			}
+
+		// handle brackets
+		} else if (current == '[') {
+			open_bracket++;
+		} else if (current == ']') {
+			if (open_bracket < 1) {
+				close_first++;
+			} else {
+				open_bracket--;
+			}
+
+		// handle braces
+		} else if (current == '{') {
+			open_brace++;
+		} else if (current == '}') {
+			if (open_brace < 1) {
+				close_first++;
+			} else {
+				open_brace--;
+			}
+
+		// handle single quotes
+		} else if (current == '\'') {
+			in_single = flip(in_single);
+
+		// handle double quotes
+		} else if (current == '\"') {
+			in_double = flip(in_double);
+		}
+	}
+	// returns: sum of close symbols first, and unclosed symbols
+	printf("close first: %d, unclosed comments: %d, unclosed parens: %d, unclosed brackets: %d, unclosed brace: %d, unmatched single: %d, unmatched double: %d\n", close_first, open_comment, open_paren, open_bracket, open_brace, in_single, in_double);
+	return close_first + open_comment + open_paren + open_bracket + open_brace + in_single + in_double;
+}
+
+int flip(int initial) {
+	if (initial == FALSE)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 int getaline(char s[], int lim) {
