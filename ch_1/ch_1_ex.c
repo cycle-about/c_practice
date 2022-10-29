@@ -1110,7 +1110,7 @@ int getaline(char s[], int lim) {
 }
 */
 
-/////////////// 10/26/22, 10/27/22, 10/28/22 ////////////////
+/////////////// 10/26/22, 10/27/22, and 10/28/22 ////////////////
 
 /****************************************
 1-22 Write a program to 'fold' long input lines into two or more shorter lines after the last non-blank character that occurs before the n-th column of input. Make sure your program does something intelligent with very long lines, and if there are no blanks or tabs before the specified column
@@ -1126,7 +1126,6 @@ Approach
 			- If is a space or tab in that width
 				Add a newline instead of that space or tab
 		* Go from the newline until the width limit; repeat space find and newline add
-*/
 
 #include <stdio.h>
 #define MAXLINE 1000 // maximum chars in a line
@@ -1165,7 +1164,6 @@ void fold_line(char original[], int len, char folded[]) {
 	for (end = WIDTH; end < len; end += WIDTH) {
 		start = end - WIDTH;
 		printf("\nfold_line() handle orig between: %d - %d\n", start, end);
-		//printf("chars remaining: %d\n", len - orig_i);
 		
 		// look for space within next max line break
 		space_found = FALSE;
@@ -1215,6 +1213,80 @@ int getaline(char s[], int lim) {
 	for (i = 0; i < lim-1 && (c = getchar()) != EOF && c !='\n'; ++i)
 		s[i] = c;
 	// add terminal character to indicate end of line
+	s[i] = '\0';
+	return i;
+}
+*/
+
+/////////////// 10/29/22 ////////////////
+
+/****************************************
+1-23 Write a program to remove all comments from a C program. Don't forget to handle quoted strings and character constants properly. C comments do not nest
+
+Test inputs
+*/	
+
+//	#include <stdio.h> #define MAXLINE 1000 /* max length of a line */ int main() {}
+// int getaline(char s[], int lim) { int c, i; /* iterators for loops */ for (int i = 0; i < len; i++) {}
+
+#include <stdio.h>
+
+#define MAXLINE 1000
+#define TRUE 1
+#define FALSE 0
+
+int getaline(char line[], int maxline);
+void decomment(char orig[], int len, char dest[]);
+
+int main() {
+	int len;
+	char line[MAXLINE];
+	char dest[MAXLINE];
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		decomment(line, len, dest);
+		printf("%s\n", dest);
+	}
+	return 0;
+}
+
+void decomment(char orig[], int len, char dest[]) {
+	char current, next;
+	int in_comment;
+	int dest_i; // next empty index of destination array
+
+	in_comment = FALSE;
+	dest_i = 0;
+	for (int i = 0; i <= len; i++) {
+		current = orig[i];
+		next = orig[i+1];
+		/*printf("i = %d\n", i);
+		printf("dest_i = %d\n", dest_i);
+		putchar(current);
+		putchar(next);
+		printf("\n"); */
+		if (current == '/' && next == '*') {
+			in_comment = TRUE;
+			//printf("start comment\n");
+		}
+		if (current == '*' && next == '/') {
+			in_comment = FALSE;
+			i += 2;    // iterate to skip two characters
+			//printf("end comment\n");
+		}
+		if (in_comment == FALSE) {
+			dest[dest_i] = orig[i];
+			dest_i++;
+		}
+	}
+}
+
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i=0; i<lim-1 && (c=getchar()) != EOF && c != '\n'; i++) {
+		s[i] = c;
+	}
 	s[i] = '\0';
 	return i;
 }
