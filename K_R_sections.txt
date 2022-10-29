@@ -1,0 +1,12 @@
+Chapter 1. A Tutorial Introduction
+Exercise count: 24
+Start: 10/15/22
+Finish: 10/29/22
+
+Chapter 2. Types, Operators, and Expressions
+Exercise count: 10
+Start: 10/29/22
+Finish: 
+
+Chapter 3. Control Flow
+Exercise count: 6
