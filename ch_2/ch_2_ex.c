@@ -276,19 +276,20 @@ enum boolean { FALSE, TRUE };
 
 void squeeze(char s[], int copy[]);
 void get_copy_arr(char r[], int copy[]);
+int get_letter_index(char c);
 
 int main() {
-	char s[] = "123_thisisatest_bbbaaabbbAAA";
-	char r[] = "abcd";
+	char s[] = "123_AaBbCcDdEe+-pm3333";
+	char r[] = "AcDm";
 	int copy[alphabet]; 
 
 	get_copy_arr(r, copy);
-	for (int i = 0; i < alphabet; i++) {
+	/* for (int i = 0; i < alphabet; i++) {
 		printf("%d ", copy[i]);
 	}
-	printf("\n");
-	//squeeze(s, copy);
-	//printf("%s\n", s);
+	printf("\n"); */
+	squeeze(s, copy);
+	printf("%s\n", s);
 }
 
 void get_copy_arr(char r[], int copy[]) {
@@ -299,8 +300,8 @@ void get_copy_arr(char r[], int copy[]) {
 	}
 	// set index of all letters to be skipped to false
 	for (i = 0; r[i] != '\0'; i++) {
-		if (islower(r[i])) {
-			letter_index = r[i] - 'a' + 26;
+		if (isalpha(r[i])) {
+			letter_index = get_letter_index(r[i]);
 			copy[letter_index] = FALSE;
 		}
 	}
@@ -310,9 +311,8 @@ void squeeze(char s[], int copy[]) {
 	int i, j, letter_index;
 
 	for (i = j = 0; s[i] != '\0'; i++) {
-		if (islower(s[i])) {
-			letter_index = s[i] - 'a';
-			printf("%d ", letter_index);
+		if (isalpha(s[i])) {
+			letter_index = get_letter_index(s[i]);
 			if (copy[letter_index] == TRUE) {
 				s[j++] = s[i];
 			}
@@ -321,4 +321,14 @@ void squeeze(char s[], int copy[]) {
 		}
 	}
 	s[j] = '\0';
+}
+
+// should be passed alpha chars only
+int get_letter_index(char c) {
+	if (isupper(c)) {
+		return c - 'A';
+	}
+	else if (islower(c)) {
+		return c - 'a' + 26;    // in copy index after upper case
+	}
 }
