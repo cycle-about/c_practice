@@ -115,14 +115,14 @@ int main() {
 		c=getchar()) != '\n'
 		c != EOF
 
-	for (int i = 0; i < lim-1; ++i) {
-		if (c=getchar()) != '\n' {
-			if (c != EOF) {
-				s[i] = c;
+	first draft: did *not* work since no breaks
+		for (int i = 0; i < lim-1; ++i) {
+			if (c=getchar()) != '\n' {
+				if (c != EOF) {
+					s[i] = c;
+				}
 			}
 		}
-	}
-*/
 
 
 #include <stdio.h>
@@ -160,4 +160,162 @@ int getaline(char s[], int lim) {
 	}
 	s[i] = '\0';
 	return i;
+}
+*/
+
+/**************************************** 
+2-3 Write the function 'htoi(s)' which converts a string of hexadecimal digits (including an
+optional 0x or 0X) into its equivalent integer value. The allowable digits are '0' to '9', 
+'a' through 'f', and 'A' through 'F' 
+
+// page 43 example
+// atoi: convert s to integer
+
+#include <stdio.h>
+#include <ctype.h>
+
+int atoi(char s[]);
+
+int main() {
+	char s[] = "12345";
+	printf("%d\n", atoi(s));
+}
+
+int atoi(char s[]) {
+	int i, n;
+	n = 0;
+	for (i = 0; isdigit(s[i]); ++i) {
+		n = 10 * n + (s[i] - '0');
+	}
+	return n;
+}
+
+Pieces that need to be changed for hex
+	Make the input var a hex
+	Loop checks that input chars are : digit, a-f, or A-F
+	Skip first two chars IF they are 0x or 0X
+
+//////////////// 10/30/22 and 10/31/22 ////////////////
+
+#include <stdio.h>
+#include <ctype.h>
+
+int htoi(char s[]);
+
+int main() {
+	char s[] = "0X233Fa4";
+	printf("%d\n", htoi(s));
+}
+
+int htoi(char s[]) {
+	int i, n;
+	n = 0;
+
+	if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+		i = 2;
+	} else
+		i = 0;
+	printf("start index: %d\n", i);
+	
+	for (i; isdigit(s[i]) || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >= 'A' && s[i] <= 'F'); ++i) {
+		printf("s[i]: %d\n", s[i]);
+		if (isdigit(s[i])) {
+			printf("digit\n");
+			n = 16 * n + (s[i] - '0');
+		}
+		else if (s[i] >= 'a' && s[i] <= 'f') {
+			printf("lower\n");
+			n = 16 * n + (s[i] - 'a' + 10);
+		}
+		else {
+			printf("upper\n");
+			n = 16 * n + (s[i] - 'A' + 10);
+		}
+	}
+	return n;
+}
+*/
+
+/**************************************** 
+2-4 Write an alternate version of squeeze(s1, s2) that deletes each character in s1 
+that matches any char in the *string* s2
+
+// original squeeze: delete all c from s (page 47)
+
+#include <stdio.h>
+
+void squeeze(char s[], int c);
+
+int main() {
+	char s[] = "test of removing characters";
+	squeeze(s, 'a');
+	printf("%s\n", s);
+}
+
+void squeeze(char s[], int c) {
+	int i, j;
+
+	for (i = j = 0; s[i] != '\0'; i++)
+		if (s[i] != c)
+			s[j++] = s[i];
+	s[j] = '\0';
+}
+*/
+
+//////////////// 11/1/22 ////////////////
+
+// handles only lower case letters for now
+
+#include <stdio.h>
+#include <ctype.h>
+
+#define alphabet 26 // presumes lowercase letters only
+
+enum boolean { FALSE, TRUE };
+
+void squeeze(char s[], int copy[]);
+void get_copy_arr(char r[], int copy[]);
+
+int main() {
+	char s[] = "123_thisisatest_bbbaaabbbAAA";
+	char r[] = "it";
+	int copy[alphabet]; 
+
+	get_copy_arr(r, copy);
+	for (int i = 0; i < alphabet; i++) {
+	}
+	squeeze(s, copy);
+	printf("%s\n", s);
+}
+
+void get_copy_arr(char r[], int copy[]) {
+	int i, letter_index;
+	// initialize array of what to copy to all true
+	for (i = 0; i < alphabet; i++) {
+		copy[i] = TRUE;
+	}
+	// set index of all letters to be skipped to false
+	for (i = 0; r[i] != '\0'; i++) {
+		if (islower(r[i])) {
+			letter_index = r[i] - 'a';
+			copy[letter_index] = FALSE;
+		}
+	}
+}
+
+void squeeze(char s[], int copy[]) {
+	int i, j, letter_index;
+
+	for (i = j = 0; s[i] != '\0'; i++) {
+		if (islower(s[i])) {
+			letter_index = s[i] - 'a';
+			printf("%d ", letter_index);
+			if (copy[letter_index] == TRUE) {
+				s[j++] = s[i];
+			}
+		} else {
+			s[j++] = s[i];
+		}
+	}
+	s[j] = '\0';
 }
