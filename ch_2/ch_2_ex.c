@@ -260,13 +260,11 @@ void squeeze(char s[], int c) {
 			s[j++] = s[i];
 	s[j] = '\0';
 }
-*/
 
 //////////////// 11/1/22 ////////////////
 
 #include <stdio.h>
 #include <ctype.h>
-
 
 // each index has a T/F for whether to copy the corresponding letter
 // upper case letters indices 0 to 26, lower case letters indices 27 to 52
@@ -284,10 +282,6 @@ int main() {
 	int copy[alphabet]; 
 
 	get_copy_arr(r, copy);
-	/* for (int i = 0; i < alphabet; i++) {
-		printf("%d ", copy[i]);
-	}
-	printf("\n"); */
 	squeeze(s, copy);
 	printf("%s\n", s);
 }
@@ -329,6 +323,79 @@ int get_letter_index(char c) {
 		return c - 'A';
 	}
 	else if (islower(c)) {
-		return c - 'a' + 26;    // in copy index after upper case
+		return c - 'a' + 26; // in copy index after upper case
+	}
+}
+*/
+
+/**************************************** 
+2-5 Write the function any(s1, s2), which returns the first location in the string s1
+where any character from the string s2 occurs, or -1 if s1 contains no characters
+from s2. (The standard library function 'strpbrk' does the same job but returns a pointer
+to the location.)
+
+*/
+
+#include <stdio.h>
+#include <ctype.h>
+
+// each index has a T/F for whether to copy the corresponding letter
+// upper case letters indices 0 to 26, lower case letters indices 27 to 52
+#define alphabet 52 
+
+enum boolean { FALSE, TRUE };
+
+void any(char s[], int find[]);
+void get_find_arr(char r[], int find[]);
+int get_letter_index(char c);
+
+int main() {
+	char s[] = "123_AaBbCcDdEe+-pm3333";
+	char r[] = "AcDm";
+	int find[alphabet]; 
+
+	get_find_arr(r, find);
+	any(s, find);
+	printf("%s\n", s);
+}
+
+void get_find_arr(char r[], int find[]) {
+	int i, letter_index;
+	// initialize array of what to find as all false
+	for (i = 0; i < alphabet; i++) {
+		find[i] = FALSE;
+	}
+	// set index of all letters to be skipped to false
+	for (i = 0; r[i] != '\0'; i++) {
+		if (isalpha(r[i])) {
+			letter_index = get_letter_index(r[i]);
+			find[letter_index] = TRUE;
+		}
+	}
+}
+
+void any(char s[], int find[]) {
+	int i, j, letter_index;
+
+	for (i = j = 0; s[i] != '\0'; i++) {
+		if (isalpha(s[i])) {
+			letter_index = get_letter_index(s[i]);
+			if (find[letter_index] == TRUE) {
+				s[j++] = s[i];
+			}
+		} else {
+			s[j++] = s[i];
+		}
+	}
+	s[j] = '\0';
+}
+
+// should be passed alpha chars only
+int get_letter_index(char c) {
+	if (isupper(c)) {
+		return c - 'A';
+	}
+	else if (islower(c)) {
+		return c - 'a' + 26; // in array after upper case
 	}
 }
