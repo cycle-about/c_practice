@@ -260,27 +260,23 @@ void squeeze(char s[], int c) {
 			s[j++] = s[i];
 	s[j] = '\0';
 }
-*/
 
 //////////////// 11/1/22 ////////////////
 
 #include <stdio.h>
-#include <ctype.h>
 #include <limits.h>
 
-// each index has a T/F for whether to copy the corresponding char
 #define NUM_CHARS UCHAR_MAX 
 
 enum boolean { FALSE, TRUE };
 
 void squeeze(char s[], int copy[]);
 void get_copy_arr(char r[], int copy[]);
-int get_letter_index(char c);
 
 int main() {
 	char s[] = "123_AaBbCcDdEe+-pm3333";
 	char r[] = "2+Dd4";
-	int copy[NUM_CHARS]; 
+	int copy[NUM_CHARS];  // each index has a T/F for whether to copy the corresponding char
 
 	get_copy_arr(r, copy);
 	squeeze(s, copy);
@@ -309,76 +305,54 @@ void squeeze(char s[], int copy[]) {
 	}
 	s[j] = '\0';
 }
-
+*/
 
 /**************************************** 
 2-5 Write the function any(s1, s2), which returns the first location in the string s1
 where any character from the string s2 occurs, or -1 if s1 contains no characters
 from s2. (The standard library function 'strpbrk' does the same job but returns a pointer
 to the location.)
-
-
+*/
 
 #include <stdio.h>
-#include <ctype.h>
+#include <limits.h>
 
-// each index has a T/F for whether to copy the corresponding letter
-// upper case letters indices 0 to 26, lower case letters indices 27 to 52
-#define alphabet 52 
+#define NUM_CHARS UCHAR_MAX 
 
 enum boolean { FALSE, TRUE };
 
 int any(char s[], int find[]);
 void get_find_arr(char r[], int find[]);
-int get_letter_index(char c);
 
 int main() {
-	char s[] = "123_AaBbCcDdEe+-pm3333";
-	char r[] = "AcDm";
-	int find[alphabet]; 
+	char s[] = "4123_AaBbCcDdEe+-pm3333";
+	char r[] = "+Dd4";
+	int find[NUM_CHARS];  // each index has a T/F for whether to copy the corresponding char
 
 	get_find_arr(r, find);
-	first_match = any(s, find);
+	int first_match = any(s, find);
 	printf("%d\n", first_match);
+}
+
+int any(char s[], int find[]) {
+	int first_match = -1;  // initialize to no match found
+
+	for (int i = 0; s[i] != '\0'; i++) {
+		if (find[s[i]] == TRUE) {
+			return i;
+		}
+	}
+	return first_match;
 }
 
 void get_find_arr(char r[], int find[]) {
 	int i, letter_index;
 	// initialize array of what to find as all false
-	for (i = 0; i < alphabet; i++) {
+	for (i = 0; i < NUM_CHARS; i++) {
 		find[i] = FALSE;
 	}
-	// set index of all letters to be skipped to false
+	// set index of all chars to be deleted to true
 	for (i = 0; r[i] != '\0'; i++) {
-		if (isalpha(r[i])) {
-			letter_index = get_letter_index(r[i]);
-			find[letter_index] = TRUE;
-		}
+		find[r[i]] = TRUE;
 	}
 }
-
-int any(char s[], int find[]) {
-	int i, letter_index;
-	int first_match = -1; // first index in s that is in find array; initialize to not found
-
-	for (i = 0; s[i] != '\0'; i++) {
-		if (isalpha(s[i])) {
-			letter_index = get_letter_index(s[i]);
-			if (find[letter_index] == TRUE) {
-				return i;
-			}
-		}
-	}
-	return first_match
-}
-
-// should be passed alpha chars only
-int get_letter_index(char c) {
-	if (isupper(c)) {
-		return c - 'A';
-	}
-	else if (islower(c)) {
-		return c - 'a' + 26; // in array after upper case
-	}
-}
-*/
