@@ -260,15 +260,16 @@ void squeeze(char s[], int c) {
 			s[j++] = s[i];
 	s[j] = '\0';
 }
+*/
 
 //////////////// 11/1/22 ////////////////
 
 #include <stdio.h>
 #include <ctype.h>
+#include <limits.h>
 
-// each index has a T/F for whether to copy the corresponding letter
-// upper case letters indices 0 to 26, lower case letters indices 27 to 52
-#define alphabet 52 
+// each index has a T/F for whether to copy the corresponding char
+#define NUM_CHARS UCHAR_MAX 
 
 enum boolean { FALSE, TRUE };
 
@@ -278,8 +279,8 @@ int get_letter_index(char c);
 
 int main() {
 	char s[] = "123_AaBbCcDdEe+-pm3333";
-	char r[] = "AcDm";
-	int copy[alphabet]; 
+	char r[] = "2+Dd4";
+	int copy[NUM_CHARS]; 
 
 	get_copy_arr(r, copy);
 	squeeze(s, copy);
@@ -289,44 +290,26 @@ int main() {
 void get_copy_arr(char r[], int copy[]) {
 	int i, letter_index;
 	// initialize array of what to copy as all true
-	for (i = 0; i < alphabet; i++) {
+	for (i = 0; i < NUM_CHARS; i++) {
 		copy[i] = TRUE;
 	}
-	// set index of all letters to be skipped to false
+	// set index of all chars to be deleted to false
 	for (i = 0; r[i] != '\0'; i++) {
-		if (isalpha(r[i])) {
-			letter_index = get_letter_index(r[i]);
-			copy[letter_index] = FALSE;
-		}
+		copy[r[i]] = FALSE;
 	}
 }
 
 void squeeze(char s[], int copy[]) {
-	int i, j, letter_index;
+	int i, j;
 
 	for (i = j = 0; s[i] != '\0'; i++) {
-		if (isalpha(s[i])) {
-			letter_index = get_letter_index(s[i]);
-			if (copy[letter_index] == TRUE) {
-				s[j++] = s[i];
-			}
-		} else {
+		if (copy[s[i]] == TRUE) {
 			s[j++] = s[i];
 		}
 	}
 	s[j] = '\0';
 }
 
-// should be passed alpha chars only
-int get_letter_index(char c) {
-	if (isupper(c)) {
-		return c - 'A';
-	}
-	else if (islower(c)) {
-		return c - 'a' + 26; // in copy index after upper case
-	}
-}
-*/
 
 /**************************************** 
 2-5 Write the function any(s1, s2), which returns the first location in the string s1
@@ -334,7 +317,7 @@ where any character from the string s2 occurs, or -1 if s1 contains no character
 from s2. (The standard library function 'strpbrk' does the same job but returns a pointer
 to the location.)
 
-*/
+
 
 #include <stdio.h>
 #include <ctype.h>
@@ -345,7 +328,7 @@ to the location.)
 
 enum boolean { FALSE, TRUE };
 
-void any(char s[], int find[]);
+int any(char s[], int find[]);
 void get_find_arr(char r[], int find[]);
 int get_letter_index(char c);
 
@@ -355,8 +338,8 @@ int main() {
 	int find[alphabet]; 
 
 	get_find_arr(r, find);
-	any(s, find);
-	printf("%s\n", s);
+	first_match = any(s, find);
+	printf("%d\n", first_match);
 }
 
 void get_find_arr(char r[], int find[]) {
@@ -374,20 +357,19 @@ void get_find_arr(char r[], int find[]) {
 	}
 }
 
-void any(char s[], int find[]) {
-	int i, j, letter_index;
+int any(char s[], int find[]) {
+	int i, letter_index;
+	int first_match = -1; // first index in s that is in find array; initialize to not found
 
-	for (i = j = 0; s[i] != '\0'; i++) {
+	for (i = 0; s[i] != '\0'; i++) {
 		if (isalpha(s[i])) {
 			letter_index = get_letter_index(s[i]);
 			if (find[letter_index] == TRUE) {
-				s[j++] = s[i];
+				return i;
 			}
-		} else {
-			s[j++] = s[i];
 		}
 	}
-	s[j] = '\0';
+	return first_match
 }
 
 // should be passed alpha chars only
@@ -399,3 +381,4 @@ int get_letter_index(char c) {
 		return c - 'a' + 26; // in array after upper case
 	}
 }
+*/
