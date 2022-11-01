@@ -264,12 +264,13 @@ void squeeze(char s[], int c) {
 
 //////////////// 11/1/22 ////////////////
 
-// handles only lower case letters for now
-
 #include <stdio.h>
 #include <ctype.h>
 
-#define alphabet 26 // presumes lowercase letters only
+
+// each index has a T/F for whether to copy the corresponding letter
+// upper case letters indices 0 to 26, lower case letters indices 27 to 52
+#define alphabet 52 
 
 enum boolean { FALSE, TRUE };
 
@@ -278,26 +279,28 @@ void get_copy_arr(char r[], int copy[]);
 
 int main() {
 	char s[] = "123_thisisatest_bbbaaabbbAAA";
-	char r[] = "it";
+	char r[] = "abcd";
 	int copy[alphabet]; 
 
 	get_copy_arr(r, copy);
 	for (int i = 0; i < alphabet; i++) {
+		printf("%d ", copy[i]);
 	}
-	squeeze(s, copy);
-	printf("%s\n", s);
+	printf("\n");
+	//squeeze(s, copy);
+	//printf("%s\n", s);
 }
 
 void get_copy_arr(char r[], int copy[]) {
 	int i, letter_index;
-	// initialize array of what to copy to all true
+	// initialize array of what to copy as all true
 	for (i = 0; i < alphabet; i++) {
 		copy[i] = TRUE;
 	}
 	// set index of all letters to be skipped to false
 	for (i = 0; r[i] != '\0'; i++) {
 		if (islower(r[i])) {
-			letter_index = r[i] - 'a';
+			letter_index = r[i] - 'a' + 26;
 			copy[letter_index] = FALSE;
 		}
 	}
