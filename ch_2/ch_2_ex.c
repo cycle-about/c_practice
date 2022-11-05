@@ -312,7 +312,6 @@ void squeeze(char s[], int copy[]) {
 where any character from the string s2 occurs, or -1 if s1 contains no characters
 from s2. (The standard library function 'strpbrk' does the same job but returns a pointer
 to the location.)
-*/
 
 #include <stdio.h>
 #include <limits.h>
@@ -356,3 +355,12 @@ void get_find_arr(char r[], int find[]) {
 		find[r[i]] = TRUE;
 	}
 }
+*/
+
+/**************************************** 
+2-6 Write a function setbits(x,p,n,y) that returns x with the n bits that begin at 
+position p set to the rightmost n bits of y, leaving the other bits unchanged
+
+x and y must be integral operands: char, short, int, long, signed or unsigned
+
+*/
