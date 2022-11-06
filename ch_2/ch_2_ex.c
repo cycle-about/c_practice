@@ -362,5 +362,38 @@ void get_find_arr(char r[], int find[]) {
 position p set to the rightmost n bits of y, leaving the other bits unchanged
 
 x and y must be integral operands: char, short, int, long, signed or unsigned
-
 */
+
+#include <stdio.h>
+
+int setbits(int x, int p, int n, int y);
+void int_to_binary(int n);
+
+int main() {
+	printf("%d\n", setbits(1000, 40, 5, 4));
+}
+
+int setbits(int x, int p, int n, int y) {
+	printf("start bits of x: ");
+	int_to_binary(x);
+	printf("start bits of y: ");
+	int_to_binary(y);
+	
+	printf("start modifying x at index p: %d\n", p);
+	printf("rightmost count to get from y: %d\n", n);
+	return x;
+}
+
+// print int in binary
+void int_to_binary(int n) {
+	int a[10], i;
+	
+	for(i = 0; n > 0; i++) {    
+		a[i] = n % 2;    
+		n = n / 2;    
+	}
+	for(i = i - 1; i >= 0; i--) {    
+		printf("%d", a[i]);    
+	}
+	printf("\n");
+}

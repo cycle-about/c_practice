@@ -39,9 +39,10 @@ Findings about int_to_binary_modulo(), for various arg types
 
 Compare with binary_to_int_modulo(int n)
 	1100011			-> binary 1100011 to int: 99
-
+	1000001			-> binary 1000001 to decimal: 65
 */
 
+/*
 #include <stdio.h>
 #include <string.h>
 
@@ -54,7 +55,7 @@ int main() {
 	// int_to_binary_modulo(65); // prints value only
 	
 	// int_to_binary_bitwise(8); // CAUTION only accepts 32 bit int. Prints value only
-	printf("%d\n", binary_to_int_modulo(1100011)); // returns int
+	printf("%d\n", binary_to_int_modulo(11111111)); // returns int
 }
 
 // print int as bits [copied from internet]
@@ -111,4 +112,33 @@ int binary_to_int_modulo(int n) {
         base = base * 2;
     }
     return dec_value;
+}
+*/
+
+/*
+Implement the examples in book section 2.9
+*/
+
+#include <stdio.h>
+
+void int_to_binary(int n);
+
+int main() {
+	int n = 255;
+	printf("binary of %d: ", n);
+	int_to_binary(n);
+}
+
+// print int in binary
+void int_to_binary(int n) {
+	int a[10], i;
+	
+	for(i = 0; n > 0; i++) {    
+		a[i] = n % 2;    
+		n = n / 2;    
+	}
+	for(i = i - 1; i >= 0; i--) {    
+		printf("%d", a[i]);    
+	}
+	printf("\n");
 }
