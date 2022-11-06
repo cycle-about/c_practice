@@ -357,6 +357,8 @@ void get_find_arr(char r[], int find[]) {
 }
 */
 
+//////////////// 11/6/22 ////////////////
+
 /**************************************** 
 2-6 Write a function setbits(x,p,n,y) that returns x with the n bits that begin at 
 position p set to the rightmost n bits of y, leaving the other bits unchanged
@@ -384,17 +386,23 @@ Test case draft
 Test case result should be: 101010011
 
 
-Test case
+Test case 1
 	x = 291, binary 100100011
 	y = 391, binary 110000111
 	p = 4
 	n = 3
 	Result should be: 100111111 (decimal 319)
 
-Mask rule
-	Start with the bits from y
-	Right shift by p-n+1 bits, so those are unchanged in x
-	Operator for replacing bits with mask: OR
+Test case 1 printouts:
+	original bits of x: 100100011
+	original bits of y: 110000111
+	modifying x starting at index: 4
+	number of digits to replace: 3
+	bits in x to be replaced: 
+	bits in y to swap in: 111
+	11100
+	100111111
+
 
 */
 
@@ -429,13 +437,15 @@ int setbits(int x, int p, int n, int y) {
 
 	// step 3 make mask
 	int mask = swap_y << p-n+1; // should be 11100
+	printf("mask: ");
 	int_to_binary(mask);
 
 	// step 4 apply mask with OR
 	x = x | mask;
+	printf("x after masking: ");
 	int_to_binary(x); // should be 100111111
 
-	return 0;
+	return x;
 }
 
 // return n bits from position p
