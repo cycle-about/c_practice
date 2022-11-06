@@ -362,6 +362,27 @@ void get_find_arr(char r[], int find[]) {
 position p set to the rightmost n bits of y, leaving the other bits unchanged
 
 x and y must be integral operands: char, short, int, long, signed or unsigned
+
+Assume: p counted from index 0 on right
+
+Breakdown of steps
+	1. locate the bits in x to be replaced
+	2. locate the bits in y to be subbed in
+	3. make a mask of those digits of y that will change only target bits in x,
+	  and leave all others before and after unchaged (ie needs 'no effect' bits
+	  on right end of mask)
+
+Use from book for steps 1 and 2: getbits() function, 'get n bits from position p'
+
+Test case
+	x = 341, binary 101010101
+	y = 9, binary        1001
+	p = 4
+	n = 3
+							101010101 <- substituted 3 digits, starting index 3 from right
+								1001  <- replace with the 3 rightmost in y
+Test case result should be: 101010011
+
 */
 
 #include <stdio.h>
@@ -370,19 +391,21 @@ int setbits(int x, int p, int n, int y);
 void int_to_binary(int n);
 
 int main() {
-	printf("%d\n", setbits(1000, 40, 5, 4));
+	printf("%d\n", setbits(341, 4, 3, 9));
 }
 
 int setbits(int x, int p, int n, int y) {
-	printf("start bits of x: ");
+	printf("original bits of x: ");
 	int_to_binary(x);
-	printf("start bits of y: ");
+	printf("original bits of y: ");
 	int_to_binary(y);
 	
-	printf("start modifying x at index p: %d\n", p);
-	printf("rightmost count to get from y: %d\n", n);
+	printf("modifying x starting at index: %d\n", p);
+	printf("digits to replace: %d\n", n);
 	return x;
 }
+
+
 
 // print int in binary
 void int_to_binary(int n) {

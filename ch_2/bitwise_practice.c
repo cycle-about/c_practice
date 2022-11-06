@@ -3,6 +3,8 @@ Combined compile and run command
 gcc -o bitwise_practice bitwise_practice.c && ./bitwise_practice
 */
 
+//////////////// 11/5/22 ////////////////
+
 /*
 Things to figure out before exercises on bitwise operators
 	/ 1. How to get bit value of integral operators (char, short, int, long; signed and unsigned)
@@ -115,23 +117,52 @@ int binary_to_int_modulo(int n) {
 }
 */
 
-/*
-Implement the examples in book section 2.9
+//////////////// 11/6/22 ////////////////
+
+/* try out shift operators
+
+Results with x = 13, binary 1101
+left shifts (point left, <<)
+	x = x << 0 		-> 1101   		-> decimal 13
+	x = x << 1 		-> 11010 		-> decimal 26
+	x = x << 2 		-> 110100 		-> decimal 52
+	x = x << 3 		-> 1101000 		-> decimal 104
+	x = x << 4  	-> 11010000 	-> decimal 208
+
+Results with x = 53, binary 110101
+right shifts (point right, >>)
+	x = x >> 0 		-> 110101 		-> decimal 53
+	x = x >> 1 		-> 11010 		-> decimal 26
+	x = x >> 2 		-> 1101			-> decimal 13
+	x = x >> 3 		-> 110 			-> decimal 6
+	x = x >> 4 		-> 11 			-> decimal 3
+
+Conclusion: left shift add that int count of zeros to right end of number, doubling it for each digit
+right shift deletes that number of bits from right end, halving it for each digit
 */
 
 #include <stdio.h>
 
 void int_to_binary(int n);
+int binary_to_int_modulo(int n);
 
 int main() {
-	int n = 255;
-	printf("binary of %d: ", n);
-	int_to_binary(n);
+	printf("int from binary = %d\n", binary_to_int_modulo(101010101));
+
+	int x = 53;
+	// printf("start as int: %d\n", x);
+	//printf("start as binary: ");
+	//int_to_binary(x);
+
+	x = x >> 4;
+	printf("binary after shift: ");
+	int_to_binary(x);
+	printf("decimal after shift: %d\n", x);
 }
 
 // print int in binary
 void int_to_binary(int n) {
-	int a[10], i;
+	int a[32], i;
 	
 	for(i = 0; n > 0; i++) {    
 		a[i] = n % 2;    
@@ -141,4 +172,20 @@ void int_to_binary(int n) {
 		printf("%d", a[i]);    
 	}
 	printf("\n");
+}
+
+int binary_to_int_modulo(int n) {
+	printf("binary %d to decimal: ", n);
+
+    int dec_value = 0;
+    int base = 1; // initialize base value to 1, i.e 2^0
+  
+    int temp = n;
+    while (temp) {
+        int last_digit = temp % 10;
+        temp = temp / 10;
+        dec_value += last_digit * base;
+        base = base * 2;
+    }
+    return dec_value;
 }

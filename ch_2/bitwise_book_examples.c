@@ -3,6 +3,8 @@ Combined compile and run command
 gcc -o bitwise_book_examples bitwise_book_examples.c && ./bitwise_book_examples
 */
 
+//////////////// 11/5/22 ////////////////
+
 /**************************************** 
 Section 2.9 page 48 example 1
 	"bitwise AND operator & is often used to mask *off* some set of bits"
@@ -225,6 +227,8 @@ int main() {
 	int_to_binary(mask_2);
 }
 */
+
+//////////////// 11/5/22 ////////////////
 
 /**************************************** 
 Section 2.9 page 49 example 2
