@@ -139,7 +139,7 @@ right shifts (point right, >>)
 
 Conclusion: left shift add that int count of zeros to right end of number, doubling it for each digit
 right shift deletes that number of bits from right end, halving it for each digit
-*/
+
 
 #include <stdio.h>
 
@@ -147,7 +147,7 @@ void int_to_binary(int n);
 int binary_to_int_modulo(int n);
 
 int main() {
-	printf("int from binary = %d\n", binary_to_int_modulo(110000111));
+	printf("int from binary = %d\n", binary_to_int_modulo(101101001));
 
 	int x = 53;
 	// printf("start as int: %d\n", x);
@@ -159,6 +159,32 @@ int main() {
 	int_to_binary(x);
 	printf("decimal after shift: %d\n", x);
 }
+*/
+
+
+/***********************************
+try out inversion operator
+
+*/
+
+#include <stdio.h>
+
+void int_to_binary(int n);
+
+int main() {
+	int x = 5;
+	printf("original int: %d\n", x);
+	printf("original binary: ");
+	int_to_binary(x);
+	
+	x = ~(x);
+	printf("int after one's complement: %d\n", x);
+	printf("binary after one's complement: ");
+	int_to_binary(x);
+	return 0;
+}
+
+///////////////// use these methods with all mains /////////////////
 
 // print int in binary
 void int_to_binary(int n) {

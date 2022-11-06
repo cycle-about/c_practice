@@ -271,6 +271,31 @@ unsigned getbits(unsigned x, int p, int n) {
 	return (x >> (p + 1 - n)) & ~(~0 << n);
 }
 
+//////////////// 11/6/22 ////////////////
+
+/*
+More thorough review of getbits(), for using ~ in ex 2.7
+
+It makes a bit array, then masks it with bitwise & operation
+
+Bit array:    (x >> (p + 1 - n))
+	Take x, and right shift it (remove all bits) outside target range (defined by p and n)
+
+Operation: bitwise and &
+	This has effect of: anything 0 in mask becomes 0 in result (turns off bits)
+
+Mask:    ~(~0 << n)
+	First clause:    ~0 << n
+		Starts with ~0, which is all ones
+		Then LEFT shift it, adding n zeros to the right end
+	Second clause:    ~ of prior result
+		Invert result. Right end now all ones, so matches original
+*/
+
+unsigned getbits(unsigned x, int p, int n) {
+	return (x >> (p + 1 - n)) & ~(~0 << n);
+}
+
 
 ///////// HELPER FUNCTIONS, USE FOR ALL EXAMPLES /////////
 
