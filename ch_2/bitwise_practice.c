@@ -147,7 +147,7 @@ void int_to_binary(int n);
 int binary_to_int_modulo(int n);
 
 int main() {
-	printf("int from binary = %d\n", binary_to_int_modulo(101010101));
+	printf("int from binary = %d\n", binary_to_int_modulo(110000111));
 
 	int x = 53;
 	// printf("start as int: %d\n", x);

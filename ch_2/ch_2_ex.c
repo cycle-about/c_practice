@@ -363,25 +363,38 @@ position p set to the rightmost n bits of y, leaving the other bits unchanged
 
 x and y must be integral operands: char, short, int, long, signed or unsigned
 
-Assume: p counted from index 0 on right
+Assume: p counted from same side as example getbits(), so from RIGHT
 
 Breakdown of steps
-	1. locate the bits in x to be replaced
-	2. locate the bits in y to be subbed in
+	/ 1. locate the bits in x to be replaced (counted from index 0 on right)
+	2. locate the bits in y to be subbed in (rightmost only)
 	3. make a mask of those digits of y that will change only target bits in x,
 	  and leave all others before and after unchaged (ie needs 'no effect' bits
 	  on right end of mask)
 
 Use from book for steps 1 and 2: getbits() function, 'get n bits from position p'
 
-Test case
+Test case draft
 	x = 341, binary 101010101
 	y = 9, binary        1001
-	p = 4
-	n = 3
+	p = 4 					
+	n = 3 					000011100
 							101010101 <- substituted 3 digits, starting index 3 from right
 								1001  <- replace with the 3 rightmost in y
 Test case result should be: 101010011
+
+
+Test case
+	x = 291, binary 100100011
+	y = 391, binary 110000111
+	p = 4
+	n = 3
+	Result should be: 100111111 (decimal 319)
+
+Mask rule
+	Start with the bits from y
+	Right shift by p-n+1 bits, so those are unchanged in x
+	Operator for replacing bits with mask: OR
 
 */
 
@@ -389,9 +402,10 @@ Test case result should be: 101010011
 
 int setbits(int x, int p, int n, int y);
 void int_to_binary(int n);
+unsigned getbits(unsigned x, int p, int n);
 
 int main() {
-	printf("%d\n", setbits(341, 4, 3, 9));
+	setbits(291, 4, 3, 391);
 }
 
 int setbits(int x, int p, int n, int y) {
@@ -401,11 +415,33 @@ int setbits(int x, int p, int n, int y) {
 	int_to_binary(y);
 	
 	printf("modifying x starting at index: %d\n", p);
-	printf("digits to replace: %d\n", n);
-	return x;
+	printf("number of digits to replace: %d\n", n);
+
+	// step 1 locate what to replace in in x
+	printf("bits in x to be replaced: "); // for test case should be: 000
+	int rep_x = getbits(x, p, n);
+	int_to_binary(rep_x);
+
+	// step 2 get bits from y, rightmost n count
+	printf("bits in y to swap in: "); // for test case should be: bits 111, decimal 7
+	int swap_y = getbits(y, n-1, n);
+	int_to_binary(swap_y);
+
+	// step 3 make mask
+	int mask = swap_y << p-n+1; // should be 11100
+	int_to_binary(mask);
+
+	// step 4 apply mask with OR
+	x = x | mask;
+	int_to_binary(x); // should be 100111111
+
+	return 0;
 }
 
-
+// return n bits from position p
+unsigned getbits(unsigned x, int p, int n) {
+	return (x >> (p + 1 - n)) & ~(~0 << n);
+}
 
 // print int in binary
 void int_to_binary(int n) {
