@@ -465,9 +465,14 @@ int setbits(int x, int p, int n, int y) {
 }
 */
 
-/**************************************** 
+/****************************************
+ * NEED TO FINISH THIS
 2-7 Write a function invert(x, p, n) that returns x with the n bits that begin at position p
-inverted (ie 1 changed into 0 and vice versa), leaving the others unchanged 
+inverted (ie 1 changed into 0 and vice versa), leaving the others unchanged
+
+Two operations that can keep bit unchanged with mask:
+	and & 1
+	or  | 0
 
 test case 1
 	x = 341, binary 101010101
@@ -476,13 +481,10 @@ test case 1
 Result should be: 101101001 (decimal 361)
 
 
-*/
-
 #include <stdio.h>
 
 int invert(int x, int p, int n);
 unsigned getmask(unsigned x, int p, int n);
-unsigned getbits(unsigned x, int p, int n);
 void int_to_binary(int n);
 
 int main() {
@@ -495,25 +497,13 @@ int invert(x, p, n) {
 	printf("x invert starting at index: %d\n", p);
 	printf("number of digits to invert: %d\n", n);
 
-	// bits in x to be inverted
-	unsigned inv_x = getbits(x, p, n);
-	printf("decimal of bits in x to be inverted: %d\n", inv_x);
-	printf("bits in x to be inverted: ");
-	int_to_binary(inv_x);
-
-	// left shift bits to be inverted, preparing as mask
-	//inv_x = inv_x << p-n+1;
-	//printf("shifted decimal to be inverted: %d\n", inv_x);
-	//printf("shifted bits to be inverted: ");
-	//int_to_binary(inv_x);
-
-	// make mask by inverting that whole thing
-	unsigned mask = getmask(inv_x, p, n);
+	// make mask
+	unsigned mask = getmask(x, p, n);
 	printf("mask decimal: %d\n", mask);
 	printf("mask bits (shift inverted): ");
 	int_to_binary(mask);
 
-	// apply with & operation
+	// apply mask
 	x = x & mask;
 	printf("x after mask: ");
 	int_to_binary(x);
@@ -522,12 +512,8 @@ int invert(x, p, n) {
 }
 
 unsigned getmask(unsigned x, int p, int n) {
-	return ~(x << p-n+1);
-}
-
-// return n bits from position p
-unsigned getbits(unsigned x, int p, int n) {
-	return (x >> (p + 1 - n)) & ~(~0 << n);
+	unsigned temp = ~(x >> (p + 1 - n)) & ~(~0 << n);
+	return ~(temp << p-n+1);
 }
 
 // print int in binary
@@ -543,3 +529,14 @@ void int_to_binary(int n) {
 	}
 	printf("\n");
 }
+*/
+
+/****************************************
+ * NEED TO DO THIS
+2-8 Write a function rightrot(x,n) that returns the value of the integer x rotated to the
+right by n bit positions
+*/ 
+
+/****************************************
+2-9 In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x.
+Explain why. Use this observation to write a faster version of 'bitcount'.

@@ -1,0 +1,98 @@
+---------------------------
+One's and Two's Complement
+---------------------------
+
+All About Electronics
+1's Complement and 2's Complement | Signed Binary Numbers Explained (17 min)
+https://www.youtube.com/watch?v=MuUnffIpX7Y
+	Signed Binary Numbers: three ways to represent
+		Sign Magnitude Form
+		1's Complement
+		2's Complement
+	Positive numbers are the same in all forms
+	Negative numbers are DIFFERENT in all forms
+	Most Significant Bit (MSB): 0 for positive numbers, 1 for negative numbers
+
+	Sign Magnitude Form
+		Same as binary for number, just 1 at MSB
+		eg +52 (in 8 bit)    00110100
+		   -52 (in 8 bit)    10110100
+		This form has both a +0 and a -0 (10000000 and 00000000)
+		Range for n-bit number is -(2^(n-1) - 1) to 2^(n-1) - 1
+		eg 4 bits represent: -7 to -1, -0, +0, and +1 to +7
+		Issues that keep it from being used in digial circuits
+			Arithmetic with it takes a lot of manipulation
+			Two representations of zero
+
+	One's Complement
+		Put the negative number's positive version into binary
+		Then take inverse of each bit, including the sign bit
+			eg +34 (8 bit)    00100010
+			   -34 (8 bit)    11011101
+		-34 is the one's complement of +34
+		For a n-bit number N, it's one's complement is: (2^n - 1) - N
+		eg decimal 12 in 5-bit: 01100
+		    (2^5 - 1) - 12 = 11111 - 01100 = 10011
+		* inversion is done by all-ones minus the number to invert *
+		This ALSO has issue of both -0 and +0; computations with it are easier though
+
+	Two's Complement
+		Two by-hand ways to find it
+			- Start with number's positive representation, invert all bits (ie get one's complement),
+			  then add 1 to it
+				eg +34 (8 bit)        00100010
+				   one's complement   11011101
+				    						+1
+				   two's complement   11011110
+			
+			- Start with number's positive representation, copy up to and including first 1,
+			  then reverse all remaining digits
+			  	eg +34 (8 bit)       00100010  <- from right: copy 0 then 1, but then reverse all after
+			  	   two's complement  11011110
+
+			- 2^n - N       Where n is count of bits, and N is positive decimal
+				eg decimal +34 (8 bit) = 2^8 - 34 = 256 - 43
+				                      -> 100000000 - 00100010 = 11011110
+
+		Range representable in two's complement: for n-bit number
+			-(2^(n-1)) to 2^(n-1) - 1
+			eg 4-bit number:    -(2^3) to (2^3) -1    
+				->  -8 to -1, 0, and +1 to +7
+		If try to get two's positive of most negative number (eg -8), only get the same number (-8)
+
+---------------------------------
+
+BitMerge
+One's Complement, Two's Complement, and Sign Magnitude
+https://www.youtube.com/watch?v=Z3mswCN2FJs
+
+	Walks through the arithmetic issues with sign magnitude and one's complement
+
+---------------------------------
+
+Organic Chemistry Tutor
+Binary Addition and Subtraction With Negative Numbers, 2's Complements & Signed Magnitude
+https://www.youtube.com/watch?v=sJXTo3EZoxM
+
+	Not watched yet, another option
+
+
+---------------------------
+Bit Masking
+---------------------------
+
+HackerRank
+Algorightms: Bit Manipulation
+https://www.youtube.com/watch?v=NLKQEOgBAnw
+	(Unnecessary and less clear to me) alternate way to describe two's complement: the number 
+	that you would need to add to the positive representation (absolute value) to get 
+	2^ number of bits in the number (eg 2^8 for 8-bit number)
+		eg to get -18
+			00010010 	(decimal 18)
+		  + ????????
+		 = 100000000 	(decimal 2^8)
+	Actually not necessary and to more more confusing
+	Afterwards describes just inverting then add 1
+	Logical versus Arithmetic shifts on negative numbers: how to handle sign bit
+		Logical: just move all bits, fill in vacants with 0, even if changes sign
+		Arithmetic: moves all bits, and fills in vacant with what sign bit was
