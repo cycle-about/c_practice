@@ -1,3 +1,5 @@
+//////////////// 11/7/22 ////////////////
+
 ---------------------------
 One's and Two's Complement
 ---------------------------
@@ -70,11 +72,7 @@ https://www.youtube.com/watch?v=Z3mswCN2FJs
 
 ---------------------------------
 
-Organic Chemistry Tutor
-Binary Addition and Subtraction With Negative Numbers, 2's Complements & Signed Magnitude
-https://www.youtube.com/watch?v=sJXTo3EZoxM
 
-	Not watched yet, another option
 
 
 ---------------------------
@@ -96,3 +94,120 @@ https://www.youtube.com/watch?v=NLKQEOgBAnw
 	Logical versus Arithmetic shifts on negative numbers: how to handle sign bit
 		Logical: just move all bits, fill in vacants with 0, even if changes sign
 		Arithmetic: moves all bits, and fills in vacant with what sign bit was
+	Mask to determine if bit at position i is 1 or 0
+		Make a mask by left-shifting a 1 by i times
+		Then bitwise & the mask and the original: bit at position i matches original
+			(x & (1 << i)) != 0
+	Mask to SET a bit to 1
+		Make mask with all zeros, except 1 at position i
+		Then bitwise | it, and position i will be a 1
+		x | (1 << i)
+	Mask to clear a bit, aka set it to 0
+		Make a mask that is 1 everywhere but at target bit
+		Get that mask by making one as above, then invert it
+		x & (~(1 << i))
+
+
+//////////////// 11/8/22 ////////////////
+
+* Extremely good, more advanced *
+Bit Fields in C. What are they, and how do I use them?
+Jacob Sorber
+https://www.youtube.com/watch?v=aMAM5vL7wTs
+	Uses of bit fields: get info into as little space as possible, eg limited network bandwidth
+	Bit field: a series of bits where individual bits or clusters of bits mean different things
+	Use 1. Flags, eg params passed when opening a file: passes an int, but each of 32 bits
+		corresponds to a particular option (eg read only mode true or false)
+		Type 'uint8_t' is an unsigned 8-bit int
+	Use 2. If number will always be smaller than int, store it in less space
+		eg someone's school grade will always be between 1-12, don't need to use full int
+		Need to add flag 'packed' to struct, to not align its fields as usual, 
+			instructs compiler to use slower and more commpact setup
+	Use 3. Treat the int as an array of bits, where each position doesn't have name
+		Language does NOT allow directly defining a structure of bits
+		Writes macros with '#define' to set bits to particular values
+
+		Set a bit (make it 1): bitwise or | it with mask that has 1 at target field
+			#define SET_BIT(BF, N) |= ((uint64_t)0x0000000000000001 << N)
+		Clear a bit (make it 0): bitwise and & it with complement ~ of mask with 1 at target field
+			#define CLR_BIT(BF, N) &= ~((uint64_t)0x0000000000000001 << N)
+		Check if a bit it set: remove everything right of target bit, bitwise and & with single-bit mask, 1
+			Returns 1 if it's 1, 0 if it's 0
+			#define IS_BIT_SET(BF, N) ((BF >> N) & 0x1)
+
+---------------------------------
+
+What are Bit Masks, and how do I use them? (examples in C)
+Jacob Sorber
+https://www.youtube.com/watch?v=Ew2QnDeTCCE
+	
+	Set bit 3 to 1, with bitwise or | 			set bit: bitwise or |
+		x |= (0x00000001 << 3)
+	Clear bit 3 to 0, with itwise and &         clear bit: bitwise and & with ~
+		x &= ~(0x00000001 << 3) 	-> inverse of mask with 1 at target
+
+	Bit mask: binary pattern used to modify another binary pattern using
+		bitwise operations (&, |, ~, etc)
+
+	Get bits from positions 4 to 9
+		x  = 0b0000100001010001
+		x &= 0b0000001111110000 	-> mask with 1 at target
+	result=  0b0000000001010000
+
+	Toggle a bit, aka invert it: use bitwise XOR
+		x  = 0b00100000
+		x ^= 0b00001000 	-> mask with 1 at target
+	result=  0b00101000
+
+	If/else equivalent to toggling with "x ^= "
+		if (x & (0x1 << 3))
+			x &= ~(0x1 << 3);
+		else
+			x |= (0x1 << 3);
+
+
+---------------------------------
+
+Bit Manipulation 04: Bit Masking
+0612 TV w/ NERDfirst
+https://www.youtube.com/watch?v=lUzQtTLCglk
+	Mask is used to operate on individual bits
+	Turn bit to 1: OR with a 1 in mask
+	Make mask: make a binary 1, then left shift as far as needed
+	Toggle bit: XOR with 1
+	Turn bit to 0: make mask, invert NOT it, then AND
+	Query a number: this result is not written into original number
+	AND with a bit as 1, and returned value is what bit was, ie a nonzero in mask
+	Masking also used in image manipulation, to combine image and mask
+		eg AND, OR of corresponding pixels across layers, with different opaque/transparent parts
+
+---------------------------
+TODO Other Videos
+---------------------------
+
+What is Bit Masking | How to apply Bit Masking | Types of Bit Masking
+TechVedas .learn
+https://www.youtube.com/watch?v=FmY-PjukO8I
+
+
+Practical uses of bitwise operations - Implementing a Flag System
+CodeVault
+https://www.youtube.com/watch?v=6hnLMnid1M0
+
+
+[ The ULTIMATE guide in C ] | C course for beginners
+CodeVault
+3:24 hours
+https://www.youtube.com/watch?v=FQ9y2a-Zj2g
+
+
+* Good General Channel *
+The What, How and Why of Void Pointers in C and C++
+Jason Sorber
+13 min
+https://www.youtube.com/watch?v=Vd-4eGnBAK8
+
+
+Binary Addition and Subtraction With Negative Numbers, 2's Complements & Signed Magnitude
+Organic Chemistry Tutor
+https://www.youtube.com/watch?v=sJXTo3EZoxM
