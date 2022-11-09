@@ -466,7 +466,7 @@ int setbits(int x, int p, int n, int y) {
 */
 
 /****************************************
- * first effort
+ * first effort, abandoned
 2-7 Write a function invert(x, p, n) that returns x with the n bits that begin at position p
 inverted (ie 1 changed into 0 and vice versa), leaving the others unchanged
 
@@ -531,6 +531,8 @@ void int_to_binary(int n) {
 }
 */
 
+//////////////// 11/9/22 ////////////////
+
 /****************************************
  * second effort, started over
 2-7 Write a function invert(x, p, n) that returns x with the n bits that begin at position p
@@ -545,7 +547,7 @@ Should get for invert(341, 4, 3)
 Should get for invert(585, 5, 2)
 	1001001001
  -> 1001111001
-*/
+
 
 #include <stdio.h>
 
@@ -579,13 +581,81 @@ void print_bits(int n) {
 	}
 	printf("\n");
 }
+*/
 
 
 /****************************************
- * NEED TO DO THIS
 2-8 Write a function rightrot(x,n) that returns the value of the integer x rotated to the
 right by n bit positions
+
+Bit Rotation: A rotation (or circular shift) is an operation similar to shift except that 
+the bits that fall off at one end are put back to the other end.
+
+Algorithm from search results preview only
+	Loop n times, x >> 1 each iteration; if the old low bit of x was 1, set the new high bit.
+
+Check rightmost bit: bitwise and & with one-bit mask of 1
+
+Should get for rotate(143, 2)
+	0000000010001111
+ -> 1100000000100011  (decimal 49,187)
+
+Should get for rotate(49293, 3)
+	1100000010001101
+ -> 1011100000010001  (decimal 47,121)
+
+happening for "x |= (1 << INT_BITS);"
+	warning: left shift count >= width of type
+https://stackoverflow.com/questions/4201301/warning-left-shift-count-width-of-type
+Resolution: set to presumes highest bit position is 16
+
 */ 
+
+#include <stdio.h>
+#include <stdint.h>
+
+#define BITS 15
+
+int rotate(int x, int n);
+void print_bits(int n);
+
+int main() {
+	printf("result: %d\n", rotate(49293, 3));
+}
+
+int rotate(int x, int n) {
+	printf("start x bits: ");
+	print_bits(x);
+	int low;
+	for (int i = 0 ; i < n; i++) {
+		low = x & 0x1;    // low gets value of start rightmost bit
+		x >>= 1;
+		if (low == 1) {
+			int mask = (1 << BITS);
+			printf("mask: ");
+			print_bits(mask);
+			x |= mask;    // set highest bit to 1 if prior low was 1
+		}
+	}
+	printf("end x bits: ");
+	print_bits(x);
+	return x;
+}
+
+// print int in binary
+void print_bits(int n) {
+	int a[32], i;
+	
+	for(i = 0; n > 0; i++) {    
+		a[i] = n % 2;    
+		n = n / 2;    
+	}
+	for(i = i - 1; i >= 0; i--) {    
+		printf("%d", a[i]);    
+	}
+	printf("\n");
+}
+
 
 /****************************************
 2-9 In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x.
