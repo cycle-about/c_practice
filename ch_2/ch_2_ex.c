@@ -466,7 +466,7 @@ int setbits(int x, int p, int n, int y) {
 */
 
 /****************************************
- * NEED TO FINISH THIS
+ * first effort
 2-7 Write a function invert(x, p, n) that returns x with the n bits that begin at position p
 inverted (ie 1 changed into 0 and vice versa), leaving the others unchanged
 
@@ -532,6 +532,56 @@ void int_to_binary(int n) {
 */
 
 /****************************************
+ * second effort, started over
+2-7 Write a function invert(x, p, n) that returns x with the n bits that begin at position p
+inverted (ie 1 changed into 0 and vice versa), leaving the others unchanged
+
+Needed operation: XOR
+
+Should get for invert(341, 4, 3)
+	101010101
+ -> 101001001
+
+Should get for invert(585, 5, 2)
+	1001001001
+ -> 1001111001
+*/
+
+#include <stdio.h>
+
+int invert(int x, int p, int n);
+void print_bits(int n);
+
+int main() {
+	invert(585, 5, 2);
+}
+
+int invert(int x, int p, int n) {
+	printf("start x bits: ");
+	print_bits(x);
+	for (int i =0 ; i < n; i++)
+		x ^= (0x1 << p-i);
+	printf("end x bits: ");
+	print_bits(x);
+	return x;
+}
+
+// print int in binary
+void print_bits(int n) {
+	int a[10], i;
+	
+	for(i = 0; n > 0; i++) {    
+		a[i] = n % 2;    
+		n = n / 2;    
+	}
+	for(i = i - 1; i >= 0; i--) {    
+		printf("%d", a[i]);    
+	}
+	printf("\n");
+}
+
+
+/****************************************
  * NEED TO DO THIS
 2-8 Write a function rightrot(x,n) that returns the value of the integer x rotated to the
 right by n bit positions
@@ -540,3 +590,4 @@ right by n bit positions
 /****************************************
 2-9 In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x.
 Explain why. Use this observation to write a faster version of 'bitcount'.
+*/ 
