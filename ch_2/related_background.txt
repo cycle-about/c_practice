@@ -70,10 +70,6 @@ https://www.youtube.com/watch?v=Z3mswCN2FJs
 
 	Walks through the arithmetic issues with sign magnitude and one's complement
 
----------------------------------
-
-
-
 
 ---------------------------
 Bit Masking
@@ -180,6 +176,7 @@ https://www.youtube.com/watch?v=lUzQtTLCglk
 	AND with a bit as 1, and returned value is what bit was, ie a nonzero in mask
 	Masking also used in image manipulation, to combine image and mask
 		eg AND, OR of corresponding pixels across layers, with different opaque/transparent parts
+
 
 ---------------------------
 TODO Other Videos

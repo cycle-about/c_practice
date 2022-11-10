@@ -3,6 +3,7 @@ Combined compile and run command
 gcc -o bitwise_practice bitwise_practice.c && ./bitwise_practice
 */
 
+
 //////////////// 11/5/22 ////////////////
 
 /*
@@ -117,6 +118,7 @@ int binary_to_int_modulo(int n) {
 }
 */
 
+
 //////////////// 11/6/22 ////////////////
 
 /* try out shift operators
@@ -165,7 +167,8 @@ int main() {
 /***********************************
 try out inversion operator
 
-*/
+issue: one's complement makes negative numbers
+
 
 #include <stdio.h>
 
@@ -183,11 +186,87 @@ int main() {
 	int_to_binary(x);
 	return 0;
 }
+*/
+
+
+/***********************************
+Example runs for 2-9:
+	In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x
+	Pattern to get x-1 in binary: x binary, go left until first 1, flip it to 0, then flip all remaining bits
+
+Ends with 0, only a single 1
+	Change x and x-1: 'carries' all the way to highest bit, removes highest bit, all others become 1 (they flip)
+	Result with &: every bit becomes 0 
+
+	100000    (x: 32)
+ &=  11111    (x-1: 32)
+	          (& masked: 0)
+
+	1000000   (x: 64)
+ &=  111111   (x-1: 64)
+	          (& masked: 0)
+--------
+
+Ends with 0, multiple 1's: 
+	Change x and x-1: 'carries' until unsets the lowest 1 bit, then flips all others
+	Result with &: first 1 bit is made 0, rest is unchanged
+
+	10010    (x: 18)
+	10001    (x-1: 18)
+ &= 10000    (& masked: 16)
+
+	1010101010    (x: 682)
+	1010101001    (x-1: 682)
+ &= 1010101000    (& masked: 680)
+
+	101010000    (x: 336)
+	101001111    (x-1: 336)
+ &= 101000000    (& masked: 320)
+
+--------
+
+Single bit, 1
+	Change x and x-1: the 1 bit is made 0
+	Result after &: whole value becomes 0
+
+	1    (x: 1)
+ &=      (x-1: 1)
+         (& masked: 0)
+--------
+
+Ends with 1, multiple 1's
+	1100000010001101    (x: 49293)
+	1100000010001100    (x-1: 49293)
+ &= 1100000010001100    (& masked: 49292)
+
+	101010111    (x: 343)
+	101010110    (x-1: 343)
+ &= 101010110    (& masked: 342)
+
+
+*/
+
+#include <stdio.h>
+
+void print_bits(int n);
+
+int main() {
+	int x  = 343;
+	print_bits(x);
+	printf("    (x: %d)\n", x);
+	print_bits(x-1);
+	printf("    (x-1: %d)\n", x);
+	x &= (x-1);
+	print_bits(x);
+	printf("    (& masked: %d)\n", x);
+}
+
+
 
 ///////////////// use these methods with all mains /////////////////
 
 // print int in binary
-void int_to_binary(int n) {
+void print_bits(int n) {
 	int a[32], i;
 	
 	for(i = 0; n > 0; i++) {    
@@ -197,7 +276,7 @@ void int_to_binary(int n) {
 	for(i = i - 1; i >= 0; i--) {    
 		printf("%d", a[i]);    
 	}
-	printf("\n");
+	//printf("\n");
 }
 
 int binary_to_int_modulo(int n) {

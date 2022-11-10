@@ -609,10 +609,8 @@ happening for "x |= (1 << INT_BITS);"
 https://stackoverflow.com/questions/4201301/warning-left-shift-count-width-of-type
 Resolution: set to presumes highest bit position is 16
 
-*/ 
 
 #include <stdio.h>
-#include <stdint.h>
 
 #define BITS 15
 
@@ -655,9 +653,96 @@ void print_bits(int n) {
 	}
 	printf("\n");
 }
+*/ 
 
 
 /****************************************
 2-9 In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x.
 Explain why. Use this observation to write a faster version of 'bitcount'.
-*/ 
+
+1. Getting x-1 in two's complement has the effect of 'carrying' the subtract leftwards until
+reaching the first bit set to 1. That then becomes 0, and 'carrying' the value back rightwards
+has the effect of flipping all bits from that first 1 to the least significant bit, inclusive
+of the first 1
+
+When doing an & with that flipped-until-first-1 value for x-1, the least significant 1 in the
+original is now 0 in x-1, so with & becomes 0 in the result. All following less-significant 0's 
+in the original are 0 in the & result.
+
+2. How to use this for alternate version of bitcount
+Call x &= x-1 until x is 0. Count those calls. It will only loop until 1's are gone, rather than 
+every digit as in the original version
+
+*/
+
+#include <stdio.h>
+
+void print_bits(int n);
+void and_prints(int x);
+int bitcount_orig(unsigned x);
+int bitcount_new(unsigned x);
+
+int main() {
+	int x = 343;
+	print_bits(x);
+	bitcount_new(x);
+	bitcount_orig(x);
+}
+
+// using mask: count bits in x set to 1
+int bitcount_new(unsigned x) {
+	int i; // loops used for calculation: one per bit found
+
+	printf("\nnew bitcount\n");
+	// termination condition: when x is 0, so once there are no 1's left in it
+	// incrementor: & mask to turn the next 1 to a 0
+	for (i = 0; x != 0; i++) {
+		print_bits(x);
+		x &= x-1;
+	}
+	printf("  loops used: %d\n", i);
+	printf("  ones count: %d\n", i);
+	return i;
+}
+
+// original: count bits in x set to 1
+int bitcount_orig(unsigned x) {
+	int b; // 1 bits counted
+	int i; // loops used for calculation
+
+	printf("\noriginal bitcount\n");
+	// termination condition: end when x is 0, so once there are no 1's left in it
+	// incrementor: right shift by one, so remove least sig bit
+	for (b = i = 0; x != 0; x >>= 1, i++) {
+		print_bits(x);
+		if (x & 01) // bitwise and of the least sig bit, with a 1: check bit, returns 1 if bit was 1
+			b++;
+	}
+	printf("  loops used: %d\n", i);
+	printf("  ones count: %d\n", b);
+	return b;
+}
+
+void and_prints(int x) {
+	print_bits(x);
+	printf("    (x: %d)\n", x);
+	print_bits(x-1);
+	printf("    (x-1: %d)\n", x);
+	x &= (x-1);
+	print_bits(x);
+	printf("    (& masked: %d)\n", x);
+}
+
+// print int in binary
+void print_bits(int n) {
+	int a[32], i;
+	
+	for(i = 0; n > 0; i++) {    
+		a[i] = n % 2;    
+		n = n / 2;    
+	}
+	for(i = i - 1; i >= 0; i--) {    
+		printf("%d", a[i]);    
+	}
+	printf("\n");
+}

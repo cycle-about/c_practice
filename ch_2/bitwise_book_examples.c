@@ -240,7 +240,7 @@ Results all with x = 657, binary 1010010001
 	getbits(x, 9, 3) 	-> binary 101 (int 5)
 	getbits(x, 3, 3) 	-> binary [none] (int 0)
 	getbits(x, 3, 4) 	-> binary 1 (int 1)  		omits leading zeros
-*/
+
 
 #include <stdio.h>
 
@@ -270,6 +270,7 @@ int main() {
 unsigned getbits(unsigned x, int p, int n) {
 	return (x >> (p + 1 - n)) & ~(~0 << n);
 }
+*/
 
 //////////////// 11/6/22 ////////////////
 
@@ -290,10 +291,36 @@ Mask:    ~(~0 << n)
 		Then LEFT shift it, adding n zeros to the right end
 	Second clause:    ~ of prior result
 		Invert result. Right end now all ones, so matches original
-*/
 
 unsigned getbits(unsigned x, int p, int n) {
 	return (x >> (p + 1 - n)) & ~(~0 << n);
+}
+*/
+
+//////////////// 11/9/22 ////////////////
+
+/**************************************** 
+Section 2.10 page 50
+*/
+
+#include <stdio.h>
+
+int bitcount(unsigned x);
+
+int main() {
+	printf("result: %d\n", bitcount(9));
+}
+
+// count bits in x set to 1
+int bitcount(unsigned x) {
+	int b;
+
+	// termination condition: end when x is 0, so once there are no 1's left in it
+	// incrementor: right shift by one, so remove least sig bit
+	for (b = 0; x != 0; x >>= 1)
+		if (x & 01) // bitwise and of the least sig bit, with a 1: check bit, returns 1 if bit was 1
+			b++;
+	return b;
 }
 
 
