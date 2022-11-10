@@ -655,6 +655,7 @@ void print_bits(int n) {
 }
 */ 
 
+//////////////// 11/10/22 ////////////////
 
 /****************************************
 2-9 In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit in x.
@@ -670,10 +671,9 @@ original is now 0 in x-1, so with & becomes 0 in the result. All following less-
 in the original are 0 in the & result.
 
 2. How to use this for alternate version of bitcount
-Call x &= x-1 until x is 0. Count those calls. It will only loop until 1's are gone, rather than 
-every digit as in the original version
+Call x &= x-1 until x is 0. The count of loops is the number of 1's in original number, since it
+will only loop until 1's are gone, rather than on every digit as in the original version
 
-*/
 
 #include <stdio.h>
 
@@ -745,4 +745,33 @@ void print_bits(int n) {
 		printf("%d", a[i]);    
 	}
 	printf("\n");
+}
+
+/****************************************
+2-10 Rewrite the function 'lower', which converts upper case letters to lower case, with a
+conditional expression instead of 'if-else'
+*/
+
+#include <stdio.h>
+
+int lower_orig(int c);
+int lower_ternary(int c);
+
+int main() {
+	int c = 'B';
+	putchar(lower_ternary(c));
+	// putchar(lower_orig(c));
+	printf("\n");
+}
+
+int lower_new(int c) {
+	return (c >= 'A' && c <= 'Z') ? (c + 'a' - 'A') : c;
+}
+
+// page 43
+int lower_ternary(int c) {
+	if (c >= 'A' && c <= 'Z')
+		return c + 'a' - 'A';
+	else
+		return c;
 }
