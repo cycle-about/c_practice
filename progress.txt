@@ -1,0 +1,14 @@
+Started: 10/15/22
+
+Chapter							 Exercises 		Done % 		Date Finished
+
+1. Tutorial Intro						24 			25 		10/29/22
+2. Types, Operators, Expressions		10 			35 		11/10/22
+3. Control Flow 						 6 			41
+4. Functions and Program Structure 		14 			56
+5. Pointers and Arrays   				20			76
+6. Structures 							 6 			82
+7. Input and Output 					 9 			92
+8. UNIX System Interface 				 8 		   100
+
+TOTAL 									97

@@ -21,7 +21,10 @@ One-check runtimes
 	0.000043
 	0.000048
 	0.000044
-*/
+
+Loops for particular example: 4 with orig, and 5 with new
+This new version continues bisect loop even if target is found
+
 
 #include <stdio.h>
 #include <time.h>
@@ -30,9 +33,9 @@ int binsearch_orig(int x, int v[], int n);
 int binsearch_new(int x, int v[], int n);
 
 int main() {
-	int v[] = {1, 5, 6, 9, 10, 12, 15, 16, 18, 20, 21, 22, 25, 27, 28, 30, 35, 38, 41};
+	int v[] = {-20, -10, -6, -1, 1, 5, 6, 9, 10, 12, 15, 16, 18, 20, 21, 22, 25, 27, 28, 30, 35, 38, 41};
 	int n = sizeof(v) / sizeof(v[0]);
-	int x = 9;
+	int x = -20;
 
 	double runtime = 0.0;
 	clock_t begin = clock();
@@ -42,17 +45,18 @@ int main() {
 
 	clock_t end = clock();
 	runtime += (double) (end - begin) / CLOCKS_PER_SEC;
-	printf("Elapsed time %f seconds", runtime);
+	printf("Elapsed time %f seconds\n", runtime);
 }
 
 int binsearch_new(int x, int v[], int n) {
-	int low, high, mid;
+	int low, high, mid, i;
 
-	low = 0;
+	low = i = 0;
 	high = n - 1;
 
-	printf("start max is %d\n", high);
+	//printf("start max is %d\n", high);
 	while (low <= high) {
+		i++;
 		mid = (low + high) / 2;
 		//printf("index checked: %d\n", mid);
 		if (x < v[mid]) {
@@ -63,6 +67,7 @@ int binsearch_new(int x, int v[], int n) {
 			//printf("search higher, new min is %d\n", low);
 		}
 	}
+	printf("loops done: %d\n", i);
 	if (v[low] == x)
 		return low;
 	else if (v[high] == x)
@@ -72,18 +77,92 @@ int binsearch_new(int x, int v[], int n) {
 }
 
 int binsearch_orig(int x, int v[], int n) {
-	int low, high, mid;
+	int low, high, mid, i;
 
-	low = 0;
+	low = i = 0;
 	high = n - 1;
 	while (low <= high) {
+		i++;
 		mid = (low + high) / 2;
 		if (x < v[mid])
 			high = mid - 1;
 		else if (x > v[mid])
 			low = mid + 1;
-		else
+		else {
+			printf("loops done: %d\n", i);
 			return mid;
+		}
 	}
+	printf("loops done: %d\n", i);
 	return -1;    // no match
 }
+*/
+
+/**************************************** 
+3-2 Write a function escape(s, t) that converts characters like newline and tab
+into visible escape sequences like \n and \t as it copies the string s to t. Use
+a switch. Write a function for the other direction as well, converting escape
+sequences into the real characters.
+
+Starting point: chapter 1 page 29 example that prints longest line of input
+*/
+
+#include <stdio.h>
+
+#include <stdio.h>
+#define MAXLINE 1000 // maximum chars in a line
+
+int getaline(char line[], int maxline);
+void escape(char to[], char from[]);
+
+int main() {
+	int len;    // current line length
+	char line[MAXLINE];    // current input line
+	char escaped[MAXLINE];    // escaped version saved here
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		escape(escaped, line);
+		printf("%s", escaped);
+	}
+	return 0;
+}
+
+// replace newline and tab into visible escape sequences
+// assumes 'to' is big enough
+void escape(char to[], char from[]) {
+	int i_from, i_to;
+
+	i_from = i_to = 0;
+	while (from[i_from] != '\0') {
+		switch (from[i_from]) {
+			case '\n':
+				to[i_to] = '\\';
+				to[++i_to] = 'n';
+				break;
+			case '\t':
+				to[i_to] = '\\';
+				to[++i_to] = 't';
+				break;
+			default:
+				to[i_to] = from[i_from];
+				break;
+		}
+		++i_from;
+		++i_to;
+	}
+}
+
+// read a line into s, return length
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i = 0; i<lim-1 && (c=getchar())!=EOF && c !='\n'; ++i)
+		s[i] = c;
+	if (c == '\n') {
+		s[i] = c;
+		++i;
+	}
+	s[i] = '\0';
+	return i;
+}
+
