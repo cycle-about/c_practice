@@ -3,8 +3,6 @@ Combined compile and run command
 gcc -o ch_3_ex ch_3_ex.c && ./ch_3_ex
 */
 
-//////////////// 11/12/22 ////////////////
-
 /**************************************** 
 3-1 Our binary search makes two tests inside the loop, when one would suffice
 (at the price of more tests outside). Write a version with only one test inside
@@ -114,6 +112,7 @@ Starting point: chapter 1 page 29 example that prints longest line of input
 
 int getaline(char line[], int maxline);
 void escape(char to[], char from[]);
+void unescape(char to[], char from[]);
 
 int main() {
 	int len;    // current line length
@@ -121,7 +120,7 @@ int main() {
 	char escaped[MAXLINE];    // escaped version saved here
 
 	while ((len = getaline(line, MAXLINE)) > 0) {
-		escape(escaped, line);
+		unescape(escaped, line);
 		printf("%s", escaped);
 	}
 	return 0;
@@ -150,6 +149,49 @@ void escape(char to[], char from[]) {
 		++i_from;
 		++i_to;
 	}
+}
+
+// replace visible escape sequences into newline and tab
+// assumes 'to' is big enough
+void unescape(char to[], char from[]) {
+	int i_from, i_to;
+
+	i_from = i_to = 0;
+	while (from[i_from] != '\0') {
+		if (from[i_from] == '\\') {
+			printf("\n\\ found, char after is: ");
+			putchar(from[i_from + 1]);
+			printf("\n");
+			// switch defined by expression, compared against 'cases'
+			switch (from[i_from + 1]) { 	// is char after a '\' n or t
+				case 'n': 				// case must be constatant integer value
+					to[i_to] = '\n';
+					i_from++; 			// increment to skip second char in orig
+					//to[++i_to] = 'n';
+					break;
+				case 't':
+					printf("reached case \\t\n");
+					to[i_to] = '\t';
+					i_from++; 			// increment to skip second char in orig
+					//to[++i_to] = 't';
+					break;
+				default:
+					printf("default of switch\n");
+					to[i_to] = from[i_from];
+					break;
+			}
+		}
+		else {
+			printf("copying char: ");
+			putchar(from[i_from]);
+			printf("\n");
+			to[i_to] = from[i_from];
+		}
+		++i_from;
+		++i_to;
+	}
+	// copy last character
+	to[i_to] = from[i_from];
 }
 
 // read a line into s, return length
