@@ -96,6 +96,7 @@ int binsearch_orig(int x, int v[], int n) {
 }
 */
 
+
 /**************************************** 
 3-2 Write a function escape(s, t) that converts characters like newline and tab
 into visible escape sequences like \n and \t as it copies the string s to t. Use
@@ -103,7 +104,7 @@ a switch. Write a function for the other direction as well, converting escape
 sequences into the real characters.
 
 Starting point: chapter 1 page 29 example that prints longest line of input
-*/
+
 
 #include <stdio.h>
 
@@ -159,32 +160,22 @@ void unescape(char to[], char from[]) {
 	i_from = i_to = 0;
 	while (from[i_from] != '\0') {
 		if (from[i_from] == '\\') {
-			printf("\n\\ found, char after is: ");
-			putchar(from[i_from + 1]);
-			printf("\n");
 			// switch defined by expression, compared against 'cases'
 			switch (from[i_from + 1]) { 	// is char after a '\' n or t
-				case 'n': 				// case must be constatant integer value
+				case 'n': 				// case must be constatant integer value OR constant expression
 					to[i_to] = '\n';
 					i_from++; 			// increment to skip second char in orig
-					//to[++i_to] = 'n';
 					break;
 				case 't':
-					printf("reached case \\t\n");
 					to[i_to] = '\t';
 					i_from++; 			// increment to skip second char in orig
-					//to[++i_to] = 't';
 					break;
 				default:
-					printf("default of switch\n");
 					to[i_to] = from[i_from];
 					break;
 			}
 		}
 		else {
-			printf("copying char: ");
-			putchar(from[i_from]);
-			printf("\n");
 			to[i_to] = from[i_from];
 		}
 		++i_from;
@@ -207,4 +198,82 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
+*/
 
+
+/**************************************** 
+3-3 Write a function expand(s1, s2) that expands shorthand notations like a-z in the string s1
+into the equivalent complete list abc...xyz in s2. Allow for letters of either case and digits,
+and be prepared to handle cases like a-b-c and a-z0-9 and -a-z. Arrange that a leading or
+trailing - is taken literally.
+
+Draft approach
+	Find any instance of char '-'
+	Start a loop to print all chars in a range
+		start char: check char before '-'
+			if a space, it is first printable char
+			if not a space, it is that preceding char
+		end char: check char after '-'
+			if a space, it is last printable char
+			if not a space, it is that following char
+
+ASCII benchmarks
+	0 - 48
+	9 - 57
+	A - 65
+	Z - 90
+	a - 97
+	z - 122
+
+*/
+
+#include <stdio.h>
+
+#define MAXLINE 100 // maximum chars in a line
+
+int getaline(char line[], int maxline);
+void expand(char s1[], char s2[]);
+
+int main() {
+
+	int len; 			   		// length current line
+	char line[MAXLINE];    		// current input line
+	char expanded[MAXLINE]; 	// expanded version of input line
+
+	while ((len = getaline(line, MAXLINE)) > 0) {
+		expand(line, expanded);
+		printf("expanded line: %s\n", expanded);
+	}
+}
+
+void expand(char s1[], char s2[]) {
+	int i = 0;
+	char c;
+
+	for ( ; ((c = s1[i]) != '\0'); i++) {
+		s2[i] = s1[i];
+	}
+	s2[i] = '\0';
+}
+
+// read a line into s, return length of line
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i = 0; i < lim-1; i++) {
+		c = getchar();
+		if (c == EOF) {
+			break;
+		} else if (c == '\n') {
+			break;
+		} else {
+			s[i] = c;
+		}
+	}
+	if (c == '\n') {
+		s[i] = c;
+		++i;
+	}
+	s[i] = '\0';
+	return i;
+}
