@@ -225,9 +225,16 @@ ASCII benchmarks
 	a - 97
 	z - 122
 
+Cases to handle
+	Leading '-' first char in string
+	Leading '-' preceded by whitespace
+	Trailing '-' last char in string
+	Trailing '-' preceded by whitespace
+
 */
 
 #include <stdio.h>
+#include <ctype.h>
 
 #define MAXLINE 100 // maximum chars in a line
 
@@ -246,14 +253,46 @@ int main() {
 	}
 }
 
-void expand(char s1[], char s2[]) {
-	int i = 0;
-	char c;
+void expand(char from[], char to[]) {
+	int i_from, i_to, j;
+	char c, start, end;
 
-	for ( ; ((c = s1[i]) != '\0'); i++) {
-		s2[i] = s1[i];
+	for (i_from = i_to = 0; ((c = from[i_from]) != '\0'); i_from++, i_to++) {
+		
+		// case: fill in range
+		if (c == '-') {
+
+			// case: dash is first char in line, and has a char after it
+			if ((i_from == 0) && (from[i_from+1]) != '\0') {
+				end = from[i_from+1];      // end char for loop
+				if (isupper(end))
+					start = 'A';
+				else if (islower(end))
+					start = 'a';
+				else if (isdigit(end))
+					start = '0';
+				i_to++;    // undo increment below, since start not already copied
+			}
+			
+			// case: range defines its own start and end
+			else {
+				start = from[i_from-1];    // start char for loop
+				end = from[i_from+1];      // end char for loop
+			}
+
+			// fill in range from start to end
+			i_to--;    // don't duplicate the start char
+			for (j = start; j <= end; j++) {
+				to[i_to++] = j;
+			}
+		}
+
+		// case: not a range
+		else {    // case
+			to[i_to] = from[i_from];
+		}
 	}
-	s2[i] = '\0';
+	to[i_to] = '\0';
 }
 
 // read a line into s, return length of line
