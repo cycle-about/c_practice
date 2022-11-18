@@ -250,14 +250,20 @@ Cases to handle
 
 int getaline(char line[], int maxline);
 void expand(char s1[], char s2[]);
-int get_start(char c);
-int get_end(char c);
+int get_start(int end);
+int get_end(int start);
 
 int main() {
 
 	int len; 			   		// length current line
 	char line[MAXLINE];    		// current input line
 	char expanded[MAXLINE]; 	// expanded version of input line
+
+	// initialize strings to all nulls
+	for (int i = 0; i < MAXLINE; i++) {
+		line[i] = '\0';
+		expanded[i] = '\0';
+	}
 
 	while ((len = getaline(line, MAXLINE)) > 0) {
 		expand(line, expanded);
@@ -267,28 +273,34 @@ int main() {
 
 void expand(char from[], char to[]) {
 	int i_from, i_to, j;
-	char c, start, end;
+	int c, start, end;
 
-	for (i_from = i_to = 0; ((c = from[i_from]) != '\0'); i_from++, i_to++) {
+	for (i_from = i_to = 0; ((c = from[i_from]) != '\0'); i_from++) {
 		
 		// case: handle filling in range
 		if (c == '-') {
+			printf("\nrange copy");
 
-			// step 1. Assign start of range
-			// case: dash is first char in line
-			if (i_from == 0) {
-				start = get_start(from[i_from+1]);
-				i_to++;    // undo increment below, since start not already copied
+			// case: dash is first char in line, has alpha after
+			if (i_from == 0 && isalnum(from[i_from+1])) {
+				end = from[i_from+1];
+				start = get_start(end);
+				i_from++;    				// already copied char after dash
 			}
-			
+
 			// case: range defines its own start and end
 			else {
-				start = from[i_from-1];    // start char for loop
-				end = from[i_from+1];      // end char for loop
+				start = from[i_from-1];    	// start char for loop
+				end = from[i_from+1];      	// end char for loop
+				i_from++;    				// already copied char after dash
 			}
 
 			// all range-filling cases: fill in range from start to end
-			i_to--;    // don't duplicate the start char
+			printf("\nstart char: ");
+			putchar(start);
+			printf("\nend char: ");
+			putchar(end);
+			printf("\n");
 			for (j = start; j <= end; j++) {
 				to[i_to++] = j;
 			}
@@ -296,27 +308,34 @@ void expand(char from[], char to[]) {
 
 		// case: not a range, copy only
 		else {    // case
-			to[i_to] = from[i_from];
+			printf("\nNON-RANGE COPY: ");
+			putchar(from[i_from]);
+			printf("\nindex of from[]: %d\n", i_from);
+			printf("index in to[]: %d\n", i_to);
+			to[i_to++] = from[i_from];
+			printf("check char at index in to[]: ");
+			putchar(to[i_to]);
+			printf("\n");
 		}
 	}
 	to[i_to] = '\0';
 }
 
-int get_start(char c) {
-	if isdigit(c)
+int get_start(int end) {
+	if isdigit(end)
 		return '0';
-	else if (isupper(c))
+	else if (isupper(end))
 		return 'A';
-	else if (islower(c))
+	else if (islower(end))
 		return 'a';
 }
 
-int get_end(char c) {
-	if isdigit(c)
+int get_end(int start) {
+	if isdigit(start)
 		return '9';
-	else if (isupper(c))
+	else if (isupper(start))
 		return 'Z';
-	else if (islower(c))
+	else if (islower(start))
 		return 'z';
 }
 
