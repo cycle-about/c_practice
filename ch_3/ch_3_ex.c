@@ -226,10 +226,20 @@ ASCII benchmarks
 	z - 122
 
 Cases to handle
-	Leading '-' first char in string
-	Leading '-' preceded by whitespace
-	Trailing '-' last char in string
-	Trailing '-' preceded by whitespace
+	
+	Keep these out of for loop
+		2. Dash is first char (can't assign a before char)
+			-> assign 'start' to start of following char's range 		-> response 2
+		3. Dash is last char (can't assign a following char)
+			-> assign 'end' to end of prior's range 					-> response 3
+
+	Handle in for loop
+		/ 1. Dash has a printable char both before and after it
+			-> assign those chars to 'start' and 'end' 					-> response 1
+		4. Dash is after nonprintable char
+			-> assign 'end' to end of prior's range 					-> response 3
+		5. Dash is before nonprintable char
+			-> assign 'start' to start of following char's range 		-> response 2
 
 */
 
@@ -240,6 +250,8 @@ Cases to handle
 
 int getaline(char line[], int maxline);
 void expand(char s1[], char s2[]);
+int get_start(char c);
+int get_end(char c);
 
 int main() {
 
@@ -259,18 +271,13 @@ void expand(char from[], char to[]) {
 
 	for (i_from = i_to = 0; ((c = from[i_from]) != '\0'); i_from++, i_to++) {
 		
-		// case: fill in range
+		// case: handle filling in range
 		if (c == '-') {
 
-			// case: dash is first char in line, and has a char after it
-			if ((i_from == 0) && (from[i_from+1]) != '\0') {
-				end = from[i_from+1];      // end char for loop
-				if (isupper(end))
-					start = 'A';
-				else if (islower(end))
-					start = 'a';
-				else if (isdigit(end))
-					start = '0';
+			// step 1. Assign start of range
+			// case: dash is first char in line
+			if (i_from == 0) {
+				start = get_start(from[i_from+1]);
 				i_to++;    // undo increment below, since start not already copied
 			}
 			
@@ -280,19 +287,37 @@ void expand(char from[], char to[]) {
 				end = from[i_from+1];      // end char for loop
 			}
 
-			// fill in range from start to end
+			// all range-filling cases: fill in range from start to end
 			i_to--;    // don't duplicate the start char
 			for (j = start; j <= end; j++) {
 				to[i_to++] = j;
 			}
 		}
 
-		// case: not a range
+		// case: not a range, copy only
 		else {    // case
 			to[i_to] = from[i_from];
 		}
 	}
 	to[i_to] = '\0';
+}
+
+int get_start(char c) {
+	if isdigit(c)
+		return '0';
+	else if (isupper(c))
+		return 'A';
+	else if (islower(c))
+		return 'a';
+}
+
+int get_end(char c) {
+	if isdigit(c)
+		return '9';
+	else if (isupper(c))
+		return 'Z';
+	else if (islower(c))
+		return 'z';
 }
 
 // read a line into s, return length of line
