@@ -206,41 +206,6 @@ int getaline(char s[], int lim) {
 into the equivalent complete list abc...xyz in s2. Allow for letters of either case and digits,
 and be prepared to handle cases like a-b-c and a-z0-9 and -a-z. Arrange that a leading or
 trailing - is taken literally.
-
-Draft approach
-	Find any instance of char '-'
-	Start a loop to print all chars in a range
-		start char: check char before '-'
-			if a space, it is first printable char
-			if not a space, it is that preceding char
-		end char: check char after '-'
-			if a space, it is last printable char
-			if not a space, it is that following char
-
-ASCII benchmarks
-	0 - 48
-	9 - 57
-	A - 65
-	Z - 90
-	a - 97
-	z - 122
-
-Cases to handle
-	
-	Keep these out of for loop
-		2. Dash is first char (can't assign a before char)
-			-> assign 'start' to start of following char's range 		-> response 2
-		3. Dash is last char (can't assign a following char)
-			-> assign 'end' to end of prior's range 					-> response 3
-
-	Handle in for loop
-		/ 1. Dash has a printable char both before and after it
-			-> assign those chars to 'start' and 'end' 					-> response 1
-		4. Dash is after nonprintable char
-			-> assign 'end' to end of prior's range 					-> response 3
-		5. Dash is before nonprintable char
-			-> assign 'start' to start of following char's range 		-> response 2
-
 */
 
 #include <stdio.h>
@@ -273,36 +238,38 @@ void expand(char from[], char to[]) {
 		
 		// case: handle filling in range
 		if (c == '-') {
-			printf("\nrange copy");
 
-			// case: dash is first char in line, has alpha after
+			// case: dash is first char in line (cannot check char before), alpha after
 			if (i_from == 0 && isalnum(from[i_from+1])) {
 				end = from[i_from+1];
 				start = get_start(end);
-				i_from++;    				// already copied char after dash
+				i_from++;    				// range already wrote char after dash in from[]
 			}
 
-			// case: has non-alpha after (including null, for lats in line), has alpha before
-			else if ( !(isalnum(from[i_from+1])) && isalnum(from[i_from-1])) {
-				printf("handling case 2");
+			// case: non-alpha before, alpha after
+			else if ( !(isalnum(from[i_from-1])) && isalnum(from[i_from+1])) {
+				end = from[i_from+1];
+				start = get_end(start);
+				i_from++;    				// range already wrote char after dash in from[]
+			}
+
+			// case: alpha before, non-alpha after (including null, meaning dash was last char in line)
+			else if (isalnum(from[i_from-1]) && !(isalnum(from[i_from+1]))) {
 				start = from[i_from-1];
 				end = get_end(start);
-				i_to--;    // start printing range where start char was already written
+				i_to--;    					// over-write already-copied start char of range
 			}
 
-			// case: range defines its own start and end
-			else {
+			// case: alpha before, alpha after
+			else if (isalnum(from[i_from-1]) && isalnum(from[i_from+1])) {
 				start = from[i_from-1];    	// start char for loop
 				end = from[i_from+1];      	// end char for loop
-				i_from++;    				// already copied char after dash
+				i_from++;    				// range already wrote char after dash in from[]
+				i_to--;    					// over-write already-copied start char of range
 			}
-
-			// all range-filling cases: fill in range from start to end
-			printf("\nstart char: ");
-			putchar(start);
-			printf("\nend char: ");
-			putchar(end);
-			printf("\n");
+			else {
+				printf("RANGE UNDEFINED\n");
+			}
 
 			for (j = start; j <= end; j++) {
 				to[i_to++] = j;
@@ -310,15 +277,8 @@ void expand(char from[], char to[]) {
 		}
 
 		// case: not a range, copy only
-		else {    // case
-			printf("\nNON-RANGE COPY: ");
-			putchar(from[i_from]);
-			printf("\nindex of from[]: %d\n", i_from);
-			printf("index in to[]: %d\n", i_to);
+		else {
 			to[i_to++] = from[i_from];
-			printf("check char at index in to[]: ");
-			putchar(to[i_to]);
-			printf("\n");
 		}
 	}
 	to[i_to] = '\0';
