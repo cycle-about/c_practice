@@ -259,12 +259,6 @@ int main() {
 	char line[MAXLINE];    		// current input line
 	char expanded[MAXLINE]; 	// expanded version of input line
 
-	// initialize strings to all nulls
-	for (int i = 0; i < MAXLINE; i++) {
-		line[i] = '\0';
-		expanded[i] = '\0';
-	}
-
 	while ((len = getaline(line, MAXLINE)) > 0) {
 		expand(line, expanded);
 		printf("expanded line: %s\n", expanded);
@@ -288,6 +282,14 @@ void expand(char from[], char to[]) {
 				i_from++;    				// already copied char after dash
 			}
 
+			// case: has non-alpha after (including null, for lats in line), has alpha before
+			else if ( !(isalnum(from[i_from+1])) && isalnum(from[i_from-1])) {
+				printf("handling case 2");
+				start = from[i_from-1];
+				end = get_end(start);
+				i_to--;    // start printing range where start char was already written
+			}
+
 			// case: range defines its own start and end
 			else {
 				start = from[i_from-1];    	// start char for loop
@@ -301,6 +303,7 @@ void expand(char from[], char to[]) {
 			printf("\nend char: ");
 			putchar(end);
 			printf("\n");
+
 			for (j = start; j <= end; j++) {
 				to[i_to++] = j;
 			}
