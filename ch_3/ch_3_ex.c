@@ -206,7 +206,7 @@ int getaline(char s[], int lim) {
 into the equivalent complete list abc...xyz in s2. Allow for letters of either case and digits,
 and be prepared to handle cases like a-b-c and a-z0-9 and -a-z. Arrange that a leading or
 trailing - is taken literally.
-*/
+
 
 #include <stdio.h>
 #include <ctype.h>
@@ -322,4 +322,124 @@ int getaline(char s[], int lim) {
 	}
 	s[i] = '\0';
 	return i;
+}
+*/
+
+/**************************************** 
+3-4 In a two's compliment number representation, our version of itoa does not handle the largest
+negative number, that is, the value of n equal to -(2^(wordsize-1)). Explain why not. Modify it
+to print that value correctly, regardless of the machine on which it runs.
+
+Conversions for 8-bit word size
+
+	Decimal 	Binary 			Twos Complement
+	 127 		0111 1111		1000 0001
+	 126 		0111 1110 		1000 0010
+	  64 		0100 0000 		1100 0000
+	  63 		0011 1111 		1100 0001
+	   5 		0000 0101 		1111 1011
+	   4 		0000 0100 		1111 1100
+	   3 		0000 0011 		1111 1101
+	   2 		0000 0010 		1111 1110
+	   1 		0000 0001 		1111 1111
+	   0  		0000 0000 		0000 0000
+	  -1 		1111 1111  		0000 0001
+	  -2 		1111 1110 		0000 0010
+	  -3 		1111 1101 		0000 0011
+	  -4 		1111 1100 		0000 0100
+	  -5 		1111 1011 		0000 0101
+	 -63 		1100 0001 		0011 1111
+	 -64 		1100 0000 		0100 0000
+	-127 		1000 0001		0111 1111
+	-128 		1000 0000		1000 0000
+
+orig itoa() cannot print eg -128 because: at the conditional to check for negative, it executes
+"n = -(-128)", and this overflows the maximum positive int that can be in n.
+
+Trace of what happens to -128 (two's complement: 1000 0000) in itoa()
+
+void itoa_orig(int -128, char s[]) {
+	int i, sign;
+
+	if ((sign = n) < 0)   	// sign = -128			
+		n = -n; 			// n = 128 decimal, outside range for max positive number
+	i = 0;
+
+What is output with most negative int
+	printf("%d", INT_MIN) 		-> "-2147483648"
+	itoa(INT_MIN) 				-> "-("
+	ascii value of '('
+		printf("%d", '(') 		-> 40, binary: 
+
+Compare with max positive int: itoa(INT_MAX)
+	printf("%d", INT_MIN) 		-> "2147483647"
+	itoa(INT_MIN) 				-> "2147483647"
+*/
+
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include <ctype.h>
+
+#define MAXCHAR 32
+
+void itoa_orig(int n, char s[]);
+void itoa_new(int n, char s[]);
+void reverse(char s[]);
+
+int main() {
+	int i = 5280;
+	char s[MAXCHAR];
+	itoa_new(i, s);
+	printf("string value: %s\n", s);
+}
+
+// convert n to characters in s
+void itoa_new(int n, char s[]) {
+	int i, sign;
+
+	if ((sign = n) < 0)   	// assign 'sign' to n
+		n = -n; 			// make n positive if it was negative originally
+	i = 0;
+	do {
+		printf("ones place: ");
+		putchar(n % 10 + '0');
+		printf("\n");
+		// assign to string s from left to right: leftmost digit of n (one's place)
+		s[i++] = n % 10 + '0';     	// assign left
+		// after each assignment, REMOVE one's place from n 
+	} while ((n /= 10) > 0); 		// delete it
+	if (sign < 0)
+		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
+	s[i++] = '\0';
+	reverse(s);
+}
+
+// convert n to characters in s
+void itoa_orig(int n, char s[]) {
+	int i, sign;
+
+	if ((sign = n) < 0)   	// assign 'sign' to n
+		n = -n; 			// make n positive if it was negative originally
+	i = 0;
+	do {
+		// assign to string s from left to right: leftmost digit of n (one's place)
+		s[i++] = n % 10 + '0';     	// assign left
+		// after each assignment, REMOVE one's place from n 
+	} while ((n /= 10) > 0); 		// delete it
+	if (sign < 0)
+		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
+	s[i++] = '\0';
+	reverse(s);
+}
+
+// page 62: reverse string in place
+void reverse(char s[]) {
+	int c, i, j;
+
+	for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
 }
