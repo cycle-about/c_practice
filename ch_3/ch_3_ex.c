@@ -388,7 +388,7 @@ Approaches considered for handling largest negative number
 					1  					/ 					47 					49
 					2 					. 					46 					50
 					3 					- 					45 					51
-					7 					
+					7 					) 					41 					55
 
 	Do not see a way to undo after putting into string
 		2. Add 1 to the number before making it positive
@@ -396,6 +396,9 @@ Approaches considered for handling largest negative number
 
 	Seems relevant, do not see how to implement
 		4. Bit mask
+
+**** WHAT WORKED ****
+	Store positive version in unsigned int, which has higher positve value than signed
 
 */
 
@@ -411,7 +414,8 @@ void itoa_new(int n, char s[]);
 void reverse(char s[]);
 
 int main() {
-	int i = -7;
+	int i = INT_MIN;
+	printf("decimal value: %d\n", i);
 	char s[MAXCHAR];
 	itoa_new(i, s);
 	printf("string value: %s\n", s);
@@ -420,34 +424,18 @@ int main() {
 // convert n to characters in s
 void itoa_new(int n, char s[]) {
 	int i, sign;
+	unsigned copy;
 
+	if ((sign = n) < 0)   	// assign 'sign' to n
+		copy = -n; 			// make n positive if it was negative originally
 	i = 0;
-	
-	printf("first n: %d\n", n);
-	s[i++] = n % 10 + '0';  // put ones place digit into fist string index
-	printf("first ones digit: ");
-	putchar(n % 10 + '0');
-	printf("\n");
-	
-	n /= 10; 				// delete that ones place from number
-	printf("n after division: %d\n", n);
-
-
-	if ((sign = n) < 0)   	// assign 'sign' to remaining n (without orig ones digit)
-		n = -n; 			// make n positive if it was negative originally
-	printf("n after handle sign: %d\n", n);
-	
-	for (; n > 0; n /= 10) {
-		printf("n in loop: %d\n", n);
-		s[i++] = n % 10 + '0';     	// assign left
-		printf("ones digit: ");
-		putchar(n % 10 + '0');
-		printf("\n\n");
-	}
-
+	do {
+		// assign to string s from left to right: leftmost digit of n (one's place)
+		s[i++] = copy % 10 + '0';     	// assign left
+		// after each assignment, REMOVE one's place from n 
+	} while ((copy /= 10) > 0); 		// delete it
 	if (sign < 0)
 		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
-	
 	s[i++] = '\0';
 	reverse(s);
 }
