@@ -399,7 +399,7 @@ Approaches considered for handling largest negative number
 
 **** WHAT WORKED ****
 	Store positive version in unsigned int, which has higher positve value than signed
-*/
+
 
 #include <stdio.h>
 #include <string.h>
@@ -470,7 +470,7 @@ void reverse(char s[]) {
 		s[j] = c;
 	}
 }
-
+*/
 
 
 /**************************************** 
@@ -479,7 +479,7 @@ in the string 's'. In particular, itob(n,s,16) formats n as a hexadecimal intege
 
 Starting point: 3-4 method, writes int to string, hardcoded to use base 10
 
-
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -491,8 +491,8 @@ void reverse(char s[]);
 
 int main() {
 
-	int n = 17;
-	int b = 10;
+	int n = 2047;
+	int b = 16;
 	char s[MAXCHAR];
 	printf("decimal value: %d\n", n);
 	itob(n, s, b);
@@ -506,12 +506,15 @@ void itob(int n, char s[], int b) {
 
 	if ((sign = n) < 0)   	// assign 'sign' to n
 		copy = -n; 			// make n positive if it was negative originally
+	else
+		copy = n;
+	
 	i = 0;
 	do {
 		// assign to string s from left to right: leftmost digit of n (one's place)
-		s[i++] = copy % 10 + '0';     	// assign left
+		s[i++] = copy % b + '0';     	// assign left
 		// after each assignment, REMOVE one's place from n 
-	} while ((copy /= 10) > 0); 		// delete it
+	} while ((copy /= b) > 0); 		// delete it
 	if (sign < 0)
 		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
 	s[i++] = '\0';
@@ -528,4 +531,3 @@ void reverse(char s[]) {
 		s[j] = c;
 	}
 }
-*/
