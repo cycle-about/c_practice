@@ -399,7 +399,6 @@ Approaches considered for handling largest negative number
 
 **** WHAT WORKED ****
 	Store positive version in unsigned int, which has higher positve value than signed
-
 */
 
 #include <stdio.h>
@@ -414,7 +413,8 @@ void itoa_new(int n, char s[]);
 void reverse(char s[]);
 
 int main() {
-	int i = INT_MIN;
+	// int i = INT_MIN;
+	int i = 24;
 	printf("decimal value: %d\n", i);
 	char s[MAXCHAR];
 	itoa_new(i, s);
@@ -428,6 +428,8 @@ void itoa_new(int n, char s[]) {
 
 	if ((sign = n) < 0)   	// assign 'sign' to n
 		copy = -n; 			// make n positive if it was negative originally
+	else
+		copy = n;
 	i = 0;
 	do {
 		// assign to string s from left to right: leftmost digit of n (one's place)
@@ -468,3 +470,62 @@ void reverse(char s[]) {
 		s[j] = c;
 	}
 }
+
+
+
+/**************************************** 
+3-5 Write the function itob(n,s,b) that converts the integer n into a base 'b' character representation
+in the string 's'. In particular, itob(n,s,16) formats n as a hexadecimal integer in s.
+
+Starting point: 3-4 method, writes int to string, hardcoded to use base 10
+
+
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAXCHAR 32
+
+void itob(int n, char s[], int b);
+void reverse(char s[]);
+
+int main() {
+
+	int n = 17;
+	int b = 10;
+	char s[MAXCHAR];
+	printf("decimal value: %d\n", n);
+	itob(n, s, b);
+	printf("string of value in base %d: %s\n", b, s);
+}
+
+// convert int n into base 'b' representation, in string 's'
+void itob(int n, char s[], int b) {
+	int i, sign;
+	unsigned copy;
+
+	if ((sign = n) < 0)   	// assign 'sign' to n
+		copy = -n; 			// make n positive if it was negative originally
+	i = 0;
+	do {
+		// assign to string s from left to right: leftmost digit of n (one's place)
+		s[i++] = copy % 10 + '0';     	// assign left
+		// after each assignment, REMOVE one's place from n 
+	} while ((copy /= 10) > 0); 		// delete it
+	if (sign < 0)
+		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
+	s[i++] = '\0';
+	reverse(s);
+}
+
+// page 62: reverse string in place
+void reverse(char s[]) {
+	int c, i, j;
+
+	for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
+}
+*/
