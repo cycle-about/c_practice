@@ -491,7 +491,7 @@ void reverse(char s[]);
 
 int main() {
 
-	int n = 2047;
+	int n = -127;
 	int b = 16;
 	char s[MAXCHAR];
 	printf("decimal value: %d\n", n);
@@ -501,7 +501,7 @@ int main() {
 
 // convert int n into base 'b' representation, in string 's'
 void itob(int n, char s[], int b) {
-	int i, sign;
+	int i, sign, ones;
 	unsigned copy;
 
 	if ((sign = n) < 0)   	// assign 'sign' to n
@@ -512,7 +512,16 @@ void itob(int n, char s[], int b) {
 	i = 0;
 	do {
 		// assign to string s from left to right: leftmost digit of n (one's place)
-		s[i++] = copy % b + '0';     	// assign left
+		int ones = copy % b;
+		printf("ones decimal val: %d\n", ones);
+		if (ones < 10) {    // use digits for 0-9
+			printf("use digit\n");
+			ones +=  '0';
+		} else {
+			printf("use letter\n");
+			ones = ones - 10 + 'a';    // use lowercase letters for 9 and over
+		}
+		s[i++] = ones;     	// assign left
 		// after each assignment, REMOVE one's place from n 
 	} while ((copy /= b) > 0); 		// delete it
 	if (sign < 0)
