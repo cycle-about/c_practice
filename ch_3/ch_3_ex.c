@@ -479,7 +479,6 @@ in the string 's'. In particular, itob(n,s,16) formats n as a hexadecimal intege
 
 Starting point: 3-4 method, writes int to string, hardcoded to use base 10
 
-*/
 
 #include <stdio.h>
 #include <string.h>
@@ -513,21 +512,93 @@ void itob(int n, char s[], int b) {
 	do {
 		// assign to string s from left to right: leftmost digit of n (one's place)
 		int ones = copy % b;
-		printf("ones decimal val: %d\n", ones);
 		if (ones < 10) {    // use digits for 0-9
-			printf("use digit\n");
 			ones +=  '0';
 		} else {
-			printf("use letter\n");
 			ones = ones - 10 + 'a';    // use lowercase letters for 9 and over
 		}
 		s[i++] = ones;     	// assign left
-		// after each assignment, REMOVE one's place from n 
-	} while ((copy /= b) > 0); 		// delete it
+		// after each assignment, REMOVE one's place from n, using /=
+	} while ((copy /= b) > 0);
 	if (sign < 0)
 		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
 	s[i++] = '\0';
 	reverse(s);
+}
+
+// page 62: reverse string in place
+void reverse(char s[]) {
+	int c, i, j;
+
+	for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
+}
+*/
+
+
+/**************************************** 
+3-6 Write a version of itoa that accepts three arguments instead of two. The third
+argument is a minimum field width; the converted number must be passed with blanks
+on the left if necessary to make it wide enough.
+
+Example of padding, during reversing step
+
+	int 				4321
+	width: 				8
+	needed result 		00004321
+	result just before reverse
+		1234
+		* pad to the END of this 0's until have needed width
+
+*/
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAXCHAR 32
+
+void itoa_pad(int n, char s[], int p);
+void reverse(char s[]);
+
+int main() {
+	// int i = INT_MIN;
+	int i = -800;
+	int p = 8;
+	printf("decimal value: %d\n", i);
+	char s[MAXCHAR];
+	itoa_pad(i, s, p);
+	printf("string value padded to %d: %s\n", p, s);
+}
+
+// convert n to characters in s
+void itoa_pad(int n, char s[], int p) {
+	int i, sign;
+	unsigned copy;
+
+	if ((sign = n) < 0)   	// assign 'sign' to n
+		copy = -n; 			// make n positive if it was negative originally
+	else
+		copy = n;
+	i = 0;
+	do {
+		// assign to string s from left to right: leftmost digit of n (one's place)
+		s[i++] = copy % 10 + '0';     	// assign left
+		// after each assignment, REMOVE one's place from n 
+	} while ((copy /= 10) > 0); 		// delete it
+
+	
+	// pad to needed width: add zeros to RIGHT end of un-reversed string
+	while (i < p) {
+		s[i++] = '0';
+	}
+	
+	if (sign < 0)
+		s[i++] = '-'; 	// if original value of n was negative, add '-' to end of string
+	reverse(s);
+	s[i++] = '\0';
 }
 
 // page 62: reverse string in place
