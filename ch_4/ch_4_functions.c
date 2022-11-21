@@ -6,7 +6,7 @@ gcc -o ch_4_functions ch_4_functions.c && ./ch_4_functions
 /*********************************
 page 69 find all lines matching pattern
 
-Input to use:
+Test input to use:
 	
 Ah Love! could you and I with Fate conspire
 To grasp this sorry Scheme of Things entire,

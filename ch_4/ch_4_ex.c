@@ -60,9 +60,15 @@ int getaline(char s[], int lim) {
 4-2 Extend atof to handle scientific notation of the form "123.45e-6" where a floating-point
 number may be followed by 'e' or 'E' and an optionally signed exponent
 
+Original syntax handled 	7654.321
+Additional syntax 			123.45e-6
+
 How to handle that kind of string:
 	Read chars left to right
 	if reach an 'E' or 'e'
+		change 'power' by that amount
+			negative after e: 	power *= 10   (make eventual division greater)
+			positive after e:  	power /= 10   (make eventual division smaller)
 
 */
 
@@ -73,31 +79,71 @@ double atof_orig(char s[]);
 double atof_new(char s[]);
 
 int main() {
-	//printf("%f\n", atof_orig("4321"));
-	printf("%f\n", atof_orig("7654.321"));
+	printf("%f\n", atof_new("4321"));
+	printf("Result: %f\n", atof_new("123.45e3"));
 }
 
 // convert string s to double
 double atof_new(char s[]) {
-	double val, power;
-	int i, sign;
+	double val, power, e_val;
+	int i, sign, e_sign;
+
+	printf("Original String: %s\n", s);
 
 	for (i = 0; isspace(s[i]); i++)    // skip white space
 		;
 	sign = (s[i] == '-') ? -1 : 1;
 	if (s[i] == '+' || s[i] == '-')
 		i++;
-	for (val = 0.0; isdigit(s[i]); i++)
+
+	//printf("\nBefore Period\n");
+	for (val = 0.0; isdigit(s[i]); i++) {
 		val = 10.0 * val + (s[i] - '0');
-	if (s[i] == '.')
+		//printf("val at loop %d: %f\n", i, val);
+	}
+	
+	if (s[i] == '.') {
 		i++;
+		//printf("\nperiod found\n");
+	}
+	
+	//printf("\nAfter Period\n");
 	for (power = 1.0; isdigit(s[i]); i++) {
 		val = 10.0 * val + s[i] - '0';
 		power *= 10.0;
+		//printf("val at loop %d: %f\n", i, val);
+		//printf("power at loop %d: %f\n", i, power);
+	}
+
+	if (s[i] == 'e' || s[i] == 'E') {
+		i++;
+		//printf("\nexponent found: ");
+
+		e_sign = (s[i] == '-') ? 0 : 1;
+		//printf("%d\n\n", e_sign);
+		if (s[i] == '+' || s[i] == '-')
+			i++;
+
+		//printf("After exponent\n");
+		for (e_val = 0.0 ; isdigit(s[i]); i++) {
+			e_val = 10.0 * e_val + s[i] - '0';
+			//printf("e_val at loop %d: %f\n", i, e_val);
+		}
+
+		for (i = 0; i < e_val; i++) {
+			if (e_sign) {
+				//printf("positive exponent\n");
+				power /= 10.0;
+			} else {
+				//printf("negative exponent\n");
+				power *= 10.0;
+			}
+			//printf("Power after adjust for exponent: %f\n", power);
+		}
 	}
 	return sign * val / power;
 }
-
+/*
 // convert string s to double, page 71
 double atof_orig(char s[]) {
 	double val;    	// 
@@ -144,3 +190,4 @@ double atof_orig(char s[]) {
 	//     by count of how many negative exponents it had (ie digits after period)
 	return sign * val / power;
 }
+*/
