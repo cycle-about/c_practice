@@ -70,7 +70,6 @@ How to handle that kind of string:
 			negative after e: 	power *= 10   (make eventual division greater)
 			positive after e:  	power /= 10   (make eventual division smaller)
 
-*/
 
 #include <stdio.h>
 #include <ctype.h>
@@ -143,6 +142,8 @@ double atof_new(char s[]) {
 	}
 	return sign * val / power;
 }
+*/
+
 /*
 // convert string s to double, page 71
 double atof_orig(char s[]) {
@@ -190,4 +191,11 @@ double atof_orig(char s[]) {
 	//     by count of how many negative exponents it had (ie digits after period)
 	return sign * val / power;
 }
+*/
+
+
+/**************************************** 
+4-3 Given the basic framework, it's straightforward to extend the calculator. Add the
+modulus (%) operator and provisions for negative numbers.
+
 */
