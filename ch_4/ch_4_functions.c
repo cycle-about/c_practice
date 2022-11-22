@@ -79,6 +79,20 @@ while (next operator or operand is not end-of-file indicator)
 
 page 76 implementation of reverse polish notation
 
+Finding: if enter negative numbers, it DOES show the correct answer, but also
+	the message "error: stack empty" before, since it tried to handle the '-'
+	as an operator
+		-> adding handling for negative numbers is part of ex 4-3
+
+Result of test for whether the ORDER of declarations makes external variables
+unaccessible to prior parts
+	Setup: in main(), try printing using later declaration 'sp'
+	'sp' is external, not defined in a function
+	Errors out as undeclared
+	If move it to above main(): then it works
+
+	So: order of external variables DOES matter
+
 */
 
 #include <stdio.h>
@@ -93,6 +107,9 @@ double pop(void);
 
 // reverse Polish notation calculator
 int main() {
+	// test of using a later external variable
+	//printf("stack pointer declared later: %d\n", sp);
+
 	int type;
 	double op2;
 	char s[MAXOP];
@@ -157,7 +174,8 @@ double pop(void) {
 	if (sp > 0)
 		return val[--sp];
 	else {
-		printf("error: stack empty");
+		// DEBUGGING: this shows before correct answer if a negative number is entered
+		printf("error: stack empty\n");
 		return 0.0;
 	}
 }
