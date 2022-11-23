@@ -198,7 +198,6 @@ double atof_orig(char s[]) {
 4-3 Given the basic framework, it's straightforward to extend the calculator. Add the
 modulus (%) operator and provisions for negative numbers.
 
-*/
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -311,27 +310,192 @@ int getop(char s[]) {
 	// check if '-' is subtraction operator, or means negative number
 	if (c == '-') { 		
 		next = getch();
-		printf("minus sign found, followed by: ");
-		putchar(next);
-		printf("\n");
+		// printf("minus sign found, followed by: ");
+		// putchar(next);
+		// printf("\n");
 		if (next == ' ' || next == '\t' || next == '\n') {	// return subtraction operator if whitespace after
-			printf("subtraction operand\n");
+			// printf("subtraction operand\n");
 			ungetch(next);
 			return c;
 		}
 		ungetch(next);
 	}
 
-	if (isdigit(c) || c == '-')    	// collect sign and integer part
+	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
 		while (isdigit(s[++i] = c = getch()))
 			;
-	if (c == '.')		// get part after a decimal
+	if (c == '.')					// get part of number after a decimal
 		while (isdigit(s[++i] = c = getch()))
 			;
 	s[i] = '\0';
 	if (c != EOF)
 		ungetch(c);
-	return NUMBER;    // signal that a number was found: NOT VALUE OF NUMBER
+	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
+}
+
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 		// buffer for ungetch
+int bufp = 0; 			// next free position in buf
+
+int getch(void) { 		// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) {    // push char back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
+*/
+
+
+/******************************************************************************** 
+4-4 Add commands to print the top element of the stack without popping, to duplicate it,
+and to swap the top two elements. Add a command to clear the stack
+
+	1. Print top element of stack without popping it
+	2. Duplicate top element of stack
+	3. Swap top two elements of stack
+	4. Clear the stack
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0'    	// signal that a number was found
+
+int getop(char []); 	// ? why does this and push not name the args ?
+void push(double);
+double pop(void);
+void print_top(void);
+
+// reverse Polish notation calculator
+int main() {
+	int type;
+	double op2;
+	char s[MAXOP];
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			// printf("string: %s\n", s);
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			print_top();
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-': 	 			// order of operands matters
+			op2 = pop(); 		// most recent operand
+			push(pop() - op2);	// second most recent - most recent
+			break;
+		case '/': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor\n");
+			break;
+		case '%': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push((int) pop() % (int) op2);    // modulo can't use double
+			else
+				printf("error: zero modulo\n");
+			break;
+		case '\n':
+			printf("\t%.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+// stack and stack pointer are used by both push and pop, so declared external to them
+#define MAXVAL 	100 	// max depth of val stack
+
+int sp = 0; 			// next free stack position
+double val[MAXVAL]; 	// value stack
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL)
+		val[sp++] = f;
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0)
+		return val[--sp];
+	else {
+		printf("error: stack empty\n");
+		return 0.0;
+	}
+}
+
+
+// print top element of stack
+void print_top(void) {
+	if (sp > 0) {
+		printf("Top of stack: %f\n", val[sp]);
+	} else {
+		printf("error: stack empty\n");
+	}
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+// getop: get next operator or numeric operand
+int getop(char s[]) {
+	int i, c, next;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
+		;
+	s[1] = '\0';
+
+	// char is not part of a number, so return it
+	if (!isdigit(c) && c != '.' && c != '-')
+		return c; 		
+
+	i = 0;
+	if (c == '-') { 	// check whether subtraction operator, or negative number
+		next = getch();
+		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+			ungetch(next);
+			return c;
+		}
+		ungetch(next);
+	}
+
+	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')					// get part of number after a decimal
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
 }
 
 
