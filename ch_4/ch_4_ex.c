@@ -219,6 +219,7 @@ int main() {
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
 		case NUMBER:
+			printf("string: %s\n", s);
 			push(atof(s));
 			break;
 		case 'p':
@@ -296,29 +297,31 @@ void ungetch(int);
 
 // getop: get next operator or numeric operand
 int getop(char s[]) {
-	int i, c, next, sign;
-
-	sign = 1;    // default sign of numbers to positive
+	int i, c, next;
 
 	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
 		;
 	s[1] = '\0';
 
-	if (c == '-') { 		// check if '-' is subtraction operator, or means negative number
+	// char is not part of a number, so return it
+	if (!isdigit(c) && c != '.' && c != '-')
+		return c; 		
+
+	i = 0;
+	// check if '-' is subtraction operator, or means negative number
+	if (c == '-') { 		
 		next = getch();
-		if (next == ' ' || next == '\t')	// return subtraction operator if whitespace after
+		printf("minus sign found, followed by: ");
+		putchar(next);
+		printf("\n");
+		if (next == ' ' || next == '\t' || next == '\n') {	// return subtraction operator if whitespace after
+			printf("subtraction operand\n");
 			return c;
-		else {
-			sign = -1;
-			ungetch(next); 
 		}
+		ungetch(next);
 	}
 
-	if (!isdigit(c) && c != '.')
-		return c; 		// not a number, so return it
-	
-	i = 0;
-	if (isdigit(c))    	// collect integer part
+	if (isdigit(c) || c == '-')    	// collect sign and integer part
 		while (isdigit(s[++i] = c = getch()))
 			;
 	if (c == '.')		// get part after a decimal
@@ -327,7 +330,7 @@ int getop(char s[]) {
 	s[i] = '\0';
 	if (c != EOF)
 		ungetch(c);
-	return NUMBER * sign;
+	return NUMBER;    // signal that a number was found: NOT VALUE OF NUMBER
 }
 
 
