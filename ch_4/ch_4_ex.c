@@ -316,6 +316,7 @@ int getop(char s[]) {
 		printf("\n");
 		if (next == ' ' || next == '\t' || next == '\n') {	// return subtraction operator if whitespace after
 			printf("subtraction operand\n");
+			ungetch(next);
 			return c;
 		}
 		ungetch(next);
