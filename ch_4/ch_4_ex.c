@@ -354,14 +354,17 @@ void ungetch(int c) {    // push char back on input
 
 /******************************************************************************** 
 4-4 Add commands to:
-	1. Print top element of the stack without popping
-	2. Duplicate top element of stack
-	3. Swap the top two elements
-	4. Clear the stack
+	/ 1. Print top element of the stack without popping
+	/ 2. Duplicate top element of stack
+	/ 3. Swap the top two elements
+	/ 4. Clear the stack
 
-Need before starting these: way to print entire stack
+Need before starting these
+	/ Way to print entire stack
 
-*/
+Note: duplicating the top of the stack has effect that there is a number left on the stack
+if another operand is not added
+
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -372,8 +375,11 @@ Need before starting these: way to print entire stack
 int getop(char []);
 void push(double);
 double pop(void);
+void print_stack(void);
 void print_top(void);
 void duplicate_top(void);
+void swap_top(void);
+void clear_stack(void);
 
 // reverse Polish notation calculator
 int main() {
@@ -414,6 +420,15 @@ int main() {
 		case 'p': 			// print top of stack without popping
 			print_top();
 			break;
+		case 'd': 			// duplicate top element of stack
+			duplicate_top();
+			break;
+		case 's': 			// swap top two elements of stack
+			swap_top();
+			break;
+		case 'c': 			// clear stack
+			clear_stack();
+			break;
 		case '\n':
 			printf("\tCalculator Result: %.8g\n", pop());
 			break;
@@ -432,15 +447,20 @@ int main() {
 int sp = 0; 			// next free stack position
 double val[MAXVAL]; 	// value stack
 
-// push: push f onto value stack
-void push(double f) {
-	if (sp < MAXVAL) {
-		val[sp++] = f;
-		printf("stack after push:");
+void print_stack(void) {
+		printf("stack:");
 		for (int i = 0; i < sp; i++) {
 			printf(" %.1f", val[i]);    // print to 1 decimal place only
 		}
 		printf("\n");
+}
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL) {
+		val[sp++] = f;
+		printf("push, ");
+		print_stack();
 	}
 	else
 		printf("error: stack full, can't push %g\n", f);
@@ -458,10 +478,248 @@ double pop(void) {
 	}
 }
 
+// print top of stack, without poping
+void print_top(void) {
+	printf("top of stack: %.1f\n", val[sp-1]);
+}
+
+// duplicate top element of stack
+void duplicate_top(void) {
+	val[sp++] = val[sp-1];
+	printf("duplicated top, ");
+	print_stack();
+}
+
+// duplicate top element of stack
+void swap_top(void) {
+	double temp = val[sp-1];
+	val[sp-1] = val[sp-2];
+	val[sp-2] = temp;
+	printf("swapped top, ");
+	print_stack();
+}
+
+// clear stack
+void clear_stack(void) {
+	sp = 0;
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+// getop: get next operator or numeric operand
+int getop(char s[]) {
+	int i, c, next;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
+		;
+	s[1] = '\0';
+
+	// char is not part of a number, so return it
+	if (!isdigit(c) && c != '.' && c != '-')
+		return c; 		
+
+	i = 0;
+	if (c == '-') { 	// check whether subtraction operator, or negative number
+		next = getch();
+		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+			ungetch(next);
+			return c;
+		}
+		ungetch(next);
+	}
+
+	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')					// get part of number after a decimal
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
+}
+
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 		// buffer for ungetch
+int bufp = 0; 			// next free position in buf
+
+int getch(void) { 		// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) {    // push char back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
+*/
+
+
+/******************************************************************************** 
+4-5 Add access to library functions like sin, exp, and pow. See <math.h> in Appendix B,
+Section 4
+
+Syntax of these functions
+	sin(x) - sine of x. One operand
+	exp(x) - exponential function e^x. One operand
+	pow(x,y) - x^y. Errors out if x=0 and y<=0, or if x<0 and y not an int. Two operands
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+#include <math.h> 		// for sin, exp, pow
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0'    	// signal that a number was found and added to stack
+
+int getop(char []);
+void push(double);
+double pop(void);
+void print_stack(void);
+void print_top(void); 		// t
+void duplicate_top(void); 	// d
+void swap_top(void); 		// w
+void clear_stack(void); 	// c
+
+
+// reverse Polish notation calculator
+int main() {
+	int type;
+	double op2;
+	char s[MAXOP];    // characters of a single number to be added to stack
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			// printf("string: %s\n", s);
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-': 	 			// order of operands matters
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor\n");
+			break;
+		case '%': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push((int) pop() % (int) op2);    // modulo can't use double, cast to ints
+			else
+				printf("error: zero modulo\n");
+			break;
+		case 's': 		// sine of x
+			printf("sine\n");
+			sin(pop());
+			break;
+		case 'e': 		// e^x
+			printf("e^x\n");
+			exp(pop());
+			break;
+		case 't': 			// print top of stack without popping
+			print_top();
+			break;
+		case 'd': 			// duplicate top element of stack
+			duplicate_top();
+			break;
+		case 'w': 			// swap top two elements of stack
+			swap_top();
+			break;
+		case 'c': 			// clear stack
+			clear_stack();
+			break;
+		case '\n':
+			printf("\tCalculator Result: %.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+// stack and stack pointer are used by both push and pop, so declared external to them
+#define MAXVAL 	100 	// max depth of val stack
+
+int sp = 0; 			// next free stack position
+double val[MAXVAL]; 	// value stack
+
+void print_stack(void) {
+		printf("stack:");
+		for (int i = 0; i < sp; i++) {
+			printf(" %.1f", val[i]);    // print to 1 decimal place only
+		}
+		printf("\n");
+}
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL) {
+		val[sp++] = f;
+		printf("push, ");
+		print_stack();
+	}
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0) {
+		printf("pop: %.1f\n", val[sp-1]);
+		return val[--sp];
+	} else {
+		printf("error: stack empty\n");
+		return 0.0;
+	}
+}
 
 // print top of stack, without poping
 void print_top(void) {
 	printf("top of stack: %.1f\n", val[sp-1]);
+}
+
+// duplicate top element of stack
+void duplicate_top(void) {
+	val[sp++] = val[sp-1];
+	printf("duplicated top, ");
+	print_stack();
+}
+
+// duplicate top element of stack
+void swap_top(void) {
+	double temp = val[sp-1];
+	val[sp-1] = val[sp-2];
+	val[sp-2] = temp;
+	printf("swapped top, ");
+	print_stack();
+}
+
+// clear stack
+void clear_stack(void) {
+	sp = 0;
 }
 
 
