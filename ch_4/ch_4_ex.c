@@ -353,13 +353,13 @@ void ungetch(int c) {    // push char back on input
 
 
 /******************************************************************************** 
-4-4 Add commands to print the top element of the stack without popping, to duplicate it,
-and to swap the top two elements. Add a command to clear the stack
-
-	1. Print top element of stack without popping it
+4-4 Add commands to:
+	1. Print top element of the stack without popping
 	2. Duplicate top element of stack
-	3. Swap top two elements of stack
+	3. Swap the top two elements
 	4. Clear the stack
+
+Need before starting these: way to print entire stack
 
 */
 
@@ -367,18 +367,19 @@ and to swap the top two elements. Add a command to clear the stack
 #include <stdlib.h>    	// for atof()
 
 #define MAXOP 	100 	// max size of operand or operator
-#define NUMBER 	'0'    	// signal that a number was found
+#define NUMBER 	'0'    	// signal that a number was found and added to stack
 
-int getop(char []); 	// ? why does this and push not name the args ?
+int getop(char []);
 void push(double);
 double pop(void);
 void print_top(void);
+void duplicate_top(void);
 
 // reverse Polish notation calculator
 int main() {
 	int type;
 	double op2;
-	char s[MAXOP];
+	char s[MAXOP];    // characters of a single number to be added to stack
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -388,14 +389,13 @@ int main() {
 			break;
 		case '+':
 			push(pop() + pop());
-			print_top();
 			break;
 		case '*':
 			push(pop() * pop());
 			break;
 		case '-': 	 			// order of operands matters
-			op2 = pop(); 		// most recent operand
-			push(pop() - op2);	// second most recent - most recent
+			op2 = pop();
+			push(pop() - op2);
 			break;
 		case '/': 				// order of operands and value of op2 matter
 			op2 = pop();
@@ -407,12 +407,15 @@ int main() {
 		case '%': 				// order of operands and value of op2 matter
 			op2 = pop();
 			if (op2 != 0.0)
-				push((int) pop() % (int) op2);    // modulo can't use double
+				push((int) pop() % (int) op2);    // modulo can't use double, cast to ints
 			else
 				printf("error: zero modulo\n");
 			break;
+		case 'p': 			// print top of stack without popping
+			print_top();
+			break;
 		case '\n':
-			printf("\t%.8g\n", pop());
+			printf("\tCalculator Result: %.8g\n", pop());
 			break;
 		default:
 			printf("error: unknown command %s\n", s);
@@ -431,8 +434,14 @@ double val[MAXVAL]; 	// value stack
 
 // push: push f onto value stack
 void push(double f) {
-	if (sp < MAXVAL)
+	if (sp < MAXVAL) {
 		val[sp++] = f;
+		printf("stack after push:");
+		for (int i = 0; i < sp; i++) {
+			printf(" %.1f", val[i]);    // print to 1 decimal place only
+		}
+		printf("\n");
+	}
 	else
 		printf("error: stack full, can't push %g\n", f);
 }
@@ -440,22 +449,19 @@ void push(double f) {
 
 // pop: pop and return top value from stack
 double pop(void) {
-	if (sp > 0)
+	if (sp > 0) {
+		printf("pop: %.1f\n", val[sp-1]);
 		return val[--sp];
-	else {
+	} else {
 		printf("error: stack empty\n");
 		return 0.0;
 	}
 }
 
 
-// print top element of stack
+// print top of stack, without poping
 void print_top(void) {
-	if (sp > 0) {
-		printf("Top of stack: %f\n", val[sp]);
-	} else {
-		printf("error: stack empty\n");
-	}
+	printf("top of stack: %.1f\n", val[sp-1]);
 }
 
 
