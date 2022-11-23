@@ -1,6 +1,11 @@
 /*
 Combined compile and run command
+
+if NOT using math.h
 gcc -o ch_4_ex ch_4_ex.c && ./ch_4_ex
+
+if using math.h
+gcc -o ch_4_ex ch_4_ex.c -lm && ./ch_4_ex
 */
 
 /******************************************************************************** 
@@ -572,6 +577,9 @@ Syntax of these functions
 	exp(x) - exponential function e^x. One operand
 	pow(x,y) - x^y. Errors out if x=0 and y<=0, or if x<0 and y not an int. Two operands
 
+Compile command needs to be changed to use math.h: add '-lm' must be at END of command
+	gcc -o ch_4_ex ch_4_ex.c -lm && ./ch_4_ex
+
 */
 
 #include <stdio.h>
@@ -594,7 +602,7 @@ void clear_stack(void); 	// c
 // reverse Polish notation calculator
 int main() {
 	int type;
-	double op2;
+	double op2, op1;
 	char s[MAXOP];    // characters of a single number to be added to stack
 
 	while ((type = getop(s)) != EOF) {
@@ -627,13 +635,22 @@ int main() {
 			else
 				printf("error: zero modulo\n");
 			break;
-		case 's': 		// sine of x
+		case 's': 			// sine of x
 			printf("sine\n");
-			sin(pop());
+			push(sin(pop()));
 			break;
-		case 'e': 		// e^x
+		case 'e': 			// e^x
 			printf("e^x\n");
-			exp(pop());
+			push(exp(pop()));
+			break;
+		case 'p': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+			printf("x^y\n");
+			op2 = pop();
+			op1 = pop();
+			if (op1 != 0 || op2 != 0)
+				push(pow(op1, op2));
+			else
+				printf("error: exp when both base and power are 0\n");
 			break;
 		case 't': 			// print top of stack without popping
 			print_top();
