@@ -821,6 +821,9 @@ Clear thing to implement for this
 		- Where does it need to be: depends on whether needs access to stack or not
 			-> only in main, since only involves a pop from stack, none of its other values
 
+Followup steps (I think)
+	1. Add a way to use 'r' variable in calculations
+
 */
 
 #include <stdio.h>
@@ -843,8 +846,9 @@ void clear_stack(void); 	// c
 // reverse Polish notation calculator
 int main() {
 	int type;
-	double op2, op1;
-	double r;    		// most recently printed value
+	double op2; 		// most recently pushed number (op1 op2 /  -->  op1 / op2)
+	double op1; 		// second most recently pushed number
+	double r;    		// result of most recent calculation
 	char s[MAXOP];    	// characters of a single number to add to stack
 
 	while ((type = getop(s)) != EOF) {
@@ -909,6 +913,12 @@ int main() {
 			clear_stack();
 			break;
 		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
+
+		/**** VARIABLE ADDED IN EX 4-6 ****/
+		case 'r':
+			push(r); 		// push value of most recent calc result to stack
+			break;
+		/**** VARIABLE ADDED IN EX 4-6 ****/
 
 		case '\n':
 			r = pop();
