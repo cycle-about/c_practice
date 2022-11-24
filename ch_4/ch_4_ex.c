@@ -810,14 +810,16 @@ void ungetch(int c) {    // push char back on input
 4-6 Add commands for handling single variables. (It's easy to provide twenty-six variables with
 single-letter names.) Add a variable for the most recently printed variable.
 
-Not fully sure what this question means: possible things to modify
-	1. Change my "commands" set up above to use something other than a-z chars
-		Single ASCII symbols would be simplest; reading in strings would take additional handling
-		Consider: either capital letters for the "commands", or other chars like ^ etc
-	2. Initialize chars a-z as ints
-	3. Add handling to retrieve the value of a variable
-	4. Look for pattern in input: c=i, where c is a char and i is an int
-		If find this, assign var c to value i
+Clear thing to implement for this
+	/ 1. Replace using lower-case letters as both math.h operands, and 'commands'
+		/ Math operands to non a-z chars
+		/ Commands to capital letters
+	/ 2. Add a variable for the most recently printed variable
+		- Interpret this as: most recent value printed as calculator result, so after '\n'
+		- Use 'r', setup for mention of 26 single-letter vars (for now don't make changes to 
+		differentiate commands added in 4-5 from variables added here)
+		- Where does it need to be: depends on whether needs access to stack or not
+			-> only in main, since only involves a pop from stack, none of its other values
 
 */
 
@@ -842,7 +844,8 @@ void clear_stack(void); 	// c
 int main() {
 	int type;
 	double op2, op1;
-	char s[MAXOP];    // characters of a single number to be added to stack
+	double r;    		// most recently printed value
+	char s[MAXOP];    	// characters of a single number to add to stack
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -874,15 +877,15 @@ int main() {
 			else
 				printf("error: zero modulo\n");
 			break;
-		case 's': 			// sine of x
+		case '~': 			// sine of x
 			printf("sine\n");
 			push(sin(pop()));
 			break;
-		case 'e': 			// e^x
+		case '#': 			// e^x
 			printf("e^x\n");
 			push(exp(pop()));
 			break;
-		case 'p': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+		case '^': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
 			printf("x^y\n");
 			op2 = pop();
 			op1 = pop();
@@ -891,20 +894,25 @@ int main() {
 			else
 				printf("error: exp when both base and power are 0\n");
 			break;
-		case 't': 			// print top of stack without popping
+		
+		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
+		case 'T': 			// print top of stack without popping
 			print_top();
 			break;
-		case 'd': 			// duplicate top element of stack
+		case 'D': 			// duplicate top element of stack
 			duplicate_top();
 			break;
-		case 'w': 			// swap top two elements of stack
+		case 'W': 			// swap top two elements of stack
 			swap_top();
 			break;
-		case 'c': 			// clear stack
+		case 'C': 			// clear stack
 			clear_stack();
 			break;
+		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
+
 		case '\n':
-			printf("\tCalculator Result: %.8g\n", pop());
+			r = pop();
+			printf("\tCalculator Result: %.8g\n", r);
 			break;
 		default:
 			printf("error: unknown command %s\n", s);
