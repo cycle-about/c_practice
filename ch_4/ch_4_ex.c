@@ -580,6 +580,245 @@ Syntax of these functions
 Compile command needs to be changed to use math.h: add '-lm' must be at END of command
 	gcc -o ch_4_ex ch_4_ex.c -lm && ./ch_4_ex
 
+Try out what this means about errors for pow() for "x<0 and y not an int", and whether to handle
+	Decision: keep as is, don't cast in that case, it shows 'nan' fine
+	Seems that pow() handles the check of losslessly casting to int if base is negative
+	If can't be, returns nan; otherwise returns result fine
+		-3 1.5 p
+			-> nan
+		-3 2 p
+			-> 9
+
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+#include <math.h> 		// for sin, exp, pow
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0'    	// signal that a number was found and added to stack
+
+int getop(char []);
+void push(double);
+double pop(void);
+void print_stack(void);
+void print_top(void); 		// t
+void duplicate_top(void); 	// d
+void swap_top(void); 		// w
+void clear_stack(void); 	// c
+
+
+// reverse Polish notation calculator
+int main() {
+	int type;
+	double op2, op1;
+	char s[MAXOP];    // characters of a single number to be added to stack
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			// printf("string: %s\n", s);
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-': 	 			// order of operands matters
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor\n");
+			break;
+		case '%': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push((int) pop() % (int) op2);    // modulo can't use double, cast to ints
+			else
+				printf("error: zero modulo\n");
+			break;
+		case 's': 			// sine of x
+			printf("sine\n");
+			push(sin(pop()));
+			break;
+		case 'e': 			// e^x
+			printf("e^x\n");
+			push(exp(pop()));
+			break;
+		case 'p': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+			printf("x^y\n");
+			op2 = pop();
+			op1 = pop();
+			if (op1 != 0 || op2 != 0) // both cannot be zero
+				push(pow(op1, op2));
+			else
+				printf("error: exp when both base and power are 0\n");
+			break;
+		case 't': 			// print top of stack without popping
+			print_top();
+			break;
+		case 'd': 			// duplicate top element of stack
+			duplicate_top();
+			break;
+		case 'w': 			// swap top two elements of stack
+			swap_top();
+			break;
+		case 'c': 			// clear stack
+			clear_stack();
+			break;
+		case '\n':
+			printf("\tCalculator Result: %.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+// stack and stack pointer are used by both push and pop, so declared external to them
+#define MAXVAL 	100 	// max depth of val stack
+
+int sp = 0; 			// next free stack position
+double val[MAXVAL]; 	// value stack
+
+void print_stack(void) {
+		printf("stack:");
+		for (int i = 0; i < sp; i++) {
+			printf(" %.1f", val[i]);    // print to 1 decimal place only
+		}
+		printf("\n");
+}
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL) {
+		val[sp++] = f;
+		printf("push, ");
+		print_stack();
+	}
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0) {
+		printf("pop: %.1f\n", val[sp-1]);
+		return val[--sp];
+	} else {
+		printf("error: stack empty\n");
+		return 0.0;
+	}
+}
+
+// print top of stack, without poping
+void print_top(void) {
+	printf("top of stack: %.1f\n", val[sp-1]);
+}
+
+// duplicate top element of stack
+void duplicate_top(void) {
+	val[sp++] = val[sp-1];
+	printf("duplicated top, ");
+	print_stack();
+}
+
+// duplicate top element of stack
+void swap_top(void) {
+	double temp = val[sp-1];
+	val[sp-1] = val[sp-2];
+	val[sp-2] = temp;
+	printf("swapped top, ");
+	print_stack();
+}
+
+// clear stack
+void clear_stack(void) {
+	sp = 0;
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+// getop: get next operator or numeric operand
+int getop(char s[]) {
+	int i, c, next;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
+		;
+	s[1] = '\0';
+
+	// char is not part of a number, so return it
+	if (!isdigit(c) && c != '.' && c != '-')
+		return c; 		
+
+	i = 0;
+	if (c == '-') { 	// check whether subtraction operator, or negative number
+		next = getch();
+		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+			ungetch(next);
+			return c;
+		}
+		ungetch(next);
+	}
+
+	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')					// get part of number after a decimal
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
+}
+
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 		// buffer for ungetch
+int bufp = 0; 			// next free position in buf
+
+int getch(void) { 		// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) {    // push char back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
+*/
+
+
+/******************************************************************************** 
+4-6 Add commands for handling single variables. (It's easy to provide twenty-six variables with
+single-letter names.) Add a variable for the most recently printed variable.
+
+Not fully sure what this question means: possible things to modify
+	1. Change my "commands" set up above to use something other than a-z chars
+		Single ASCII symbols would be simplest; reading in strings would take additional handling
+		Consider: either capital letters for the "commands", or other chars like ^ etc
+	2. Initialize chars a-z as ints
+	3. Add handling to retrieve the value of a variable
+	4. Look for pattern in input: c=i, where c is a char and i is an int
+		If find this, assign var c to value i
+
 */
 
 #include <stdio.h>
@@ -647,7 +886,7 @@ int main() {
 			printf("x^y\n");
 			op2 = pop();
 			op1 = pop();
-			if (op1 != 0 || op2 != 0)
+			if (op1 != 0 || op2 != 0) // both cannot be zero
 				push(pow(op1, op2));
 			else
 				printf("error: exp when both base and power are 0\n");
