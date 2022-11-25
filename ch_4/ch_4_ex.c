@@ -821,8 +821,12 @@ Clear thing to implement for this
 		- Where does it need to be: depends on whether needs access to stack or not
 			-> only in main, since only involves a pop from stack, none of its other values
 
-Followup steps (I think)
-	1. Add a way to use 'r' variable in calculations
+Followup step (I think)
+	/ 1. Add a way to use 'r' variable in calculations
+	/ 2. Add 26 single-letter variable names
+		/ Can variables be declared in a loop (not only defined)? Not clear, do manually
+		Add a 'symbol' like NUMBER to indicate a lower-case variable was found
+		Then, replace that var with its value in the stack
 
 */
 
@@ -832,6 +836,7 @@ Followup steps (I think)
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER 	'0'    	// signal that a number was found and added to stack
+#define LOWER 	'a' 	// signal that a lower-case letter (variable) entered
 
 int getop(char []);
 void push(double);
@@ -850,6 +855,8 @@ int main() {
 	double op1; 		// second most recently pushed number
 	double r;    		// result of most recent calculation
 	char s[MAXOP];    	// characters of a single number to add to stack
+	double a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,t,u,v,w,x,y,z;
+	a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=t=u=v=w=x=y=z= 0;
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -915,8 +922,11 @@ int main() {
 		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
 
 		/**** VARIABLE ADDED IN EX 4-6 ****/
-		case 'r':
-			push(r); 		// push value of most recent calc result to stack
+		case LOWER:
+			printf("pushing a var\n");
+			push(pop());
+		case 'r':	 		// push value of most recent calc result to stack
+			push(r);
 			break;
 		/**** VARIABLE ADDED IN EX 4-6 ****/
 
@@ -1010,9 +1020,13 @@ int getop(char s[]) {
 		;
 	s[1] = '\0';
 
-	// char is not part of a number, so return it
+	// if a lower-case letter, return symbol that was found
+	if (islower(c))
+		return LOWER;
+
+	// char was not a lower-case letter, and is not part of a number, so return it
 	if (!isdigit(c) && c != '.' && c != '-')
-		return c; 		
+		return c;
 
 	i = 0;
 	if (c == '-') { 	// check whether subtraction operator, or negative number
@@ -1052,3 +1066,9 @@ void ungetch(int c) {    // push char back on input
 	else
 		buf[bufp++] = c;
 }
+
+
+/******************************************************************************** 
+4-7 
+
+*/
