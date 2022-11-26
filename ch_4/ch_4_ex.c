@@ -836,7 +836,8 @@ Followup step (I think)
 #include <ctype.h>
 
 #define MAXOP 	100 	// max size of operand or operator
-#define NUMBER 	'0'    	// signal that a number was found and added to stack
+#define NUMBER  '0'    	// signal that number was added to stack
+#define VAR 	'a'	 	// signal that variable a-z was added to stack
 
 int getop(char []);
 void push(double);
@@ -863,6 +864,9 @@ int main() {
 		case NUMBER:
 			// printf("string: %s\n", s);
 			push(atof(s));
+			break;
+		case VAR: 		// stack contains only the single a-z char
+			push((double) s[0]);
 			break;
 		case '+':
 			push(pop() + pop());
@@ -1017,30 +1021,37 @@ int getop(char s[]) {
 		;
 	s[1] = '\0';
 
-	// char was not a lower-case letter, and is not part of a number, so return it
-	if (!isdigit(c) && c != '.' && c != '-')
+	// char is not a variable a-z, or part of a number, so return it
+	if (!islower(c) && !isdigit(c) && c != '.' && c != '-')
 		return c;
 
 	i = 0;
-	if (c == '-') { 	// check whether subtraction operator, or negative number
-		next = getch();
-		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+	if (islower(c)) {    // handle variable a-z
+		s[i] = c;
+		s[++i] = '\0';
+		printf("stack after adding lower: %s\n", s);
+		return VAR;
+	} else {    		// handle number
+		if (c == '-') { 	// check whether subtraction operator, or negative number
+			next = getch();
+			if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+				ungetch(next);
+				return c;
+			}
 			ungetch(next);
-			return c;
 		}
-		ungetch(next);
-	}
 
-	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
-		while (isdigit(s[++i] = c = getch()))
-			;
-	if (c == '.')					// get part of number after a decimal
-		while (isdigit(s[++i] = c = getch()))
-			;
-	s[i] = '\0';
-	if (c != EOF)
-		ungetch(c);
-	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
+		if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+			while (isdigit(s[++i] = c = getch()))
+				;
+		if (c == '.')					// get part of number after a decimal
+			while (isdigit(s[++i] = c = getch()))
+				;
+		s[i] = '\0';
+		if (c != EOF)
+			ungetch(c);
+	}
+	return NUMBER;    // returns signal that a number or operand was found: NOT ITS VALUE
 }
 
 
