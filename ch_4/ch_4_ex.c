@@ -909,6 +909,16 @@ int main() {
 			else
 				printf("error: exp when both base and power are 0\n");
 			break;
+		case '=': 			// assign value to variable a-z
+			op2 = pop();
+			op1 = pop();
+			printf("try to assign %f to %f\n", op1, op2);
+			if (islower(op1))
+				op1 = op2;
+			else
+				printf("error: assigning to not valid variable\n");
+			printf("new values op1 and op2: %f and %f", op1, op2);
+			break;
 		
 		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
 		case 'T': 			// print top of stack without popping
@@ -1027,9 +1037,8 @@ int getop(char s[]) {
 
 	i = 0;
 	if (islower(c)) {    // handle variable a-z
-		s[i] = c;
+		s[i] = c; 		 // return string with only the one char
 		s[++i] = '\0';
-		printf("stack after adding lower: %s\n", s);
 		return VAR;
 	} else {    		// handle number
 		if (c == '-') { 	// check whether subtraction operator, or negative number
