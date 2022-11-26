@@ -833,10 +833,10 @@ Followup step (I think)
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
 #include <math.h> 		// for sin, exp, pow
+#include <ctype.h>
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER 	'0'    	// signal that a number was found and added to stack
-#define LOWER 	'a' 	// signal that a lower-case letter (variable) entered
 
 int getop(char []);
 void push(double);
@@ -922,16 +922,13 @@ int main() {
 		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
 
 		/**** VARIABLE ADDED IN EX 4-6 ****/
-		case LOWER:
-			printf("pushing a var\n");
-			push(pop());
 		case 'r':	 		// push value of most recent calc result to stack
 			push(r);
 			break;
 		/**** VARIABLE ADDED IN EX 4-6 ****/
 
 		case '\n':
-			r = pop();
+			r = pop(); 		// assign result to variable, can use in future calculations
 			printf("\tCalculator Result: %.8g\n", r);
 			break;
 		default:
@@ -1019,10 +1016,6 @@ int getop(char s[]) {
 	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
 		;
 	s[1] = '\0';
-
-	// if a lower-case letter, return symbol that was found
-	if (islower(c))
-		return LOWER;
 
 	// char was not a lower-case letter, and is not part of a number, so return it
 	if (!isdigit(c) && c != '.' && c != '-')
