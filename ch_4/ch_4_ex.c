@@ -868,6 +868,10 @@ void clear_stack(void); 	// c
 
 
 // reverse Polish notation calculator
+
+// use rules
+//     assignment: to make "w = 3", enter exactly "3 w ="
+
 int main() {
 	int type, i;
 	double op2; 		// most recently pushed number (op1 op2 /  -->  op1 / op2)
@@ -887,10 +891,14 @@ int main() {
 			push(atof(s));
 			break;
 		case ASSIGN: 			// push char itself to stack, to be assigned value in vars[]
+			printf("pushing var name for assignment: ");
+			putchar(s[0]);
+			printf("\n");
 			push((double) s[0]);
 			break;
 		case VAR:
 			i = s[0] - 'a'; 	// push char's value in vars[], via offset to letters a-z
+			printf("using value of vars[] at index %d\n", i);
 			push(vars[i]);
 			break;
 		case '+':
@@ -936,12 +944,12 @@ int main() {
 			break;
 		case '=': 			// assign value to variable a-z
 			op2 = pop(); 	// value for var
-			op1 = pop(); 	// letter in a-z array to get assignment, aka index in vars[]
+			i = (int) pop(); 	// letter in a-z array to get assignment, aka index in vars[]
 			// printf("try to assign %f to %f\n", op1, op2);
 			if (islower(op1))
-				vars[(int) op1-'a'] = op2;
+				vars[i-'a'] = op2;
 			else
-				printf("error: assigning to not valid variable\n");
+				printf("error: assigning to not valid variable, %d\n", i);
 			// printf("new values op1 and op2: %f and %f", op1, op2);
 			printf("Vars values: ");
 			for (i = 0; i < LETTERS; i++) {
@@ -1055,7 +1063,7 @@ void ungetch(int);
 
 // getop: get next operator or numeric operand
 int getop(char s[]) {
-	int i, c, next;
+	int i, c, next, next1;
 
 	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
 		;
@@ -1069,11 +1077,21 @@ int getop(char s[]) {
 	if (islower(c)) {    	// check whether assigning value to var, or using its value
 		s[i] = c; 		 	// string gets the letter in both cases
 		s[i+1] = '\0';
-		if (s[i+4] == '=') {
-			printf("assign var\n");
+		next = getch();
+		next1 = getch();
+		printf("after lower: ");
+		putchar(next);
+		putchar(next1);
+		printf("\n");
+		if (next1 == '=') {
+			printf("assign to variable named: %d\n", c);
+			ungetch(next);
+			ungetch(next1);
 			return ASSIGN;
 		} else {
-			printf("use variable\n");
+			printf("use variable named: %d\n", c);
+			ungetch(next);
+			ungetch(next1);
 			return VAR;
 		}
 	} else {    			// handle number
