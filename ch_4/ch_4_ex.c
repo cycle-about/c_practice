@@ -834,8 +834,15 @@ What is happening with variable assignment now
 		That separate method puts char on stack without converting chars to float, as with NUMBER
 	Assignment operator = assigns 
 
-Revise structure to handling values assigned to vars a-z
-	Use a int[26], where index is (char - 'a'), and value there is var's value
+/ Revise structure to handling values assigned to vars a-z
+	/ Use a int[26], where index is (char - 'a'), and value there is var's value
+
+Handling needed for vars, where to do each case TBD
+	1. Assignment: indicated by '=' operator exactly two entries later
+		Action: returns 'VAR', and pushes letter char to stack
+	2. Use: else case for 1
+		Action: finds value for index in vars[], and returns it as NUMBER
+	*** handle this difference in getop(), which can read stack directly ***
 
 */
 
@@ -846,7 +853,8 @@ Revise structure to handling values assigned to vars a-z
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER  '0'    	// signal that number was added to stack
-#define VAR 	'a'	 	// signal that variable a-z was added to stack
+#define ASSIGN 	'1'	 	// signal that variable to be assigned was added to stack
+#define VAR 	'2'     // signal that var's value should be added to stack
 #define LETTERS	26
 
 int getop(char []);
@@ -878,8 +886,12 @@ int main() {
 			// printf("string: %s\n", s);
 			push(atof(s));
 			break;
-		case VAR: 		// push to stack: letter's index in a-z array, where a is 0
+		case ASSIGN: 			// push char itself to stack, to be assigned value in vars[]
 			push((double) s[0]);
+			break;
+		case VAR:
+			i = s[0] - 'a'; 	// push char's value in vars[], via offset to letters a-z
+			push(vars[i]);
 			break;
 		case '+':
 			push(pop() + pop());
@@ -935,6 +947,7 @@ int main() {
 			for (i = 0; i < LETTERS; i++) {
 				printf(" %.0f", vars[i]);
 			}
+			printf("\n");
 			break;
 		
 		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
@@ -1053,11 +1066,17 @@ int getop(char s[]) {
 		return c;
 
 	i = 0;
-	if (islower(c)) {    // handle variable a-z
-		s[i] = c; 		 // return string with only the one char
-		s[++i] = '\0';
-		return VAR;
-	} else {    		// handle number
+	if (islower(c)) {    	// check whether assigning value to var, or using its value
+		s[i] = c; 		 	// string gets the letter in both cases
+		s[i+1] = '\0';
+		if (s[i+4] == '=') {
+			printf("assign var\n");
+			return ASSIGN;
+		} else {
+			printf("use variable\n");
+			return VAR;
+		}
+	} else {    			// handle number
 		if (c == '-') { 	// check whether subtraction operator, or negative number
 			next = getch();
 			if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
