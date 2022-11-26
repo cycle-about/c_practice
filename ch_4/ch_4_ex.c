@@ -825,8 +825,17 @@ Followup step (I think)
 	/ 1. Add a way to use 'r' variable in calculations
 	/ 2. Add 26 single-letter variable names
 		/ Can variables be declared in a loop (not only defined)? Not clear, do manually
-		Add a 'symbol' like NUMBER to indicate a lower-case variable was found
-		Then, replace that var with its value in the stack
+	/ 3. Add a 'symbol' like NUMBER to indicate a lower-case variable was found
+	/ 4. Handle assignment operator = when first operand is a valid variable name (a-z)
+	5. Use those variables in other calculations
+
+What is happening with variable assignment now
+	getop() returns signal 'VAR' when a char a-z (variable) is pushed onto stack
+		That separate method puts char on stack without converting chars to float, as with NUMBER
+	Assignment operator = assigns 
+
+Revise structure to handling values assigned to vars a-z
+	Use a int[26], where index is (char - 'a'), and value there is var's value
 
 */
 
@@ -838,6 +847,7 @@ Followup step (I think)
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER  '0'    	// signal that number was added to stack
 #define VAR 	'a'	 	// signal that variable a-z was added to stack
+#define LETTERS	26
 
 int getop(char []);
 void push(double);
@@ -851,13 +861,16 @@ void clear_stack(void); 	// c
 
 // reverse Polish notation calculator
 int main() {
-	int type;
+	int type, i;
 	double op2; 		// most recently pushed number (op1 op2 /  -->  op1 / op2)
 	double op1; 		// second most recently pushed number
 	double r;    		// result of most recent calculation
 	char s[MAXOP];    	// characters of a single number to add to stack
-	double a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,t,u,v,w,x,y,z;
-	a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=t=u=v=w=x=y=z= 0;
+	double vars[LETTERS];	// array for values of variables, found via 26 lower-case letters
+
+	for (i = 0; i < LETTERS; i++) {
+		vars[i] = 0;
+	}
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -865,7 +878,7 @@ int main() {
 			// printf("string: %s\n", s);
 			push(atof(s));
 			break;
-		case VAR: 		// stack contains only the single a-z char
+		case VAR: 		// push to stack: letter's index in a-z array, where a is 0
 			push((double) s[0]);
 			break;
 		case '+':
@@ -910,14 +923,18 @@ int main() {
 				printf("error: exp when both base and power are 0\n");
 			break;
 		case '=': 			// assign value to variable a-z
-			op2 = pop();
-			op1 = pop();
-			printf("try to assign %f to %f\n", op1, op2);
+			op2 = pop(); 	// value for var
+			op1 = pop(); 	// letter in a-z array to get assignment, aka index in vars[]
+			// printf("try to assign %f to %f\n", op1, op2);
 			if (islower(op1))
-				op1 = op2;
+				vars[(int) op1-'a'] = op2;
 			else
 				printf("error: assigning to not valid variable\n");
-			printf("new values op1 and op2: %f and %f", op1, op2);
+			// printf("new values op1 and op2: %f and %f", op1, op2);
+			printf("Vars values: ");
+			for (i = 0; i < LETTERS; i++) {
+				printf(" %.0f", vars[i]);
+			}
 			break;
 		
 		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
