@@ -807,55 +807,27 @@ void ungetch(int c) {    // push char back on input
 
 
 /******************************************************************************** 
-4-6 Add commands for handling single variables. (It's easy to provide twenty-six variables with
-single-letter names.) Add a variable for the most recently printed variable.
+4-6 Add commands for handling variables. (It's easy to provide 26 variables with single-letter
+names.) Add a variable for the most recently printed value.
 
-Clear thing to implement for this
-	/ 1. Replace using lower-case letters as both math.h operands, and 'commands'
-		/ Math operands to non a-z chars
-		/ Commands to capital letters
-	/ 2. Add a variable for the most recently printed variable
-		- Interpret this as: most recent value printed as calculator result, so after '\n'
-		- Use 'r', setup for mention of 26 single-letter vars (for now don't make changes to 
-		differentiate commands added in 4-5 from variables added here)
-		- Where does it need to be: depends on whether needs access to stack or not
-			-> only in main, since only involves a pop from stack, none of its other values
+Things presumed needed
+	- Declare 26 variables, with names chars a-z
+	- Way to assign values to those variables in the calculator
+	- Way to USE the variables in calculation
 
-Followup step (I think)
-	/ 1. Add a way to use 'r' variable in calculations
-	/ 2. Add 26 single-letter variable names
-		/ Can variables be declared in a loop (not only defined)? Not clear, do manually
-	/ 3. Add a 'symbol' like NUMBER to indicate a lower-case variable was found
-	/ 4. Handle assignment operator = when first operand is a valid variable name (a-z)
-	5. Use those variables in other calculations
-
-What is happening with variable assignment now
-	getop() returns signal 'VAR' when a char a-z (variable) is pushed onto stack
-		That separate method puts char on stack without converting chars to float, as with NUMBER
-	Assignment operator = assigns 
-
-/ Revise structure to handling values assigned to vars a-z
-	/ Use a int[26], where index is (char - 'a'), and value there is var's value
-
-Handling needed for vars, where to do each case TBD
-	1. Assignment: indicated by '=' operator exactly two entries later
-		Action: returns 'VAR', and pushes letter char to stack
-	2. Use: else case for 1
-		Action: finds value for index in vars[], and returns it as NUMBER
-	*** handle this difference in getop(), which can read stack directly ***
+Consider
+	When a string is entered into terminal, first search it for a-z variables
+	If has a variable, pass string to function to handle assignment or var use
 
 */
+
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
 #include <math.h> 		// for sin, exp, pow
-#include <ctype.h>
 
 #define MAXOP 	100 	// max size of operand or operator
-#define NUMBER  '0'    	// signal that number was added to stack
-#define ASSIGN 	'1'	 	// signal that variable to be assigned was added to stack
-#define VAR 	'2'     // signal that var's value should be added to stack
-#define LETTERS	26
+#define NUMBER 	'0'    	// signal that a number was found and added to stack
 
 int getop(char []);
 void push(double);
@@ -868,38 +840,16 @@ void clear_stack(void); 	// c
 
 
 // reverse Polish notation calculator
-
-// use rules
-//     assignment: to make "w = 3", enter exactly "3 w ="
-
 int main() {
-	int type, i;
-	double op2; 		// most recently pushed number (op1 op2 /  -->  op1 / op2)
-	double op1; 		// second most recently pushed number
-	double r;    		// result of most recent calculation
-	char s[MAXOP];    	// characters of a single number to add to stack
-	double vars[LETTERS];	// array for values of variables, found via 26 lower-case letters
-
-	for (i = 0; i < LETTERS; i++) {
-		vars[i] = 0;
-	}
+	int type;
+	double op2, op1;
+	char s[MAXOP];    // characters of a single number to be added to stack
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
 		case NUMBER:
 			// printf("string: %s\n", s);
 			push(atof(s));
-			break;
-		case ASSIGN: 			// push char itself to stack, to be assigned value in vars[]
-			printf("pushing var name for assignment: ");
-			putchar(s[0]);
-			printf("\n");
-			push((double) s[0]);
-			break;
-		case VAR:
-			i = s[0] - 'a'; 	// push char's value in vars[], via offset to letters a-z
-			printf("using value of vars[] at index %d\n", i);
-			push(vars[i]);
 			break;
 		case '+':
 			push(pop() + pop());
@@ -925,15 +875,15 @@ int main() {
 			else
 				printf("error: zero modulo\n");
 			break;
-		case '~': 			// sine of x
+		case 's': 			// sine of x
 			printf("sine\n");
 			push(sin(pop()));
 			break;
-		case '#': 			// e^x
+		case 'e': 			// e^x
 			printf("e^x\n");
 			push(exp(pop()));
 			break;
-		case '^': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+		case 'p': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
 			printf("x^y\n");
 			op2 = pop();
 			op1 = pop();
@@ -942,46 +892,20 @@ int main() {
 			else
 				printf("error: exp when both base and power are 0\n");
 			break;
-		case '=': 			// assign value to variable a-z
-			op2 = pop(); 	// value for var
-			i = (int) pop(); 	// letter in a-z array to get assignment, aka index in vars[]
-			// printf("try to assign %f to %f\n", op1, op2);
-			if (islower(op1))
-				vars[i-'a'] = op2;
-			else
-				printf("error: assigning to not valid variable, %d\n", i);
-			// printf("new values op1 and op2: %f and %f", op1, op2);
-			printf("Vars values: ");
-			for (i = 0; i < LETTERS; i++) {
-				printf(" %.0f", vars[i]);
-			}
-			printf("\n");
-			break;
-		
-		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
-		case 'T': 			// print top of stack without popping
+		case 't': 			// print top of stack without popping
 			print_top();
 			break;
-		case 'D': 			// duplicate top element of stack
+		case 'd': 			// duplicate top element of stack
 			duplicate_top();
 			break;
-		case 'W': 			// swap top two elements of stack
+		case 'w': 			// swap top two elements of stack
 			swap_top();
 			break;
-		case 'C': 			// clear stack
+		case 'c': 			// clear stack
 			clear_stack();
 			break;
-		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
-
-		/**** VARIABLE ADDED IN EX 4-6 ****/
-		case 'r':	 		// push value of most recent calc result to stack
-			push(r);
-			break;
-		/**** VARIABLE ADDED IN EX 4-6 ****/
-
 		case '\n':
-			r = pop(); 		// assign result to variable, can use in future calculations
-			printf("\tCalculator Result: %.8g\n", r);
+			printf("\tCalculator Result: %.8g\n", pop());
 			break;
 		default:
 			printf("error: unknown command %s\n", s);
@@ -1063,58 +987,36 @@ void ungetch(int);
 
 // getop: get next operator or numeric operand
 int getop(char s[]) {
-	int i, c, next, next1;
+	int i, c, next;
 
 	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
 		;
 	s[1] = '\0';
 
-	// char is not a variable a-z, or part of a number, so return it
-	if (!islower(c) && !isdigit(c) && c != '.' && c != '-')
-		return c;
+	// char is not part of a number, so return it
+	if (!isdigit(c) && c != '.' && c != '-')
+		return c; 		
 
 	i = 0;
-	if (islower(c)) {    	// check whether assigning value to var, or using its value
-		s[i] = c; 		 	// string gets the letter in both cases
-		s[i+1] = '\0';
+	if (c == '-') { 	// check whether subtraction operator, or negative number
 		next = getch();
-		next1 = getch();
-		printf("after lower: ");
-		putchar(next);
-		putchar(next1);
-		printf("\n");
-		if (next1 == '=') {
-			printf("assign to variable named: %d\n", c);
+		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
 			ungetch(next);
-			ungetch(next1);
-			return ASSIGN;
-		} else {
-			printf("use variable named: %d\n", c);
-			ungetch(next);
-			ungetch(next1);
-			return VAR;
+			return c;
 		}
-	} else {    			// handle number
-		if (c == '-') { 	// check whether subtraction operator, or negative number
-			next = getch();
-			if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
-				ungetch(next);
-				return c;
-			}
-			ungetch(next);
-		}
-
-		if (isdigit(c) || c == '-')    	// collect sign and integer part of number
-			while (isdigit(s[++i] = c = getch()))
-				;
-		if (c == '.')					// get part of number after a decimal
-			while (isdigit(s[++i] = c = getch()))
-				;
-		s[i] = '\0';
-		if (c != EOF)
-			ungetch(c);
+		ungetch(next);
 	}
-	return NUMBER;    // returns signal that a number or operand was found: NOT ITS VALUE
+
+	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')					// get part of number after a decimal
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
 }
 
 
@@ -1133,9 +1035,3 @@ void ungetch(int c) {    // push char back on input
 	else
 		buf[bufp++] = c;
 }
-
-
-/******************************************************************************** 
-4-7 
-
-*/
