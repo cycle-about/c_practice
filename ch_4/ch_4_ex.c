@@ -903,7 +903,8 @@ Pseudocode for cases involving variables
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
-#include <math.h> 		// for sin, exp, pow
+#include <math.h> 		// for sin, exp, pow, floor, ceil
+#include <ctype.h>
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER 	'0'    	// signal that a number was found and added to stack
@@ -923,6 +924,9 @@ void clear_stack(void); 	// C
 
 // reverse Polish notation calculator
 int main() {
+
+
+
 	int type;
 	double op2, op1;
 	char s[MAXOP];    // characters of a single number to be added to stack
@@ -967,7 +971,6 @@ int main() {
 			push(sin(pop()));
 			break;
 		case '=': 			// assign value to a variable
-			// TODO call a method here, which uses array
 			assign_var();
 			break;
 		case 'E': 			// e^x
@@ -1042,10 +1045,21 @@ void push(double f) {
 
 
 // pop: pop and return top value from stack
+// if that value is letter a-z (a variable): return its value from vars[]
 double pop(void) {
 	if (sp > 0) {
-		printf("pop: %.1f\n", val[sp-1]);
-		return val[--sp];
+		// printf("pop: %.1f\n", val[sp-1]);
+		// return val[--sp];
+		// TODO finish this
+		double v = val[sp-1];
+		if (ceil(v) == floor(v) && islower(v)) { 		// is whole number, and variable a-z
+			printf("pop returns dereference %d\n", (int) v - 'a');
+			sp--;
+			return vars[(int) v - 'a']; 							// return value of variable
+		} else {
+			printf("pop returns value\n");
+			return val[--sp];
+		}
 	} else {
 		printf("error: stack empty\n");
 		return 0.0;
@@ -1054,7 +1068,7 @@ double pop(void) {
 
 void assign_var(void) {
 	double value = pop();
-	int letter = (int) pop() - 'a';
+	int letter = (int) pop() - 'a'; // TODO add range check
 	vars[letter] = value;
 	printf("assigned %f to variable %d\n", value, letter);
 }

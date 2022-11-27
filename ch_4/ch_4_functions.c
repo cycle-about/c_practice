@@ -1,6 +1,6 @@
 /*
 Combined compile and run command
-gcc -o ch_4_functions ch_4_functions.c && ./ch_4_functions
+gcc -o ch_4_functions ch_4_functions.c -lm && ./ch_4_functions
 */
 
 /******************************************************************
@@ -92,8 +92,6 @@ unaccessible to prior parts
 	If move it to above main(): then it works
 
 	So: order of external variables DOES matter
-
-*/
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -223,4 +221,42 @@ void ungetch(int c) {    // push char back on input
 		printf("ungetch: too many characters");
 	else
 		buf[bufp++] = c;
+}
+*/
+
+
+/******************************************************************
+Tests related to finding whether stack items in ex 4-6 are valid variables
+
+*** to use math.h, must change compile command to include -lm
+	gcc -o ch_4_ex ch_4_ex.c -lm && ./ch_4_ex
+*/
+
+#include <stdio.h>
+#include <math.h>
+#include <ctype.h>
+
+int main() {
+	/*
+	double i = 4.5;
+
+	printf("%f\n", ceil(4.5));
+	printf("%f\n\n", floor(4.5));
+
+	printf("%f\n", ceil(4.0));
+	printf("%f\n\n", floor(4.0));
+
+	printf("%f\n", ceil(-4.5));
+	printf("%f\n\n", floor(-4.5));
+
+	printf("%f\n", ceil(-4.0));
+	printf("%f\n\n", floor(-4.0));
+	*/
+
+	double v = (double) 'i';
+	printf("%f\n", ceil(v));
+	printf("%f\n", floor(v));
+	printf("%d\n", (int) v - 'a');          // indexes 'a' to 0, eg 'i' is 8
+	printf("%d\n", islower(v));
+	printf("%d\n", islower((int) v));
 }
