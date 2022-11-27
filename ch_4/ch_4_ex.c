@@ -810,8 +810,6 @@ void ungetch(int c) {    // push char back on input
 4-6 Add commands for handling variables. (It's easy to provide 26 variables with single-letter
 names.) Add a variable for the most recently printed value.
 
-Write pseudocode for cases involving variables
-
 Differentiation
 	When pop() returns an a-z char in "case = "
 		use the char as char itself
@@ -819,6 +817,7 @@ Differentiation
 	When pop() returns a-z char in all other operator cases:
 		use the VALUE of the char's variable
 		-> modify standard pop() to find the VALUE of the char, and RETURN THAT INSTEAD OF CHAR
+
 
 New method pop_assign()
 	Use *only* in "case = ", and use for only the SECOND pop (ie get i from "i 3 =")
@@ -828,6 +827,18 @@ New method pop_assign()
 			look up the value of that var in double[26], indexed adjusted for 'a' as 0
 		if not
 			print an error message for assigning to invalid variable
+
+Changes needed before implementing this
+	/ Change the earlier-defined commands to use CAPITAL or other symbols, to differentiate
+	/ Push lower-case chars to stack, like numbers
+		/ Need to NOT run atof() on them
+		/ Handle difference in the case statement, or in getop(): getop(), case doesn't need to see it
+	Make double[26] to store values corresponding to a-z variables (don't need to declare those vars)
+		That only needs to be in the stack-manipulating part, NOT main
+
+--------
+
+Pseudocode for cases involving variables
 
 1. Whole entered statement is ONLY an assignment
 
@@ -888,11 +899,6 @@ New method pop_assign()
 	read \n
 	pop 10, and print it
 
---------
-
-
-
-
 */
 
 
@@ -902,6 +908,7 @@ New method pop_assign()
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER 	'0'    	// signal that a number was found and added to stack
+#define VAR 	'1'		// signal that a variable a-z found and added to stack
 
 int getop(char []);
 void push(double);
@@ -924,6 +931,9 @@ int main() {
 		case NUMBER:
 			// printf("string: %s\n", s);
 			push(atof(s));
+			break;
+		case VAR: 	// push single char a-z to stack
+			push(s[0]);
 			break;
 		case '+':
 			push(pop() + pop());
@@ -949,15 +959,15 @@ int main() {
 			else
 				printf("error: zero modulo\n");
 			break;
-		case 's': 			// sine of x
+		case '~': 			// sine of x
 			printf("sine\n");
 			push(sin(pop()));
 			break;
-		case 'e': 			// e^x
+		case 'E': 			// e^x
 			printf("e^x\n");
 			push(exp(pop()));
 			break;
-		case 'p': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+		case 'P': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
 			printf("x^y\n");
 			op2 = pop();
 			op1 = pop();
@@ -966,16 +976,16 @@ int main() {
 			else
 				printf("error: exp when both base and power are 0\n");
 			break;
-		case 't': 			// print top of stack without popping
+		case 'T': 			// print top of stack without popping
 			print_top();
 			break;
-		case 'd': 			// duplicate top element of stack
+		case 'D': 			// duplicate top element of stack
 			duplicate_top();
 			break;
-		case 'w': 			// swap top two elements of stack
+		case 'W': 			// swap top two elements of stack
 			swap_top();
 			break;
-		case 'c': 			// clear stack
+		case 'C': 			// clear stack
 			clear_stack();
 			break;
 		case '\n':
@@ -1067,29 +1077,35 @@ int getop(char s[]) {
 		;
 	s[1] = '\0';
 
-	// char is not part of a number, so return it
-	if (!isdigit(c) && c != '.' && c != '-')
+	// char is not part of a number, or a variable a-z, so return it as operator
+	if (!islower(c) && !isdigit(c) && c != '.' && c != '-')
 		return c; 		
 
 	i = 0;
-	if (c == '-') { 	// check whether subtraction operator, or negative number
-		next = getch();
-		if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+	if (islower(c)) {    // handle single-char variable
+		s[i] = c;
+		s[++i] = '\n';
+		return VAR;
+	} else {    			// handle a number, can have negative sign and decimal
+		if (c == '-') { 	// check whether subtraction operator or negative number
+			next = getch();
+			if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+				ungetch(next);
+				return c;
+			}
 			ungetch(next);
-			return c;
 		}
-		ungetch(next);
-	}
 
-	if (isdigit(c) || c == '-')    	// collect sign and integer part of number
-		while (isdigit(s[++i] = c = getch()))
-			;
-	if (c == '.')					// get part of number after a decimal
-		while (isdigit(s[++i] = c = getch()))
-			;
-	s[i] = '\0';
-	if (c != EOF)
-		ungetch(c);
+		if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+			while (isdigit(s[++i] = c = getch()))
+				;
+		if (c == '.')					// get part of number after a decimal
+			while (isdigit(s[++i] = c = getch()))
+				;
+		s[i] = '\0';
+		if (c != EOF)
+			ungetch(c);
+	}
 	return NUMBER;    // returns signal that a number was found: NOT VALUE OF NUMBER
 }
 
