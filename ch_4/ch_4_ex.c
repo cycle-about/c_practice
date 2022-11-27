@@ -954,6 +954,7 @@ int main() {
 			push(atof(s));
 			break;
 		case VAR: 	// push single char a-z to stack, to be assigned
+			printf("variable to be assigned\n");
 			push(s[0]);
 			break;
 		case DEREF:
@@ -1072,9 +1073,10 @@ double pop(void) {
 	}
 }
 
+// TODO this is broken, eg for char 'i' says assigned to -97
 void assign_var(void) {
 	double value = pop();
-	int letter = (int) pop() - 'a'; // TODO add range check
+	int letter = (int) pop() - 'a';
 	vars[letter] = value;
 	printf("assigned %f to variable %d\n", value, letter);
 }
@@ -1132,18 +1134,18 @@ int getop(char s[]) {
 		// 	   otherwise, dereference
 		printf("lower found\n");
 		next = getch();
-		printf("next: %d\n", next);
+		//printf("next: %d\n", next);
 		next1 = getch();
-		printf("next1: %d\n", next1);
+		//printf("next1: %d\n", next1);
 		if (isdigit(next1)) {
 			next2 = getch();
-			printf("next2: %d\n", next2);
+			//printf("next2: %d\n", next2);
 			next3 = getch();
-			printf("next3: %d\n", next3);
+			//printf("next3: %d\n", next3);
 			if (next3 == '=') {
 				printf("letter to be assigned\n");
-				s[i] = c;
-				s[++i] = '\n';
+				s[0] = c;
+				s[1] = '\n';
 				ungetch(next3);
 				ungetch(next2);
 				ungetch(next1);
