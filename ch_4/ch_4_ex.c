@@ -1116,7 +1116,7 @@ int getop(char s[]) {
 	int i, c, next, next1, next2, next3;
 	extern double deref;
 
-	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace
+	while ((s[0] = c = getch()) == ' ' || c == '\t')
 		;
 	s[1] = '\0';
 
@@ -1126,31 +1126,43 @@ int getop(char s[]) {
 
 	i = 0;
 	if (islower(c)) {    // handle single-char variable: check whether assigned or dereferenced
-		next3 = getch();
-		next2 = getch();
-		next1 = getch();
+		// rule: if two positions away is a number,
+		//     then get four positions away
+		//     if four positions away is =, then is assignment
+		// 	   otherwise, dereference
+		printf("lower found\n");
 		next = getch();
-		printf("next: ");
-		putchar(next);
-		printf("\nnext2: ");
-		putchar(next2);
-		printf("\n");
-		if (next == '=') { // variable being assigned; add char to stack
-			printf("letter to be assigned\n");
-			s[i] = c;
-			s[++i] = '\n';
-			ungetch(next);
+		printf("next: %d\n", next);
+		next1 = getch();
+		printf("next1: %d\n", next1);
+		if (isdigit(next1)) {
+			next2 = getch();
+			printf("next2: %d\n", next2);
+			next3 = getch();
+			printf("next3: %d\n", next3);
+			if (next3 == '=') {
+				printf("letter to be assigned\n");
+				s[i] = c;
+				s[++i] = '\n';
+				ungetch(next3);
+				ungetch(next2);
+				ungetch(next1);
+				ungetch(next);
+				return VAR;
+			} else {
+				printf("deref from next3\n");
+				ungetch(next3);
+				ungetch(next2);
+				ungetch(next1);
+				ungetch(next);
+				deref = vars[c - 'a'];
+				return DEREF;
+			}
+		} else {
+			printf("deref from next1\n");
 			ungetch(next1);
-			ungetch(next2);
-			ungetch(next3);
-			return VAR;
-		} else { 			// variable being used, get its value from vars[]
-			printf("letter dereferenced\n");
+			ungetch(next);
 			deref = vars[c - 'a'];
-			ungetch(next);
-			ungetch(next1);
-			ungetch(next2);
-			ungetch(next3);
 			return DEREF;
 		}
 	} else {    			// handle a number, can have negative sign and decimal
