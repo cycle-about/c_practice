@@ -810,14 +810,88 @@ void ungetch(int c) {    // push char back on input
 4-6 Add commands for handling variables. (It's easy to provide 26 variables with single-letter
 names.) Add a variable for the most recently printed value.
 
-Things presumed needed
-	- Declare 26 variables, with names chars a-z
-	- Way to assign values to those variables in the calculator
-	- Way to USE the variables in calculation
+Write pseudocode for cases involving variables
 
-Consider
-	When a string is entered into terminal, first search it for a-z variables
-	If has a variable, pass string to function to handle assignment or var use
+Differentiation
+	When pop() returns an a-z char in "case = "
+		use the char as char itself
+		-> make a separate method "pop_assign" that does this, use it only in case_assign
+	When pop() returns a-z char in all other operator cases:
+		use the VALUE of the char's variable
+		-> modify standard pop() to find the VALUE of the char, and RETURN THAT INSTEAD OF CHAR
+
+New method pop_assign()
+	Use *only* in "case = ", and use for only the SECOND pop (ie get i from "i 3 =")
+	get the value of pop() from stack: call that method as normal, and interate stack pointer
+	Check whether the popped value is a lower-case char
+		if is lower-case char
+			look up the value of that var in double[26], indexed adjusted for 'a' as 0
+		if not
+			print an error message for assigning to invalid variable
+
+1. Whole entered statement is ONLY an assignment
+
+	i 6 = \n
+
+	read i
+	push i to stack ***want to keep as char***
+	read 6
+	push 6 to stack
+	read =
+	pop2 is 6
+	pop1 is i ***want to keep as char***
+	Execute pop1 = pop2, and print assignment
+	read \n
+	pop stack, but is empty, okay to print 'is empty' error message
+
+--------
+
+2. Statement has an assignment and a numbers-only operation
+
+	i 6 = 5 2 - \n
+
+	read i
+	push i to stack ***want to keep as char***
+	read 6
+	push 6 to stack
+	read =
+	pop2 is 6
+	pop1 is i ***want to keep as char***
+	Execute pop1 = pop2, and print assignment
+	read 5
+	push 5 to stack
+	read 2
+	push 2 to stack
+	read -
+	pop2 is 2
+	pop1 is 5
+	Execute pop1 - pop2, result is 3
+	push 3 to stack
+	read \n
+	pop 3, and print it
+
+--------
+
+3. Statement uses a previously assigned var: here, with i already assigned to 6
+
+	i 4 +
+
+	read i
+	push ***either i or its value*** to stack
+	read 4
+	push 4 to stack
+	read +
+	pop1 is 4
+	pop2 is ***either either i, or its value***
+	Execute pop1 + pop2 (order doesn't matter), result is 10
+	push 10 to stack
+	read \n
+	pop 10, and print it
+
+--------
+
+
+
 
 */
 
