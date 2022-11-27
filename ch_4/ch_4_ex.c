@@ -818,6 +818,13 @@ Differentiation
 		use the VALUE of the char's variable
 		-> modify standard pop() to find the VALUE of the char, and RETURN THAT INSTEAD OF CHAR
 
+	*** 
+	After trying to implement this, issue found:
+		Once something on the stack, since everything is cast to double, there is no way 
+		of knowing whether it was originally letter or number, so can't tell whether it should be 
+		dereferenced a variable or just returned
+	***
+
 New method pop_assign()
 	Use *only* in "case = ", and use for only the SECOND pop (ie get i from "i 3 =")
 	get the value of pop() from stack: call that method as normal, and interate stack pointer
@@ -834,6 +841,11 @@ Changes needed before implementing this
 		/ Handle difference in the case statement, or in getop(): getop(), case doesn't need to see it
 	/ Make double[26] to store values corresponding to a-z variables (don't need to declare those vars)
 		/ That only needs to be in the stack-manipulating part, NOT main
+
+
+Another approach, after trying to handle vars during pop()
+	Handle during push() instead
+	Check if 
 
 --------
 
@@ -907,8 +919,11 @@ Pseudocode for cases involving variables
 #include <ctype.h>
 
 #define MAXOP 	100 	// max size of operand or operator
-#define NUMBER 	'0'    	// signal that a number was found and added to stack
-#define VAR 	'1'		// signal that a variable a-z found and added to stack
+#define NUMBER 	'0'    	// signal that a number was found and added to string s
+#define VAR 	'1'		// signal that a variable a-z found and added to string s
+#define DEREF 	'2' 	// signal that value of derefernced var assigned to global 'deref'
+
+double deref; 			// external, dereferenced variable's value to push to stack
 
 int getop(char []);
 void push(double);
@@ -925,22 +940,24 @@ void clear_stack(void); 	// C
 // reverse Polish notation calculator
 int main() {
 
-
-
 	int type;
 	double op2, op1;
 	char s[MAXOP];    // characters of a single number to be added to stack
+	extern double deref;
 
 	initialize_vars();
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
-		case NUMBER:
+		case NUMBER:    // including values of vars
 			// printf("string: %s\n", s);
 			push(atof(s));
 			break;
-		case VAR: 	// push single char a-z to stack
+		case VAR: 	// push single char a-z to stack, to be assigned
 			push(s[0]);
+			break;
+		case DEREF:
+			push(deref);
 			break;
 		case '+':
 			push(pop() + pop());
@@ -1045,21 +1062,10 @@ void push(double f) {
 
 
 // pop: pop and return top value from stack
-// if that value is letter a-z (a variable): return its value from vars[]
 double pop(void) {
 	if (sp > 0) {
-		// printf("pop: %.1f\n", val[sp-1]);
-		// return val[--sp];
-		// TODO finish this
-		double v = val[sp-1];
-		if (ceil(v) == floor(v) && islower(v)) { 		// is whole number, and variable a-z
-			printf("pop returns dereference %d\n", (int) v - 'a');
-			sp--;
-			return vars[(int) v - 'a']; 							// return value of variable
-		} else {
-			printf("pop returns value\n");
-			return val[--sp];
-		}
+		printf("pop: %.1f\n", val[sp-1]);
+		return val[--sp];
 	} else {
 		printf("error: stack empty\n");
 		return 0.0;
@@ -1107,9 +1113,10 @@ void ungetch(int);
 
 // getop: get next operator or numeric operand
 int getop(char s[]) {
-	int i, c, next;
+	int i, c, next, next1, next2, next3;
+	extern double deref;
 
-	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
+	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace
 		;
 	s[1] = '\0';
 
@@ -1118,10 +1125,34 @@ int getop(char s[]) {
 		return c; 		
 
 	i = 0;
-	if (islower(c)) {    // handle single-char variable
-		s[i] = c;
-		s[++i] = '\n';
-		return VAR;
+	if (islower(c)) {    // handle single-char variable: check whether assigned or dereferenced
+		next3 = getch();
+		next2 = getch();
+		next1 = getch();
+		next = getch();
+		printf("next: ");
+		putchar(next);
+		printf("\nnext2: ");
+		putchar(next2);
+		printf("\n");
+		if (next == '=') { // variable being assigned; add char to stack
+			printf("letter to be assigned\n");
+			s[i] = c;
+			s[++i] = '\n';
+			ungetch(next);
+			ungetch(next1);
+			ungetch(next2);
+			ungetch(next3);
+			return VAR;
+		} else { 			// variable being used, get its value from vars[]
+			printf("letter dereferenced\n");
+			deref = vars[c - 'a'];
+			ungetch(next);
+			ungetch(next1);
+			ungetch(next2);
+			ungetch(next3);
+			return DEREF;
+		}
 	} else {    			// handle a number, can have negative sign and decimal
 		if (c == '-') { 	// check whether subtraction operator or negative number
 			next = getch();
