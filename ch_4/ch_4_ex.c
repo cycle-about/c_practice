@@ -818,7 +818,6 @@ Differentiation
 		use the VALUE of the char's variable
 		-> modify standard pop() to find the VALUE of the char, and RETURN THAT INSTEAD OF CHAR
 
-
 New method pop_assign()
 	Use *only* in "case = ", and use for only the SECOND pop (ie get i from "i 3 =")
 	get the value of pop() from stack: call that method as normal, and interate stack pointer
@@ -833,8 +832,8 @@ Changes needed before implementing this
 	/ Push lower-case chars to stack, like numbers
 		/ Need to NOT run atof() on them
 		/ Handle difference in the case statement, or in getop(): getop(), case doesn't need to see it
-	Make double[26] to store values corresponding to a-z variables (don't need to declare those vars)
-		That only needs to be in the stack-manipulating part, NOT main
+	/ Make double[26] to store values corresponding to a-z variables (don't need to declare those vars)
+		/ That only needs to be in the stack-manipulating part, NOT main
 
 --------
 
@@ -913,11 +912,13 @@ Pseudocode for cases involving variables
 int getop(char []);
 void push(double);
 double pop(void);
+void assign_var(void);
+void initialize_vars(void);
 void print_stack(void);
-void print_top(void); 		// t
-void duplicate_top(void); 	// d
-void swap_top(void); 		// w
-void clear_stack(void); 	// c
+void print_top(void); 		// T
+void duplicate_top(void); 	// D
+void swap_top(void); 		// W
+void clear_stack(void); 	// C
 
 
 // reverse Polish notation calculator
@@ -925,6 +926,8 @@ int main() {
 	int type;
 	double op2, op1;
 	char s[MAXOP];    // characters of a single number to be added to stack
+
+	initialize_vars();
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -962,6 +965,10 @@ int main() {
 		case '~': 			// sine of x
 			printf("sine\n");
 			push(sin(pop()));
+			break;
+		case '=': 			// assign value to a variable
+			// TODO call a method here, which uses array
+			assign_var();
 			break;
 		case 'E': 			// e^x
 			printf("e^x\n");
@@ -1002,16 +1009,24 @@ int main() {
 
 // stack and stack pointer are used by both push and pop, so declared external to them
 #define MAXVAL 	100 	// max depth of val stack
+#define LETTERS  26 	// size of array for values of variables a-z
 
 int sp = 0; 			// next free stack position
 double val[MAXVAL]; 	// value stack
+double vars[LETTERS];	// values of variables a-z
+
+// initialize all variables to zero
+void initialize_vars(void) {
+	for (int i = 0; i < LETTERS; i++)
+		vars[i] = 0.0;
+}
 
 void print_stack(void) {
-		printf("stack:");
-		for (int i = 0; i < sp; i++) {
-			printf(" %.1f", val[i]);    // print to 1 decimal place only
-		}
-		printf("\n");
+	printf("stack:");
+	for (int i = 0; i < sp; i++) {
+		printf(" %.1f", val[i]);    // print to 1 decimal place only
+	}
+	printf("\n");
 }
 
 // push: push f onto value stack
@@ -1035,6 +1050,13 @@ double pop(void) {
 		printf("error: stack empty\n");
 		return 0.0;
 	}
+}
+
+void assign_var(void) {
+	double value = pop();
+	int letter = (int) pop() - 'a';
+	vars[letter] = value;
+	printf("assigned %f to variable %d\n", value, letter);
 }
 
 // print top of stack, without poping
