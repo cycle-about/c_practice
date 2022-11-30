@@ -807,6 +807,7 @@ void ungetch(int c) {    // push char back on input
 
 
 /******************************************************************************** 
+ * ATTEMPT INCLUDING VARIABLES ASSIGNMENT: NOT COMPLETED
 4-6 Add commands for handling variables. (It's easy to provide 26 variables with single-letter
 names.) Add a variable for the most recently printed value.
 
@@ -909,8 +910,6 @@ Pseudocode for cases involving variables
 	push 10 to stack
 	read \n
 	pop 10, and print it
-
-*/
 
 
 #include <stdio.h>
@@ -1206,3 +1205,296 @@ void ungetch(int c) {    // push char back on input
 	else
 		buf[bufp++] = c;
 }
+*/
+
+
+/******************************************************************************** 
+ * COMBINED WITH COMMIT fa587a0: WITHOUT VARIABLES ASSIGNEMENT
+4-6 Add commands for handling single variables. (It's easy to provide twenty-six variables with
+single-letter names.) Add a variable for the most recently printed variable.
+
+Clear thing to implement for this
+	/ 1. Replace using lower-case letters as both math.h operands, and 'commands'
+		/ Math operands to non a-z chars
+		/ Commands to capital letters
+	/ 2. Add a variable for the most recently printed variable
+		- Interpret this as: most recent value printed as calculator result, so after '\n'
+		- Use 'r', setup for mention of 26 single-letter vars (for now don't make changes to 
+		differentiate commands added in 4-5 from variables added here)
+		- Where does it need to be: depends on whether needs access to stack or not
+			-> only in main, since only involves a pop from stack, none of its other values
+
+Followup step (I think)
+	/ 1. Add a way to use 'r' variable in calculations
+	/ 2. Add 26 single-letter variable names
+		/ Can variables be declared in a loop (not only defined)? Not clear, do manually
+	/ 3. Add a 'symbol' like NUMBER to indicate a lower-case variable was found
+	/ 4. Handle assignment operator = when first operand is a valid variable name (a-z)
+	5. Use those variables in other calculations
+
+What is happening with variable assignment now
+	getop() returns signal 'VAR' when a char a-z (variable) is pushed onto stack
+		That separate method puts char on stack without converting chars to float, as with NUMBER
+	Assignment operator = assigns 
+
+Revise structure to handling values assigned to vars a-z
+	Use a int[26], where index is (char - 'a'), and value there is var's value
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+#include <math.h> 		// for sin, exp, pow
+#include <ctype.h>
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0'    	// signal that a number was found and added to string s
+#define DEREF 	'1' 	// signal that value of derefernced var assigned to global 'deref'
+
+double deref; 			// external, dereferenced variable's value to push to stack
+
+int getop(char []);
+void push(double);
+double pop(void);
+void initialize_vars(void);
+void print_stack(void);
+void print_top(void); 		// T
+void duplicate_top(void); 	// D
+void swap_top(void); 		// W
+void clear_stack(void); 	// C
+void assign_var(int c, int v);
+
+
+// reverse Polish notation calculator
+int main() {
+	int type;
+	double op2; 		// most recently pushed number (op1 op2 /  -->  op1 / op2)
+	double op1; 		// second most recently pushed number
+	double r;    		// result of most recent calculation
+	char s[MAXOP];    	// characters of a single number to add to stack
+	extern double deref;
+
+	initialize_vars();
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			// printf("string: %s\n", s);
+			push(atof(s));
+			break;
+		case DEREF:
+			push(deref);
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-': 	 			// order of operands matters
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor\n");
+			break;
+		case '%': 				// order of operands and value of op2 matter
+			op2 = pop();
+			if (op2 != 0.0)
+				push((int) pop() % (int) op2);    // modulo can't use double, cast to ints
+			else
+				printf("error: zero modulo\n");
+			break;
+		case '~': 			// sine of x
+			printf("sine\n");
+			push(sin(pop()));
+			break;
+		case '#': 			// e^x
+			printf("e^x\n");
+			push(exp(pop()));
+			break;
+		case '^': 			// x^y. Error if x=0 and y<=0, or if x<0 and y not an int
+			printf("x^y\n");
+			op2 = pop();
+			op1 = pop();
+			if (op1 != 0 || op2 != 0) // both cannot be zero
+				push(pow(op1, op2));
+			else
+				printf("error: exp when both base and power are 0\n");
+			break;
+		
+		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
+		case 'T': 			// print top of stack without popping
+			print_top();
+			break;
+		case 'D': 			// duplicate top element of stack
+			duplicate_top();
+			break;
+		case 'W': 			// swap top two elements of stack
+			swap_top();
+			break;
+		case 'C': 			// clear stack
+			clear_stack();
+			break;
+		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
+
+		case '\n':
+			r = pop();
+			assign_var('r', r);
+			printf("\tCalculator Result: %.8g\n", r);
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+// stack and stack pointer are used by both push and pop, so declared external to them
+#define MAXVAL 	100 	// max depth of val stack
+#define LETTERS  26 	// size of array for values of variables a-z
+
+int sp = 0; 			// next free stack position
+double val[MAXVAL]; 	// value stack
+double vars[LETTERS];	// values of variables a-z
+
+// initialize all variables to zero
+void initialize_vars(void) {
+	for (int i = 0; i < LETTERS; i++)
+		vars[i] = 0.0;
+}
+
+void print_stack(void) {
+		printf("stack:");
+		for (int i = 0; i < sp; i++) {
+			printf(" %.1f", val[i]);    // print to 1 decimal place only
+		}
+		printf("\n");
+}
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL) {
+		val[sp++] = f;
+		printf("push, ");
+		print_stack();
+	}
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0) {
+		printf("pop: %.1f\n", val[sp-1]);
+		return val[--sp];
+	} else {
+		printf("error: stack empty\n");
+		return 0.0;
+	}
+}
+
+void assign_var(int c, int v) {
+	vars[c - 'a'] = v;
+}
+
+// print top of stack, without poping
+void print_top(void) {
+	printf("top of stack: %.1f\n", val[sp-1]);
+}
+
+// duplicate top element of stack
+void duplicate_top(void) {
+	val[sp++] = val[sp-1];
+	printf("duplicated top, ");
+	print_stack();
+}
+
+// duplicate top element of stack
+void swap_top(void) {
+	double temp = val[sp-1];
+	val[sp-1] = val[sp-2];
+	val[sp-2] = temp;
+	printf("swapped top, ");
+	print_stack();
+}
+
+// clear stack
+void clear_stack(void) {
+	sp = 0;
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+// getop: get next operator or numeric operand
+int getop(char s[]) {
+	int i, c, next;
+	extern double deref;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')    // skip whitespace, between chars
+		;
+	s[1] = '\0';
+
+	// char is not a variable a-z, or part of a number, so return it
+	if (!islower(c) && !isdigit(c) && c != '.' && c != '-')
+		return c;
+
+	i = 0;
+	if (islower(c)) {    // get value of variable a-z from that array
+		deref = vars[c - 'a'];
+		return DEREF;
+	} else {    		// handle number
+		if (c == '-') { 	// check whether subtraction operator, or negative number
+			next = getch();
+			if (next == ' ' || next == '\t' || next == '\n') {	// return as operator if whitespace after
+				ungetch(next);
+				return c;
+			}
+			ungetch(next);
+		}
+
+		if (isdigit(c) || c == '-')    	// collect sign and integer part of number
+			while (isdigit(s[++i] = c = getch()))
+				;
+		if (c == '.')					// get part of number after a decimal
+			while (isdigit(s[++i] = c = getch()))
+				;
+		s[i] = '\0';
+		if (c != EOF)
+			ungetch(c);
+	}
+	return NUMBER;    // returns signal that a number or operand was found: NOT ITS VALUE
+}
+
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 		// buffer for ungetch
+int bufp = 0; 			// next free position in buf
+
+int getch(void) { 		// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) {    // push char back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
+
+
+/******************************************************************************** 
+4-7 
+
+*/
