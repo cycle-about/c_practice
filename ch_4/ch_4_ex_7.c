@@ -1,5 +1,6 @@
 /******************************************************************************** 
-4-7 Write a routine unget(s) that will push back an entire string onto the input.
+4-7 WITH INLINE COMMENTS
+Write a routine unget(s) that will push back an entire string onto the input.
 Should 'ungets' know about 'buf' and 'bufp', or should it just use 'ungetch'?
 
 Starting point: only the baseline reverse Polish calculator, to have less to
@@ -40,12 +41,6 @@ High-level code structure of reverse Polish calculator
 		provides chars to program
 		if any were 'put back', returns those first, else reads from terminal
 
-Chain of calls to get the input
-	main()
-	getop()
-
-
-*/
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -168,6 +163,136 @@ int bufp = 0; 		// next free position in buf
 // this is the ONLY place where terminal input is read
 // this EITHER returns item from buffer, OR calls a new getchar() to read input string
 // getchar() it uses is the standard library one that reads terminal input
+int getch(void) { 	// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) { 	// push character back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
+*/
+
+
+/******************************************************************************** 
+4-7 Write a routine unget(s) that will push back an entire string onto the input.
+Should 'ungets' know about 'buf' and 'bufp', or should it just use 'ungetch'?
+
+Questions
+	What is the 'input' pushed back onto; do I make a new variable for this?
+	When during this program would 'pushing back' a string be needed, and why?
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0' 	// signal that a number was found
+
+int getop(char []);
+void push(double);
+double pop(void);
+
+// reverse Polish calculator
+int main() {
+	int type;
+	double op2;
+	char s[MAXOP];
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-':
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/':
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor");
+			break;
+		case '\n':
+			printf("\t%.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+#define MAXVAL 	100    	// maximum depth of val stack
+
+int sp = 0;				// next free stack position
+double val[MAXVAL]; 	// value stack
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL)
+		val[sp++] = f;
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0)
+		return val[--sp];
+	else {
+		printf("error: stack empty");
+		return 0.0;
+	}
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+int getop(char s[]) {
+	int i, c;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')
+		;
+	
+	s[1] = '\0';
+	if (!isdigit(c) && c != '.')
+		return c; 			// not a number: return operand to main case/switch
+	
+	i = 0;
+	if (isdigit(c)) 		// collect integer part
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')   		// collect fraction part
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c); 	// if first non-digit char was anything but EOF, still needs to be read
+	return NUMBER;
+}
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 	// buffer for ungetch
+int bufp = 0; 		// next free position in buf
+
 int getch(void) { 	// get a (possibly pushed back) character
 	return (bufp > 0) ? buf[--bufp] : getchar();
 }
