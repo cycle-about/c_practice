@@ -1209,7 +1209,7 @@ void ungetch(int c) {    // push char back on input
 
 
 /******************************************************************************** 
- * COMBINED WITH COMMIT fa587a0: WITHOUT VARIABLES ASSIGNEMENT
+ * COMBINED WITH COMMIT fa587a0: WITHOUT VARIABLE ASSIGNMENT OPERATION (other thanm )
 4-6 Add commands for handling single variables. (It's easy to provide twenty-six variables with
 single-letter names.) Add a variable for the most recently printed variable.
 
@@ -1239,8 +1239,6 @@ What is happening with variable assignment now
 
 Revise structure to handling values assigned to vars a-z
 	Use a int[26], where index is (char - 'a'), and value there is var's value
-
-*/
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -1327,7 +1325,7 @@ int main() {
 				printf("error: exp when both base and power are 0\n");
 			break;
 		
-		/**** NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS ****/
+		// NON-OPERATION COMMANDS ADDED IN EX 4-4: CAPTIAL LETTERS 
 		case 'T': 			// print top of stack without popping
 			print_top();
 			break;
@@ -1340,7 +1338,7 @@ int main() {
 		case 'C': 			// clear stack
 			clear_stack();
 			break;
-		/**** END NON-OPERATION COMMANDS ADDED IN EX 4-4 ****/
+		// END NON-OPERATION COMMANDS ADDED IN EX 4-4
 
 		case '\n':
 			r = pop();
@@ -1371,11 +1369,11 @@ void initialize_vars(void) {
 }
 
 void print_stack(void) {
-		printf("stack:");
-		for (int i = 0; i < sp; i++) {
-			printf(" %.1f", val[i]);    // print to 1 decimal place only
-		}
-		printf("\n");
+	printf("stack:");
+	for (int i = 0; i < sp; i++) {
+		printf(" %.1f", val[i]);    // print to 1 decimal place only
+	}
+	printf("\n");
 }
 
 // push: push f onto value stack
@@ -1450,7 +1448,7 @@ int getop(char s[]) {
 		return c;
 
 	i = 0;
-	if (islower(c)) {    // get value of variable a-z from that array
+	if (islower(c)) {    // get value of variable a-z from array
 		deref = vars[c - 'a'];
 		return DEREF;
 	} else {    		// handle number
@@ -1492,9 +1490,130 @@ void ungetch(int c) {    // push char back on input
 	else
 		buf[bufp++] = c;
 }
-
+*/
 
 /******************************************************************************** 
-4-7 
+4-7 Write a routine unget(s) that will push back an entire string onto the input.
+Should 'ungets' know about 'buf' and 'bufp', or should it just use 'ungetch'?
+
+Approach: start from only the baseline reverse Polish calculator, to have less to
+navigate around while doing this. Retype all of it.
 
 */
+
+#include <stdio.h>
+#include <stdlib.h>    	// for atof()
+
+#define MAXOP 	100 	// max size of operand or operator
+#define NUMBER 	'0' 	// signal that a number was found
+
+int getop(char []);
+void push(double);
+double pop(void);
+
+// reverse Polish calculator
+int main() {
+	int type;
+	double op2;
+	char s[MAXOP];
+
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-':
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/':
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor");
+			break;
+		case '\n':
+			printf("\t%.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
+		}
+	}
+	return 0;
+}
+
+
+#define MAXVAL 	100    	// maximum depth of val stack
+
+int sp = 0;				// next free stack position
+double val[MAXVAL]; 	// value stack
+
+// push: push f onto value stack
+void push(double f) {
+	if (sp < MAXVAL)
+		val[sp++] = f;
+	else
+		printf("error: stack full, can't push %g\n", f);
+}
+
+// pop: pop and return top value from stack
+double pop(void) {
+	if (sp > 0)
+		return val[--sp];
+	else {
+		printf("error: stack empty");
+		return 0.0;
+	}
+}
+
+
+#include <ctype.h>
+
+int getch(void);
+void ungetch(int);
+
+// getop: get next operator or numeric operand
+int getop(char s[]) {
+	int i, c;
+
+	while ((s[0] = c = getch()) == ' ' || c == '\t')
+		;
+	s[1] = '\0';
+	if (!isdigit(c) && c != '.')
+		return c; 			// not a number
+	i = 0;
+	if (isdigit(c)) 		// collect integer part
+		while (isdigit(s[++i] = c = getch()))
+			;
+	if (c == '.')   		// collect fraction part
+		while (isdigit(s[++i] = c = getch()))
+			;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;
+}
+
+#define BUFSIZE 100
+
+char buf[BUFSIZE]; 	// buffer for ungetch
+int bufp = 0; 		// next free position in buf
+
+int getch(void) { 	// get a (possibly pushed back) character
+	return (bufp > 0) ? buf[--bufp] : getchar();
+}
+
+void ungetch(int c) { 	// push character back on input
+	if (bufp >= BUFSIZE)
+		printf("ungetch: too many characters");
+	else
+		buf[bufp++] = c;
+}
