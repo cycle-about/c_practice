@@ -1,3 +1,5 @@
+// gcc -o ch_4_ex_7 ch_4_ex_7.c && ./ch_4_ex_7
+
 /******************************************************************************** 
 4-7 WITH INLINE COMMENTS
 Write a routine unget(s) that will push back an entire string onto the input.
@@ -181,8 +183,20 @@ void ungetch(int c) { 	// push character back on input
 Should 'ungets' know about 'buf' and 'bufp', or should it just use 'ungetch'?
 
 Questions
-	What is the 'input' pushed back onto; do I make a new variable for this?
-	When during this program would 'pushing back' a string be needed, and why?
+	1. What is the 'input' pushed back onto; do I make a new variable for this?
+	2. When during this program would 'pushing back' a string be needed, and why?
+
+Answers
+	1. the structure being pushed onto is the existing buffer.
+	2. you can use that function to put stuff into the buffer without you having to type it in the terminal to automate testing.
+		To use it in this fashion, add this to the code...
+
+		void init_buffer() {
+		    ungets("6 7 *");
+		}
+
+		And then put this in main right before the first while loop. Then once you implement ungets(), then init_buffer() will put 
+		this stuff in the buffer before any input from the keyboard is used.
 
 */
 
@@ -195,12 +209,22 @@ Questions
 int getop(char []);
 void push(double);
 double pop(void);
+void init_buffer(void);
+void ungets(char[]);
+void print_buf(void);
 
 // reverse Polish calculator
 int main() {
 	int type;
 	double op2;
 	char s[MAXOP];
+
+	void init_buffer() {
+		ungets("6 7 *");
+	}
+
+	init_buffer();
+	print_buf();
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -235,8 +259,9 @@ int main() {
 	return 0;
 }
 
-
 #define MAXVAL 	100    	// maximum depth of val stack
+
+void putch(char line[]);
 
 int sp = 0;				// next free stack position
 double val[MAXVAL]; 	// value stack
@@ -259,8 +284,13 @@ double pop(void) {
 	}
 }
 
+void ungets(char line[]) {
+	putch(line);
+}
+
 
 #include <ctype.h>
+#include <string.h>
 
 int getch(void);
 void ungetch(int);
@@ -268,8 +298,15 @@ void ungetch(int);
 int getop(char s[]) {
 	int i, c;
 
-	while ((s[0] = c = getch()) == ' ' || c == '\t')
-		;
+	// while ((s[0] = c = getch()) == ' ' || c == '\t')
+	// 	;
+
+	c = getch();
+    s[0] = c;
+    while (c == ' ' || c == '\t') {
+        c = getch();
+        s[0] = c;
+    }
 	
 	s[1] = '\0';
 	if (!isdigit(c) && c != '.')
@@ -288,10 +325,18 @@ int getop(char s[]) {
 	return NUMBER;
 }
 
+
 #define BUFSIZE 100
 
 char buf[BUFSIZE]; 	// buffer for ungetch
 int bufp = 0; 		// next free position in buf
+
+void print_buf() {
+	for (int i = 0; i < strlen(buf); i++) {
+		putchar(buf[i]);
+	}
+	putchar('\n');
+}
 
 int getch(void) { 	// get a (possibly pushed back) character
 	return (bufp > 0) ? buf[--bufp] : getchar();
@@ -302,4 +347,11 @@ void ungetch(int c) { 	// push character back on input
 		printf("ungetch: too many characters");
 	else
 		buf[bufp++] = c;
+}
+
+// puts on buffer from end of line to start
+void putch(char line[]) {
+	for (int i = strlen(line)-1; i >= 0 ; i--) {
+		buf[bufp++] = line[i];
+	}
 }
