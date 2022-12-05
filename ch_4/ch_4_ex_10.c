@@ -2,80 +2,74 @@
 
 /******************************************************************************** 
 4-10 An alternate organization uses 'getline' to read an entire input line; this
-makes 'getch' and 'ungetch' unnecessary. Revise the calculator to use this approach
+makes 'getch' and 'ungetch' unnecessary. Revise the calculator to use this approach.
+
+Plan: build off of ungets() from 4-7.
 */
 
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
-#include <string.h>
 
 #define MAXOP 	100 	// max size of operand or operator
 #define NUMBER 	'0' 	// signal that a number was found
 
-int getaline(char line[], int maxline);
-int getop(char input[], char s[]);
+int getop(char []);
 void push(double);
 double pop(void);
-void init_input(void);
-void putline(char input[], char line[]);
-
-int i_line; 			// current index of input line, used across calls to getop()
+void init_buffer(void);
+void ungets(char[]);
+void print_buf(void);
 
 // reverse Polish calculator
 int main() {
-	int type, len;
+	int type;
 	double op2;
 	char s[MAXOP];
-	char input[MAXOP];
 
 	void init_buffer() {
-		putline(input, "6 7 *");
+		ungets("6 7 *");
 	}
 
 	init_buffer();
+	print_buf();
 
-	//while ((type = getop(s)) != EOF) {
-	while ((len = getaline(input, MAXOP)) > 0 != EOF) {
-		while ((type = getop(input, s)) != EOF) {
-			switch (type) {
-			case NUMBER:
-				push(atof(s));
-				break;
-			case '+':
-				push(pop() + pop());
-				break;
-			case '*':
-				push(pop() * pop());
-				break;
-			case '-':
-				op2 = pop();
-				push(pop() - op2);
-				break;
-			case '/':
-				op2 = pop();
-				if (op2 != 0.0)
-					push(pop() / op2);
-				else
-					printf("error: zero divisor");
-				break;
-			case '\n':
-				printf("\t%.8g\n", pop());
-				break;
-			default:
-				printf("error: unknown command %s\n", s);
-				break;
-			}
+	while ((type = getop(s)) != EOF) {
+		switch (type) {
+		case NUMBER:
+			push(atof(s));
+			break;
+		case '+':
+			push(pop() + pop());
+			break;
+		case '*':
+			push(pop() * pop());
+			break;
+		case '-':
+			op2 = pop();
+			push(pop() - op2);
+			break;
+		case '/':
+			op2 = pop();
+			if (op2 != 0.0)
+				push(pop() / op2);
+			else
+				printf("error: zero divisor");
+			break;
+		case '\n':
+			printf("\t%.8g\n", pop());
+			break;
+		default:
+			printf("error: unknown command %s\n", s);
+			break;
 		}
 	}
 	return 0;
 }
 
-#include <ctype.h>
-
 #define MAXVAL 	100    	// maximum depth of val stack
 
-void putch(char line[]);
+void write_buf(char line[]);
 
 int sp = 0;				// next free stack position
 double val[MAXVAL]; 	// value stack
@@ -98,68 +92,22 @@ double pop(void) {
 	}
 }
 
-void putline(char input[], char line[]) {
-	for (int i = strlen(line)-1, j=0; i >= 0 ; i--, j++) {
-		input[j] = line[i];
-	}
+void ungets(char line[]) {
+	write_buf(line);
 }
 
-int getop(char input[], char s[]) {
-	int i, c;
 
-	extern int i_line;
-
-	while (i_line < strlen(input)) {
-
-		c = input[i_line];
-
-		while (c == ' ' || c == '\t') {
-	        c = input[++i_line];
-	        s[0] = c;
-	    }
-		
-		s[1] = '\0';
-		if (!isdigit(c) && c != '.')
-			return c; 			// not a number: return operand to main case/switch
-		
-		i = 0;
-		if (isdigit(c)) 		// collect integer part
-			while (isdigit(s[++i] = c = input[++i_line]))
-				;
-		if (c == '.')   		// collect fraction part
-			while (isdigit(s[++i] = c = input[++i_line]))
-				;
-		s[i] = '\0';
-		return NUMBER;
-
-	}
-}
-
-int getaline(char s[], int lim) {
-	int c, i;
-
-	extern int i_line;
-	i_line = 0;
-
-	for (i=0; i<lim && (c=getchar()) != EOF && c != '\n'; ++i) {
-		s[i] = c;
-	if (c == '\n') {
-		s[i] = c;
-		++i;
-	}
-	s[i] = '\0';
-	return i;
-	}
-}
-
-/*
 #include <ctype.h>
+#include <string.h>
 
 int getch(void);
 void ungetch(int);
 
 int getop(char s[]) {
 	int i, c;
+
+	// while ((s[0] = c = getch()) == ' ' || c == '\t')
+	// 	;
 
 	c = getch();
     s[0] = c;
@@ -180,42 +128,73 @@ int getop(char s[]) {
 		while (isdigit(s[++i] = c = getch()))
 			;
 	s[i] = '\0';
-
-	if (c != EOF)
-		ungetch(c); 	// if first non-digit char was anything but EOF, still needs to be read
-
+	//if (c != EOF)
+	//	ungetch(c); 	// if first non-digit char was anything but EOF, still needs to be read
 	return NUMBER;
 }
 
 
-
 #define BUFSIZE 100
+#define MAXLINE 1000
 
-char buf[BUFSIZE]; 	// buffer used by ungetch()
+int getaline(char line[], int maxline);
+
+char buf[BUFSIZE]; 	// buffer for ungetch
 int bufp = 0; 		// next free position in buf
+char line[MAXLINE];
+int len; 			// length of line read from terminal
 
+// prints buf only up to bufp
 void print_buf() {
-	for (int i = 0; i < strlen(buf); i++) {
+	printf("\nbufp: %d\n", bufp);
+	printf("buffer: ");
+	for (int i = 0; i < bufp; i++) {
 		putchar(buf[i]);
 	}
 	putchar('\n');
 }
 
 int getch(void) { 	// get a (possibly pushed back) character
-	return (bufp > 0) ? buf[--bufp] : getchar();
+	//return (bufp > 0) ? buf[--bufp] : getchar();
+	if (bufp == 0) {
+		len = getaline(line, MAXLINE);	// get line from terminal, copy into buf
+		printf("new line from terminal: %s\n", line);
+		write_buf(line);
+	} else {
+		printf("using buffer\n");
+	}
+	//return buf[--bufp];
+	bufp -= 1;
+	int ch = buf[bufp];
+	printf("returned: ");
+	putchar(ch);
+	printf("\n");
+	return ch;
 }
 
-void ungetch(int c) { 	// push character back on input, if not EOF
-	if (bufp >= BUFSIZE)
-		printf("ungetch: too many characters");
-	else if (c != EOF)
-		buf[bufp++] = c;
-}
 
-// puts 'line' onto 'buf', in reverse order
-void putch(char line[]) {
+// puts on buffer from end of line to start
+void write_buf(char line[]) {
+	bufp = 0;
+	if (strlen(line) == 0) {
+		printf("empty line input\n");
+	}
+
 	for (int i = strlen(line)-1; i >= 0 ; i--) {
 		buf[bufp++] = line[i];
 	}
+	print_buf();
 }
-*/
+
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i=0; i<lim-1 && (c=getchar()) != EOF && c != '\n'; i++)
+		s[i] = c;
+	if (c == '\n') {
+		s[i] = c;
+		++i;
+	}
+	s[i] = '\0';
+	return i;
+}
