@@ -28,7 +28,7 @@ void reverse(char s[]);
 int main() {
 	char s[100];
 	//itoa_orig(-65432, s);
-	itoa_recursive(321, s);
+	itoa_recursive(-43210, s);
 	printf("%s\n", s);
 	
 	//printd(-12345);
@@ -38,21 +38,23 @@ int main() {
 // recursive itoa: take int and s[], recursively write chars into s[]
 void itoa_recursive(int n, char s[]) {
 	static int i = 0;
-	printf("n: %d, i: %d\n", n, i);
-	int sign;
+	static int sign;
+	printf("hi n: %d, i: %d\n", n, i);
 
-	if ((sign = n) < 0) 	// sign gets original value of n
-		n = -n; 			// make n positive if it was negative
-
-	if (i == 0) {			// only on first loop
+	if (i == 0) {		// only on first loop
+		if ((sign = n) < 0) 	// sign gets original value of n
+			n = -n; 			// make n positive if it was negative
 		s[i++] = n % 10 + '0';
 		itoa_recursive(n, s);
 	} else if ((n /= 10) > 0) {
 		s[i++] = n % 10 + '0';   // get 0-indexed char value
 		itoa_recursive(n, s);
+	} else { 				// after getting all digits: sign, reverse
+		if (sign < 0)
+			s[i++] = '-';
+		s[i] = '\0';
+		reverse(s);
 	}
-	s[i] = '\0';
-	reverse(s); 	// corect order of s
 }
 
 // original itoa, page 64
