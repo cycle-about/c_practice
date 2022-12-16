@@ -138,6 +138,7 @@ Roundabout way but more clear to me
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 int getfloat(float *pn);
 int getch(void);
@@ -163,6 +164,10 @@ int main() {
 int getfloat(float *pn) {
 	int c, sign, i;
 	char s[100];
+	char non_decimal[100];
+	char decimal[100];
+
+	*pn = 0;    // set pn to 0
 
 	while (isspace(c = getch())) 	// skip white space
 		;
@@ -189,9 +194,28 @@ int getfloat(float *pn) {
 	s[i] = '\0';
 	printf("string: %s\n", s);
 
-	// get numeric value from chars
-	//for (*pn = 0; isdigit(c); c = getch())
-	//	*pn = 10 * *pn + (c - '0');
+	// get decimal and non-decimal parts into separate strings
+	int dec = 0;    // boolean for whether in decimal part of number
+	int d, nd = 0;
+
+	for (i = 0; i < strlen(s); i++) {
+		c = s[i];
+		if (c == '.') {    // once reach a decimal, reset flag
+			dec = 1;
+			continue;
+		}
+		if (dec) {
+			decimal[d++] = c;
+		} else {
+			non_decimal[nd++] = c;
+		}
+	}
+	decimal[d] = '\0';
+	non_decimal[nd] = '\0';
+
+	printf("decimal string: %s\n", decimal);
+	printf("non-decimal string: %s\n", non_decimal);
+
 	*pn *= sign;
 	
 	if (c != EOF)
