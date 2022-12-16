@@ -9,7 +9,8 @@ representation of zero. Fix it to push such a character back on the input.
 #include <stdio.h>
 #include <ctype.h>
 
-int getint(int *pn);
+int getint_orig(int *pn);
+int getint_new(int *pn);
 int getch(void);
 void ungetch(int);
 
@@ -19,22 +20,24 @@ int main() {
 	int *np; 	// np is pointer to an int
 
 	np = &x; 	// np points to x
-	printf("start value at *np: %d\n", *np);
+	// printf("start value of *np: %d\n", *np);
 
 	// re-assign *np to the next integer in terminal input
-	int n = getint(np);
-	//printf("return value of getint(): %d\n", n); 	// indication about execution
-	printf("end value at *np: %d\n", *np); 			// this prints int entered on terminal
+	int n = getint_new(np);
+
+	if (n > 0)
+		printf("new value of *np: %d\n", *np);
+	else
+		printf("invalid input, return code is: %d\n", n);
 }
 
-/* 
-book description about returns value, though pointer arg is reassigned directly:
-'returns EOF for end of file, zero if next input not number, positive value
-if input contains valid number'
-*/
+/*
+revision of get next integer from input into *pn
+	in the case of input "+" or "-" followed by non-digit:
+	push back that char, rather than treat as 0
 
-// get next integer from input into *pn
-int getint(int *pn) {
+*/
+int getint_new(int *pn) {
 	int c, sign;
 
 	while (isspace(c = getch())) 	// skip white space
@@ -44,14 +47,64 @@ int getint(int *pn) {
 		ungetch(c); 	// not a number
 		return 0;
 	}
+	
 	sign = (c == '-') ? -1 : 1;
+	
+	if (c == '+' || c == '-') {
+		c = getch();
+		if (!isdigit(c)) {
+			ungetch(c);
+			return 0;
+		}
+	}
+	
+	for (*pn = 0; isdigit(c); c = getch())
+		*pn = 10 * *pn + (c - '0');
+	
+	*pn *= sign;
+	
+	if (c != EOF)
+		ungetch(c);
+	return c;
+}
+
+/* 
+book description about return value, though pointer arg is reassigned directly:
+'returns EOF for end of file, zero if next input not number, positive value
+if input contains valid number'
+
+what happens if enter + or -, not followed by non-digit: "end value at *np: 0"
+*/
+
+// get next integer from input into *pn
+int getint_orig(int *pn) {
+	int c, sign;
+
+	while (isspace(c = getch())) 	// skip white space
+		;
+	
+	// case: if input is not valid part of a number or is EOF, exit
+	if (!isdigit(c) && c != EOF && c != '+' && c != '-') {
+		ungetch(c); 	// not a number
+		return 0;
+	}
+	
+	sign = (c == '-') ? -1 : 1;
+	
+	// get next char, if is sign
 	if (c == '+' || c == '-')
 		c = getch();
+	
+	// one char at a time, while digit:
+	//     right to left, get chars, handling incrememts of tens places
 	for (*pn = 0; isdigit(c); c = getch())
 		*pn = 10 * *pn + (c - '0');
 	*pn *= sign;
+	
+	// case: if exited loop due to not digit, and is not EOF, push back that char
 	if (c != EOF)
 		ungetch(c);
+	
 	return c;
 }
 
