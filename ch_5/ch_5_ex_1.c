@@ -19,20 +19,27 @@ int main() {
 	int *np; 	// np is pointer to an int
 
 	np = &x; 	// np points to x
+	printf("start value at *np: %d\n", *np);
 
-	printf("Value at *np: %d\n", *np);
-
-	// assign np to the next integer in terminal input
-	
+	// re-assign *np to the next integer in terminal input
+	int n = getint(np);
+	//printf("return value of getint(): %d\n", n); 	// indication about execution
+	printf("end value at *np: %d\n", *np); 			// this prints int entered on terminal
 }
 
-/*
+/* 
+book description about returns value, though pointer arg is reassigned directly:
+'returns EOF for end of file, zero if next input not number, positive value
+if input contains valid number'
+*/
+
 // get next integer from input into *pn
 int getint(int *pn) {
 	int c, sign;
 
 	while (isspace(c = getch())) 	// skip white space
 		;
+	
 	if (!isdigit(c) && c != EOF && c != '+' && c != '-') {
 		ungetch(c); 	// not a number
 		return 0;
@@ -47,7 +54,6 @@ int getint(int *pn) {
 		ungetch(c);
 	return c;
 }
-
 
 // copied from ex 4-3
 #define BUFSIZE 100
@@ -65,4 +71,3 @@ void ungetch(int c) {    // push char back on input
 	else
 		buf[bufp++] = c;
 }
-*/
