@@ -124,35 +124,45 @@ void ungetch(int c) {    // push char back on input
 return as its return value.
 
 Still returns an int, since return value is just indicator of whether input was valid
+However, pointer is to a float
+
+Code about how to get a float one char at a time: page 78, getop() part of reverse
+Polish calculator. That though only moves chars onto string, not handle powers of 10 values
+
+Roundabout way but more clear to me
+	put digits and '.' into string: smallest decimals will be first
+	loop over that string:
+		before '.', value /=10 of the digit [float should handle the decimal]
+		after '.', value *=10
 */
 
 #include <stdio.h>
 #include <ctype.h>
 
-int getint_orig(int *pn);
-int getint_new(int *pn);
+int getfloat(float *pn);
 int getch(void);
 void ungetch(int);
 
 int main() {
 
-	int x = 800;
-	int *np; 	// np is pointer to an int
+	float x = 3.45;
+	float *np; 	// np is pointer to an float
 
 	np = &x; 	// np points to x
 	// printf("start value of *np: %d\n", *np);
 
-	// re-assign *np to the next integer in terminal input
-	int n = getint_new(np);
+	// re-assign *np to the next float in terminal input
+	int n = getfloat(np);
 
 	if (n > 0)
-		printf("new value of *np: %d\n", *np);
+		printf("new value of *np: %f\n", *np);
 	else
 		printf("invalid input, return code is: %d\n", n);
 }
 
-int getint_new(int *pn) {
-	int c, sign;
+int getfloat(float *pn) {
+	int c, sign, i;
+	char s[100];
 
 	while (isspace(c = getch())) 	// skip white space
 		;
@@ -166,15 +176,22 @@ int getint_new(int *pn) {
 	
 	if (c == '+' || c == '-') {
 		c = getch();
-		if (!isdigit(c)) {
+		if (!isdigit(c)) {    // sign followed by non-digit is invalid input
 			ungetch(c);
 			return 0;
 		}
 	}
 	
-	for (*pn = 0; isdigit(c); c = getch())
-		*pn = 10 * *pn + (c - '0');
-	
+	// copy all consecutive digits and '.' into string
+	for (i = 0; isdigit(c) || c == '.'; c = getch(), i++) {
+		s[i] = c;
+	}
+	s[i] = '\0';
+	printf("string: %s\n", s);
+
+	// get numeric value from chars
+	//for (*pn = 0; isdigit(c); c = getch())
+	//	*pn = 10 * *pn + (c - '0');
 	*pn *= sign;
 	
 	if (c != EOF)
