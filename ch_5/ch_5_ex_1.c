@@ -1,5 +1,8 @@
 // gcc -o ch_5_ex_1 ch_5_ex_1.c && ./ch_5_ex_1
 
+// if using math.h
+// gcc -o ch_5_ex_1 ch_5_ex_1.c -lm && ./ch_5_ex_1
+
 /******************************************************************************** 
 5-1 As written, getint treats a + or - not followed by a digit as a valid
 representation of zero. Fix it to push such a character back on the input.
@@ -139,6 +142,7 @@ Roundabout way but more clear to me
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 int getfloat(float *pn);
 int getch(void);
@@ -215,6 +219,24 @@ int getfloat(float *pn) {
 
 	printf("decimal string: %s\n", decimal);
 	printf("non-decimal string: %s\n", non_decimal);
+
+	// get values from strings
+	for (i = 0; i < strlen(non_decimal); i++) {
+		c = non_decimal[i];
+		*pn = (10 * *pn) + (c - '0');
+		printf("handled non-decimal: %f\n", *pn);
+	}
+
+	float f = 0.0;
+	float temp, p = 0.0;
+	for (i = 0; i < strlen(decimal); i++) {
+		c = decimal[i];
+		*pn += ((float) (c - '0')) / pow(10, i+1);
+		//printf("next dec char: %f\n", temp);
+		//printf("next pow: %f\n", p);
+		//printf("next decimal: %f\n", f);
+		//printf("handled decimal: %f\n", f);
+	}
 
 	*pn *= sign;
 	
