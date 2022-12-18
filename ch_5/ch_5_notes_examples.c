@@ -58,3 +58,76 @@ void swap(int *px, int *py) {
 	*px = *py;
 	*py = temp;
 }
+
+/*
+Part of getint() on page 97
+Reads chars LEFT to RIGHT (larger to smaller) and puts into an int
+
+eg string "38"
+Reads 3, then reads 8
+
+Loop 0
+	*pn = 0
+	c = char 3, dec 51
+	(10 * 0) + (51 - 48))
+	0 + 3 = 30
+Loop 1
+	*pn = 30
+	c = char 8, dec 56
+	(10 * 30) + (56 - 48))
+	30 * 8 = 38
+
+*/
+
+//page 98
+int a[10]; 	 // defines block of 10 consecutive objects, named a[0] to a[9]
+int *pa;     // pa is a pointer to an int
+pa = &a[0];	 // sets pa to point to a[0]
+x = *pa; 	 // copies the contents of a[0] into x
+*(pa+1) 	 // refers to contents of a[1]
+
+// "adding to a pointer" means that pa+i points to element i elements after pa
+
+// page 99
+// the value of variable (or expression) of type array is address of its element 0
+
+// equivalent expressions
+pa = &a[0];  // pa points to address of a[0]
+pa = a; 	 // pa poitns to array a, meaning address of its element a[0]
+
+// equivalent expressions
+a[i] 		// value at i-th element of array a
+*(a+i) 		// value at i-th element of array a
+
+// equivalent expressions
+&[a+i] 		// address of i-th element of array a
+a+i 		// element i elements after a[0]
+
+// pointer is a variable, so these expressions are legal
+pa = a 		// pointer pa points to element a[0]
+pa++ 		// add 1 to the index of array element pa points to
+
+
+// function using pointers that returns length of a string
+// s is pointer to a char to the initial element of the array
+// this pointer is unique to this function, no effect on calling function
+// these are all valid ways to call the function
+    strlen("hello, world"); 	// string constant
+    strlen(array); 				// char array[100]
+    strlen(ptr); 				// char *ptr (to first element of array)
+
+int strlen(char *s) {
+	int n;
+
+	// s is a pointer, so incrementing it has no effect on string in calling function
+	for (n = 0; *s != '\0'; s++)
+		n++;
+	return n;
+}
+
+// equivalent as formal params in function definition (page 99-100)
+// notes latter is preferred, since explicit that param is a pointer
+char s[];
+char *s;
+
+// when array name passed to function, 

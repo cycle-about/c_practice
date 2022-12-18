@@ -1,7 +1,7 @@
-// gcc -o ch_5_ex_1 ch_5_ex_1.c && ./ch_5_ex_1
+// gcc -o ch_5_ex_1.o ch_5_ex_1.c && ./ch_5_ex_1.o
 
 // if using math.h
-// gcc -o ch_5_ex_1 ch_5_ex_1.c -lm && ./ch_5_ex_1
+// gcc -o ch_5_ex_1.o ch_5_ex_1.c -lm && ./ch_5_ex_1.o
 
 /******************************************************************************** 
 5-1 As written, getint treats a + or - not followed by a digit as a valid
