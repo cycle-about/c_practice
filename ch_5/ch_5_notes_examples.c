@@ -130,4 +130,79 @@ int strlen(char *s) {
 char s[];
 char *s;
 
-// when array name passed to function, 
+// page 100
+// pass PART of an array to a function, these both pass starting from index 2
+funct(&a[2])
+funct(a+2)
+
+// two options for function's parameter declaration
+// does NOT matter to function that param refers to only part of an array
+funct(int arr[]) {}
+funct(int *arr) {}
+
+// simplest array arithmetic
+p++ 	// increments p to point at next element of array
+p += i  // increments p to point i elements beyond where it currently does
+
+
+// page 101
+// rudimentary, stack-only storage allocator
+// works by handing out pieces of char array 'allocbuf'
+#define ALLOCSIZE 10000  // size of available space
+
+// calling functions deal with char array only by pointers, so array can be static
+static char allocbuf[ALLOCSIZE]; 	// storage for alloc
+
+// pointer to next free element initialized to start of array
+// two equivalent ways
+static char *allocp = allocbuf; 	// points to next free position in allocbuf
+static char *allocp = &allocbuf[0];
+
+// returns pointer to n characters
+// can be used by caller to store chars
+char *alloc(int n) {
+	// (start of array + array size - size used)
+	// eg started at 10, is 100 long, and has used 50
+	//    available space = 10 + 100 - 50 = 60
+	//    so an okay amount to request is 60 or less
+	if (allocbuf + ALLOCSIZE - allocp >= n) {  // it fits
+		allocp += n;
+		return allocp - n; 		// old p
+	} else { 			// not enough room
+		// in C, 0 is never valid address for data (page 102)
+		return 0;
+	}
+}
+
+void afree(char *p) {  // free storage that was pointed to by p
+	// check that p is GREATER than first position of array
+	// and that is is LESS than the end of the array
+	if (p >= allocbuf && p < allocbuf + ALLOCSIZE)
+		// set next available free space to p
+		allocp = p;
+}
+
+/* 
+NULL versus zero (page 102)
+NULL is defined in <stdio.h>
+pointers can be compared only with the constant 0, for clarity, NULL used instead of 0
+*/
+
+// pointers can be compared in only certain circumstances
+// eg can compare pointers to items in same array, for which is to earlier or later item
+
+/*
+page 103
+Valid pointer operations:
+	- assignment of pointers of the same type
+	- add or subtract a pointer and an int
+	- subtract or compare two pointers to members of the same array
+	- assign or compare to zero (aka NULL)
+
+Invalid pointer operations:
+	- add two pointers
+	- multiply, divide, shift or mask pointers
+	- add float or double
+	- except for void *, assign a pointer of one type to pointer of another
+	  type without a cast
+*/
