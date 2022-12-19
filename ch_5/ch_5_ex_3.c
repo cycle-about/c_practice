@@ -184,33 +184,69 @@ Lesson learned: see chatGPT conversation, and page 104
 #include <stdio.h>
 
 void strncat_ex(char *s, char *t, int n);
-void strcpy_ex(char *s, char *t, int n);
+void strncpy_ex(char *s, char *t, int n);
+int strncmp_ex(char *s, char *t, int n);
 
 int main() {
 	char s[100] = "hello there ";
-	char t[100] = "hiworld";
-	// strcpy_ex(s, t, 5);
-	strncat_ex(s, t, 3);
-	printf("s after call: %s\n", s);
+	char t[100] = "helzworld";
+	// strncpy_ex(s, t, 5);
+	// strncat_ex(s, t, 3);
+	// printf("s after call: %s\n", s);
+
+	printf("strncmp result: %d\n", strncmp_ex(s, t, 3));
 }
 
-// based on my answer to ex 5-3
+// compare at most n char of string cs to string ct
+// return <0 if (cs > ct), 0 if (cs==ct), or >0 if (cs > ct)
+// based on: my answer for strncpy_ex
+int strncmp_ex(char *s, char *t, int n) {
+	int i = 0;
+	while ( (*s++) && (*t++) && (i++ < n-1)) {
+		if (*s < *t) {
+			printf("s is less than t, from s starting at: %s\n", s);
+			return -1;
+		}
+		else if (*s > *t) {
+			printf("s is greater than t, from s starting at: %s\n", s);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// based on: my answer to ex 5-3
 void strncat_ex(char *s, char *t, int n) {
 	int i, j = 0;
 
-	for (i = 0; *(s+i) != '\0'; i++) {
-		//putchar(*(s+i));
+	// second implementation using while loops, matching setup of strncpy_ex
+	while (*s++) {
+		;
 	}
 
-	while ( (*(s+i) = *(t+j)) && (j < n-1) ) {
-		i++;
-		j++;
-		//printf("j value: %d\n", j);
+	*s--;  // go back one, so will over-write '\0'
+
+	while ( (*s++ = *t++) && (j++ < n-1)) {
+		;
 	}
+
+	// first implementation, with for loops
+
+	//for (i = 0; *(s+i) != '\0'; i++) {
+		//putchar(*(s+i));
+	//}
+
+	//while ( (*(s+i) = *(t+j)) && (j < n-1) ) {
+	//	i++;
+	//	j++;
+		//printf("j value: %d\n", j);
+	//}
+
 }
 
-// copy at most n chars of t to s; based on example page 106
-void strcpy_ex(char *s, char *t, int n) {
+// copy at most n chars of t to s
+// based on example page 106
+void strncpy_ex(char *s, char *t, int n) {
 	int i = 0;
 	while ( (*s++ = *t++) && (i++ < n-1)) {
 		;
