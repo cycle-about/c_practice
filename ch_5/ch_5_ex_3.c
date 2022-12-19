@@ -75,7 +75,6 @@ Approach
 	For all remaining chars until '\0', compare s there, versus t from 0
 	If any does not match, return 0
 	Otherwise, return 1
-*/
 
 #include <stdio.h>
 
@@ -83,12 +82,16 @@ int strend(char *s, char *t);
 int strleng(char *s);
 
 int main() {
-	char *s = "again,hcciccc";
+	char *s = "again,hccicccc";
 	char *t = "ccc";
-	printf("result: %d\n", strend(s, t));
+	int r = strend(s, t);
+	if (r == 1)
+		printf("end matches\n");
+	else
+		printf("does not match\n");
 }
 
-// return 1 if s ends with t
+// return 1 if s ends with t, otherwise 0
 int strend(char *s, char *t) {
 	int slen, tlen, i, j;
 
@@ -102,32 +105,27 @@ int strend(char *s, char *t) {
 		return 0;
 	}
 
-	// print last t chars of s
-	for (i = slen-tlen, j = 0; i < slen; i++, j++) {
-		if ((*(s+i)) != *(t+j)) {
+	// compare chars in t with the tlen end chars of s
+
+	// first version of iteration
+	//for (i = slen-tlen, j = 0; i < slen; i++, j++) {
+	//	if ( *(s+i) != *(t+j) ) {
+	//		printf("mismatch at indices: %d, %d\n", i, j);
+	//		return 0;
+	//	}
+	//}
+
+	// alternate iteration - note, worked on first try :)
+	i = slen-tlen;
+	j = 0;
+	while (*(s+i) != '\0') {
+		if ( *(s+i++) != *(t+j++) ) {
 			printf("mismatch at indices: %d, %d\n", i, j);
 			return 0;
 		}
 	}
-	putchar('\n');
 
 	return 1;
-
-	//for (i = 0; *(s+i) != '\0'; i++) {
-		//putchar(*(s+i));
-	//}
-
-/*
-	while (( *(s+i) = *(t+j) ) != '\0') {
-		i++;
-		j++;
-		//printf("j value: %d\n", j);
-	}
-*/
-
-	// starting at end of s, add letters in t
-	//while ((s[i++] = t[j++]) != '\0') 	// append letters in t into s, 
-	//
 }
 
 // related, page 103
@@ -138,4 +136,54 @@ int strleng(char *s) {
 	while (*p != '\0')
 		p++;
 	return p - s;
+}
+*/
+
+
+/******************************************************************************** 
+5-5 Write versions of the library functions strncpy, strncat, and strncmp, which
+operate on at most the first n characters of their arg strings. For example,
+strncpy(s,t,n) copies at most n chars of t to s. Full descriptions are in Appendix B
+
+[Note: ex does not include arg names or desciption to use exact types like size_t, 
+so use eg just int for n if helps get first version of this done]
+
+Library function signatures and descriptions page 249
+
+In all three descriptions, types are:
+    s, t 	 	char *
+    cs, ct 		const char *
+    n 			size_t
+    c 			int converted to char
+
+
+// copy at most n char of ct to s
+// return s; pad with '\0' if t has fewer than n chars
+char *strncpy(s,ct,n);  
+
+// concatenate at most n characters of string ct to string s
+// terminate s with '\0'; return s
+char *strncat(s,ct,n);
+
+// compare at most n char of string cs to string ct
+// return <0 if (cs > ct), 0 if (cs==ct), or >0 if (cs > ct)
+int strncmp_ex(cs,ct,n); 
+
+*/
+
+#include <stdio.h>
+
+char *strncat_ex(char *s, char *ct, int n);
+
+int main() {
+	char *s = "hello world";
+	const char *ct = "!";
+	printf("%s\n", s);
+}
+
+
+// concatenate at most n chars of string ct to string s
+// terminate s with '\0'; return s
+char *strncat_ex(char *s, char *ct, int n) {
+	return s;
 }
