@@ -188,7 +188,7 @@ void strcpy_ex(char *s, char *t, int n);
 int main() {
 	char s[100] = "hello there";
 	char t[100] = "hi,world";
-	strcpy_ex(s, t, 2);
+	strcpy_ex(s, t, 5);
 	printf("s after call: %s\n", s);
 }
 
@@ -197,7 +197,8 @@ void strcpy_ex(char *s, char *t, int n) {
 	int i = 0;
 	// while (*s++ = *t++ && (i++ < n)) {
 		// printf("%d\n", i);
-	while ( (*s++ = *t++) && (i++ < n)) {
+	while ( (*s++ = *t++) && (i++ < n-1)) {
 		;
 	}
+	*s = '\0';
 }
