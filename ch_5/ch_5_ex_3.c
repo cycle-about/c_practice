@@ -146,44 +146,58 @@ operate on at most the first n characters of their arg strings. For example,
 strncpy(s,t,n) copies at most n chars of t to s. Full descriptions are in Appendix B
 
 [Note: ex does not include arg names or desciption to use exact types like size_t, 
-so use eg just int for n if helps get first version of this done]
+so use eg just int for n as is done in the chapter examples]
 
 Library function signatures and descriptions page 249
 
-In all three descriptions, types are:
-    s, t 	 	char *
-    cs, ct 		const char *
-    n 			size_t
-    c 			int converted to char
+	In all three descriptions, types are:
+	    s, t 	 	char *
+	    cs, ct 		const char *
+	    n 			size_t
+	    c 			int converted to char
 
+	// copy at most n char of ct to s
+	// return s; pad with '\0' if t has fewer than n chars
+	char *strncpy(s,ct,n);  
 
-// copy at most n char of ct to s
-// return s; pad with '\0' if t has fewer than n chars
-char *strncpy(s,ct,n);  
+	// concatenate at most n characters of string ct to string s
+	// terminate s with '\0'; return s
+	char *strncat(s,ct,n);
 
-// concatenate at most n characters of string ct to string s
-// terminate s with '\0'; return s
-char *strncat(s,ct,n);
+	// compare at most n char of string cs to string ct
+	// return <0 if (cs > ct), 0 if (cs==ct), or >0 if (cs > ct)
+	int strncmp_ex(cs,ct,n); 
 
-// compare at most n char of string cs to string ct
-// return <0 if (cs > ct), 0 if (cs==ct), or >0 if (cs > ct)
-int strncmp_ex(cs,ct,n); 
+Lesson learned: see chatGPT conversation, and page 104
+	
+	This CANNOT BE MODIFIED by passing its pointer
+	It makes a string literal, stored in read-only memory location
+	Pointer itself would need to be reassigned to something else
+		char *s = "hello ";
+
+	This CAN be modified by using its pointer
+	It makes a character array, which can be changed
+		char s[100] = "hello";
 
 */
 
 #include <stdio.h>
 
-char *strncat_ex(char *s, char *ct, int n);
+void strcpy_ex(char *s, char *t, int n);
 
 int main() {
-	char *s = "hello world";
-	const char *ct = "!";
-	printf("%s\n", s);
+	char s[100] = "hello there";
+	char t[100] = "hi,world";
+	strcpy_ex(s, t, 2);
+	printf("s after call: %s\n", s);
 }
 
-
-// concatenate at most n chars of string ct to string s
-// terminate s with '\0'; return s
-char *strncat_ex(char *s, char *ct, int n) {
-	return s;
+// copy at most n chars of t to s, page 106
+void strcpy_ex(char *s, char *t, int n) {
+	int i = 0;
+	// while (*s++ = *t++ && (i++ < n)) {
+		// printf("%d\n", i);
+	while ( (*s++ = *t++) && (i++ < n)) {
+		;
+	}
 }
