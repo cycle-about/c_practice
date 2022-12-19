@@ -69,8 +69,8 @@ void strcat_ch2(char s[], char t[]) {
 end of string s, and zero otherwise
 
 Approach
-	Get lengths of both strings
-	If t longer than s, return 0
+	/ Get lengths of both strings
+	/ If t longer than s, return 0
 	Otherwise, iterate in s up to position (length s - length t)
 	For all remaining chars until '\0', compare s there, versus t from 0
 	If any does not match, return 0
@@ -79,32 +79,51 @@ Approach
 
 #include <stdio.h>
 
-void strend(char *s, char *t);
+int strend(char *s, char *t);
 int strleng(char *s);
 
 int main() {
-	char *s = "again hi";
-	char *t = " world";
-	strend(s, t);
-	printf("%s\n", s);
+	char *s = "again,hcciccc";
+	char *t = "ccc";
+	printf("result: %d\n", strend(s, t));
 }
 
-
-void strend(char *s, char *t) {
-	int slen, tlen;
+// return 1 if s ends with t
+int strend(char *s, char *t) {
+	int slen, tlen, i, j;
 
 	slen = strleng(s);
 	tlen = strleng(t);
 
-	for (i = 0; *(s+i) != '\0'; i++) {
-		//putchar(*(s+i));
+	printf("lengths: %d, %d\n", slen, tlen);
+
+	if (tlen > slen) {  // t could not be end of s
+		printf("s shorter than t\n");
+		return 0;
 	}
 
+	// print last t chars of s
+	for (i = slen-tlen, j = 0; i < slen; i++, j++) {
+		if ((*(s+i)) != *(t+j)) {
+			printf("mismatch at indices: %d, %d\n", i, j);
+			return 0;
+		}
+	}
+	putchar('\n');
+
+	return 1;
+
+	//for (i = 0; *(s+i) != '\0'; i++) {
+		//putchar(*(s+i));
+	//}
+
+/*
 	while (( *(s+i) = *(t+j) ) != '\0') {
 		i++;
 		j++;
 		//printf("j value: %d\n", j);
 	}
+*/
 
 	// starting at end of s, add letters in t
 	//while ((s[i++] = t[j++]) != '\0') 	// append letters in t into s, 
