@@ -183,20 +183,35 @@ Lesson learned: see chatGPT conversation, and page 104
 
 #include <stdio.h>
 
+void strncat_ex(char *s, char *t, int n);
 void strcpy_ex(char *s, char *t, int n);
 
 int main() {
-	char s[100] = "hello there";
-	char t[100] = "hi,world";
-	strcpy_ex(s, t, 5);
+	char s[100] = "hello there ";
+	char t[100] = "hiworld";
+	// strcpy_ex(s, t, 5);
+	strncat_ex(s, t, 3);
 	printf("s after call: %s\n", s);
 }
 
-// copy at most n chars of t to s, page 106
+// based on my answer to ex 5-3
+void strncat_ex(char *s, char *t, int n) {
+	int i, j = 0;
+
+	for (i = 0; *(s+i) != '\0'; i++) {
+		//putchar(*(s+i));
+	}
+
+	while ( (*(s+i) = *(t+j)) && (j < n-1) ) {
+		i++;
+		j++;
+		//printf("j value: %d\n", j);
+	}
+}
+
+// copy at most n chars of t to s; based on example page 106
 void strcpy_ex(char *s, char *t, int n) {
 	int i = 0;
-	// while (*s++ = *t++ && (i++ < n)) {
-		// printf("%d\n", i);
 	while ( (*s++ = *t++) && (i++ < n-1)) {
 		;
 	}
