@@ -178,7 +178,6 @@ Lesson learned: see chatGPT conversation, and page 104
 	This CAN be modified by using its pointer
 	It makes a character array, which can be changed
 		char s[100] = "hello";
-
 */
 
 #include <stdio.h>
