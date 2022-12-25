@@ -7,7 +7,7 @@ instead of array index handling. Good possiblities include:
 	/ atof and its variants - page 71
 	/ itoa and its variants - page 64
 	/ reverse - 62
-	strindex - page 69
+	/ strindex - page 69
 	getop - page 78
 
 */
@@ -17,6 +17,7 @@ instead of array index handling. Good possiblities include:
 #include <string.h>
 #define MAXLINE 1000
 
+int getop_orig(char s[]);
 int strindex_p(char *source, char *searchfor);
 int strindex_orig(char source[], char searchfor[]);
 void itoa_p(int n, char s[]);
@@ -32,10 +33,23 @@ int getaline_p(char line[], int max); // odd: does not show error with declarati
 
 int main() {
 
+	/**** PART 6 OF 6 ****/
+	char s[100] = "initial";
+	int r;
+	while ((r = getop_orig(s)) != EOF) {  // CAUTION: return value -1 terminates loop
+		if (r == 0) {
+			printf("number: %s\n", s);
+		} else {
+			printf("operand: ");
+			putchar(r);
+			putchar('\n');
+		}
+	}
+
 	/**** PART 5 OF 6 ****/
-	char s[100] = "sun is shining";
-	char t[100] = "i";
-	printf("index found: %d\n", strindex_p(s, t));
+	// char s[100] = "sun is shining";
+	// char t[100] = "i";
+	// printf("index found: %d\n", strindex_p(s, t));
 
 	/**** PARTS 3 AND 4 OF 6 ****/
 	// test reverse function separately
@@ -59,6 +73,38 @@ int main() {
 	// char line[MAXLINE];
 	// while ((len = getaline_p(line, MAXLINE)) > 0)
 	//	printf("%s", line);
+}
+
+// page 78: get next operator or numeric operand
+// returns an operator, or writes chars of a number to string (latter case: returns -1)
+// reads from input to terminal
+// note: does not use the buffer for getch and ungetch
+int getop_orig(char s[]) {
+	int i, c;
+
+	while ((s[0] = c = getchar()) == ' ' || c == '\t')
+		;
+	s[1] = '\0';
+	if (!isdigit(c) && c != '.') {
+		// printf("not part of a number\n");
+		return c;
+	}
+	// printf("current value of c: ");
+	// putchar(c);
+	// putchar('\n');
+	i = 0;
+	if (isdigit(c)) {  // collect integer part into string
+		while (isdigit(s[++i] = c = getchar())) {
+			// putchar(c);
+			// putchar('\n');
+		}
+	}
+	if (c == '.')    // collect decimal part into string
+		while (isdigit(s[++i] = c = getchar()))
+			;
+	s[i] = '\0';
+	// printf("s at end getop: %s", s);
+	return 0;
 }
 
 // t has length 1
