@@ -17,7 +17,9 @@ instead of array index handling. Good possiblities include:
 #include <string.h>
 #define MAXLINE 1000
 
+int getop_p(char *s);
 int getop_orig(char s[]);
+int getop_p(char *s);
 int strindex_p(char *source, char *searchfor);
 int strindex_orig(char source[], char searchfor[]);
 void itoa_p(int n, char s[]);
@@ -36,7 +38,7 @@ int main() {
 	/**** PART 6 OF 6 ****/
 	char s[100] = "initial";
 	int r;
-	while ((r = getop_orig(s)) != EOF) {  // CAUTION: return value -1 terminates loop
+	while ((r = getop_p(s)) != EOF) {  // CAUTION: return value -1 terminates loop
 		if (r == 0) {
 			printf("number: %s\n", s);
 		} else {
@@ -75,6 +77,37 @@ int main() {
 	//	printf("%s", line);
 }
 
+int getop_p(char *s) {
+	int c;
+
+	c = getchar();
+	*s = c;
+	while (c == ' ' || c == '\t') {
+		c = getchar();
+		*s = c;
+	}
+	*++s = '\0';
+	if (!isdigit(c) && c != '.') {
+		// printf("not part of a number\n");
+		return c;
+	}
+	if (isdigit(c)) {  // collect integer part into string
+		while (isdigit(*s = c = getchar())) {
+			*++s;
+			// putchar(c);
+			// putchar('\n');
+		}
+	}
+	if (c == '.') {    // collect decimal part into string
+		*++s = c;
+		while (isdigit(*s = c = getchar()))
+			*++s;
+	}
+	*s = '\0';
+	// printf("s at end getop: %s", s);
+	return 0;
+}
+
 // page 78: get next operator or numeric operand
 // returns an operator, or writes chars of a number to string (latter case: returns -1)
 // reads from input to terminal
@@ -82,8 +115,17 @@ int main() {
 int getop_orig(char s[]) {
 	int i, c;
 
-	while ((s[0] = c = getchar()) == ' ' || c == '\t')
-		;
+	// while ((s[0] = c = getchar()) == ' ' || c == '\t')
+	// 	;
+
+	// alternate way to do while loop
+	c = getchar();
+    s[0] = c;
+    while (c == ' ' || c == '\t') {
+        c = getchar();
+        s[0] = c;
+    }
+
 	s[1] = '\0';
 	if (!isdigit(c) && c != '.') {
 		// printf("not part of a number\n");
