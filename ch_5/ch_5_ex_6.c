@@ -5,8 +5,8 @@
 instead of array index handling. Good possiblities include:	
 	/ getline - page 32
 	/ atof and its variants - page 71
-	itoa and its variants - page 64
-	reverse - 62
+	/ itoa and its variants - page 64
+	/ reverse - 62
 	strindex - page 69
 	getop - page 78
 
@@ -17,6 +17,8 @@ instead of array index handling. Good possiblities include:
 #include <string.h>
 #define MAXLINE 1000
 
+int strindex_p(char *source, char *searchfor);
+int strindex_orig(char source[], char searchfor[]);
 void itoa_p(int n, char s[]);
 // void reverse_p(char s[]);  // works when declared this way
 void reverse_p(char *s);  // actual param when used
@@ -30,19 +32,24 @@ int getaline_p(char line[], int max); // odd: does not show error with declarati
 
 int main() {
 
-	/**** PART 3 OF 6 ****/
+	/**** PART 5 OF 6 ****/
+	char s[100] = "sun is shining";
+	char t[100] = "i";
+	printf("index found: %d\n", strindex_p(s, t));
+
+	/**** PARTS 3 AND 4 OF 6 ****/
 	// test reverse function separately
-	char t[100] = "9876543";
-	printf("original string: %s\n", t);
-	reverse_p(t);
-	printf("after reverse: %s\n", t);
+	// char t[100] = "9876543";
+	// printf("original string: %s\n", t);
+	// reverse_p(t);
+	// printf("after reverse: %s\n", t);
 	
-	char s[100];
-	int i = 765432;
-	printf("original int: %d\n", i);
-	itoa_p(i, s);
-	reverse_p(s);
-	printf("as string: %s\n", s);
+	// char s[100];
+	// int i = 765432;
+	// printf("original int: %d\n", i);
+	// itoa_p(i, s);
+	// reverse_p(s);
+	// printf("as string: %s\n", s);
 
 	/**** PART 2 OF 6 ****/
 	// printf("%f\n", atof_p("360.009873"));
@@ -52,6 +59,29 @@ int main() {
 	// char line[MAXLINE];
 	// while ((len = getaline_p(line, MAXLINE)) > 0)
 	//	printf("%s", line);
+}
+
+// t has length 1
+int strindex_p(char *s, char *t) {
+	for (int i = 0; *(s+i) != '\0'; i++) {
+		if (*(s+i) == *t)
+			return i;
+	}
+	return -1;
+}
+
+// page 69: return index of t in s, or -1 if none
+// t has length 1
+int strindex_orig(char s[], char t[]) {
+	int i, j, k;
+
+	for (i = 0; s[i] != '\0'; i++) {
+		for (j = i, k = 0; t[k] != '0' && s[j] == t[k]; j++, k++)
+			;
+		if (k > 0 && t[k] == '\0')
+			return i;
+	}
+	return -1;
 }
 
 // page 64: convert n to characters in s
@@ -66,7 +96,7 @@ void itoa_p(int n, char *s) {
 	if (sign < 0)
 		*s++ = '-';
 	*s = '\0';
-	//reverse_p(s);  // issue: this pointer is now at the END of s
+	//reverse_p(s);  // can't call like this: this pointer is now at the END of s
 }
 
 // void reverse_p(char s[]) {  // THIS DOES NOT WORK, EVEN IF DECLARING IT LIKE THIS DOES
