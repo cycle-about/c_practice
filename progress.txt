@@ -12,3 +12,9 @@ Chapter							 Exercises 		Done % 		Date Finished
 8. UNIX System Interface 				 8 		   100
 
 TOTAL 									97
+
+----------------------------
+
+Status at start of Winter Break 2022 (12/23/22)
+	Finished 61 of 97 = 62% done
+	Remaining exercises: 36

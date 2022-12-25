@@ -1,0 +1,48 @@
+This c program implements a function from "the c programming language". Why does it cause a segmentation fault when run
+
+#include <stdio.h>
+
+void strcpy(char *s, char *t);
+
+int main() {
+	char *s = "hello ";
+	char *t = "world";
+	strcpy(s, t);
+	printf("s after call: %s\n", t);
+}
+
+// copy t to s, page 106
+void strcpy(char *s, char *t) {
+	while (*s++ = *t++) {
+		;
+	}
+}
+
+The program causes a segmentation fault because it is attempting to modify a string literal, which is stored in a read-only memory region.
+
+In C, string literals are character arrays that are automatically initialized with the given string, and they are stored in a read-only memory region. This means that you cannot modify the contents of a string literal.
+
+In the main function, the variables s and t are both initialized with string literals. When the strcpy function is called, it attempts to modify the contents of the s array by assigning new values to its elements. This operation is not allowed, because the s array is stored in a read-only memory region, and the program therefore triggers a segmentation fault.
+
+To fix this issue, you can declare s and t as character arrays instead of character pointers, and initialize them with the desired strings using the strcpy function or a similar function. Here is an example of how you could do this:
+
+#include <stdio.h>
+#include <string.h>
+
+void strcpy(char *s, char *t);
+
+int main() {
+	char s[100] = "";
+	char t[100] = "world";
+	strcpy(s, t);
+	printf("s after call: %s\n", s);
+}
+
+// copy t to s, page 106
+void strcpy(char *s, char *t) {
+	while (*s++ = *t++) {
+		;
+	}
+}
+
+This version of the program should work as expected and will not cause a segmentation fault.
