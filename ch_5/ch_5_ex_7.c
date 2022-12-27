@@ -4,6 +4,7 @@
 // pages 108-110 setup for 5-7
 
 /*
+
 #include <stdio.h>
 #include <string.h>
 
@@ -179,14 +180,12 @@ int main() {
 
 #define MAXLEN 1000 	// max length of any input line
 int getaline(char *, int);
-// char *alloc(int);
 
 // modifies char *lineptr[], which is used elsewhere in program
 // change to make for 5-7: store lines in array supplied by main, NOT calling alloc
 // 'lines' has ALL THE LINES, sequentially; pointers are to places in this
 int readlines(char *lineptr[], int maxlines, char lines[], char *linesp, int size) {
 	int len, nlines;
-	//char *p, line[MAXLEN];
 	char oneline[MAXLEN]; // array for a single line at a time
 
 	nlines = 0;
@@ -200,30 +199,13 @@ int readlines(char *lineptr[], int maxlines, char lines[], char *linesp, int siz
 			printf("new line does not fit in array\n");
 			return -1;
 		} else {
-			printf("putting new line in lineptr\n");
 			oneline[len-1] = '\0';  // delete newline
 			strcpy(linesp, oneline);  // 'linesp' gets contents of 'oneline'
-			linesp += len;  // update next available place in all lines array
 			lineptr[nlines++] = linesp; // put pointer to new line into variable used throughout program
+			linesp += len;  // update next available place in all lines array
 		}
 	}
 	return nlines;
-}
-
-
-// page 101
-// #define ALLOCSIZE 10000    // size of available space
-
-// static char allocbuf[ALLOCSIZE];  // storage for alloc
-// static char *allocp = allocbuf;  // next free position
-
-char *alloc(int n) {    // return pointer to n characters
-	if (allocbuf + ALLOCSIZE - allocp >= n) {  // it fits
-		allocp += n;
-		return allocp - n;  // old p
-	} else {
-		return 0;
-	}
 }
 
 void qsort(char *v[], int left, int right) {
