@@ -3,7 +3,7 @@
 // ********************************************************************************
 // pages 108-110 setup for 5-7
 
-
+/*
 #include <stdio.h>
 #include <string.h>
 
@@ -134,7 +134,7 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
-
+*/
 
 /********************************************************************************
 5-7
@@ -147,7 +147,7 @@ calling alloc to maintain storage.
 
 Part 2. How much faster is the program?
 
-
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -183,26 +183,28 @@ int getaline(char *, int);
 
 // modifies char *lineptr[], which is used elsewhere in program
 // change to make for 5-7: store lines in array supplied by main, NOT calling alloc
-int readlines(char *lineptr[], int maxlines, char line[], char *p, int size) {
+// 'lines' has ALL THE LINES, sequentially; pointers are to places in this
+int readlines(char *lineptr[], int maxlines, char lines[], char *linesp, int size) {
 	int len, nlines;
 	//char *p, line[MAXLEN];
+	char oneline[MAXLEN]; // array for a single line at a time
 
 	nlines = 0;
-	while ((len = getaline(line, MAXLEN)) > 0) {
+	while ((len = getaline(oneline, MAXLEN)) > 0) {
 		// if (nlines >= maxlines || (p = alloc(len)) == NULL) {
 		if (nlines >= maxlines) {
 			printf("count of lines is over max lines");
 			return -1;
 		} 
-		if (allocbuf + size - allocp < len) {
+		if (lines + size - linesp < len) {
 			printf("new line does not fit in array\n");
 			return -1;
 		} else {
 			printf("putting new line in lineptr\n");
-			allocp += len;
-			line[len-1] = '\0';  // delete newline
-			strcpy(p, line);  // 'p' gets contents of 'line'
-			lineptr[nlines++] = p; // put pointer to line into variable used throughout program
+			oneline[len-1] = '\0';  // delete newline
+			strcpy(linesp, oneline);  // 'linesp' gets contents of 'oneline'
+			linesp += len;  // update next available place in all lines array
+			lineptr[nlines++] = linesp; // put pointer to new line into variable used throughout program
 		}
 	}
 	return nlines;
@@ -267,4 +269,3 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
-*/
