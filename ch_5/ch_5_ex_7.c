@@ -1,22 +1,21 @@
 // gcc -o ch_5_ex_7.o ch_5_ex_7.c && ./ch_5_ex_7.o
 
+// ********************************************************************************
 // pages 108-110 setup for 5-7
+
 
 #include <stdio.h>
 #include <string.h>
 
 #define MAXLINES 5000    	// max number of lines to be sorted
-#define ALLOCSIZE 10000    // size of available space
 
 // char *lineptr[MAXLINES]: lineptr is an array of MAXLINES elements,
 //     each element of which is a pointer to a char
 // lineptr[i]: a char pointer
 // *lineptr[i]: char it points to, the first character of the i-th saved text line
 char *lineptr[MAXLINES]; 	// array of pointers, each element is pointer to a line's first char
-char allocbuf[ALLOCSIZE];  	// storage for use by readlines
-char *allocp = allocbuf;  	// next free position in allocbuf
 
-int readlines(char *lineptr[], int nlines, char allocbuf[], char *allocp, int ALLOCSIZE);
+int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
 void qsort(char *lineptr[], int left, int right);
 
@@ -25,7 +24,7 @@ void qsort(char *lineptr[], int left, int right);
 int main() {
 	int nlines; 	// number of input lines read
 
-	if ((nlines = readlines(lineptr, MAXLINES, allocbuf, allocp)) >= 0) {
+	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
 		qsort(lineptr, 0, nlines-1);
 		writelines(lineptr, nlines);
 		return 0;
@@ -35,38 +34,33 @@ int main() {
 	}
 }
 
-// ********************************************************************************
-// 5-7
-// Part 1. Rewrite readlines to store lines in an array supplied by main, rather than
-// calling alloc to maintain storage. 
-// Part 2. How much faster is the program?
-// ********************************************************************************
-
 #define MAXLEN 1000 	// max length of any input line
 int getaline(char *, int);
-// char *alloc(int);
+char *alloc(int);
 
 // read input lines: collect and save chars of each line,
 //     put pointers to the lines in array for use by rest of program, and return count of input lines
 // it modifies char *lineptr[], which is used elsewhere in program
-int readlines(char *lineptr[], int maxlines, char allocbuf[], char *allocp, int maxbuf) {
+int readlines(char *lineptr[], int maxlines) {
 	int len, nlines;
 	char *p, line[MAXLEN];
 
 	nlines = 0;
 	// loop and get lines until terminal input is length 0
 	while ((len = getaline(line, MAXLEN)) > 0) {
-		// if (nlines >= maxlines || (p = alloc(len)) == NULL) { // todo: change for ex 5-7
-		if (nlines >= maxlines)
+		// if (nlines >= maxlines || (p = alloc(len)) == NULL) {
+		if (nlines >= maxlines) {
 			return -1;
-		if (allocbuf + maxbuf - allocp >= n) {
+		}
+		p = alloc(len); // if len fits in array, allocp iterates by len, and returns the OLD allocp value 
+		if (p == 0) {  	// alloc returns 0 if value did not fit
 			return -1;
-		} else {
-
+		}
+		else {
 			line[len-1] = '\0';  // delete newline
 			// strcpy library function p 249: copy 'line' (type: const char *) into 'p' (type: char *)
 			// 'p' gets contents of 'line'
-			strcpy(p, line);
+			strcpy(p, line);  // put line into next empty value of array
 			lineptr[nlines++] = p; // put pointer to line into variable used throughout program
 		}
 	}
@@ -142,4 +136,135 @@ int getaline(char s[], int lim) {
 }
 
 
+/********************************************************************************
+5-7
+Note: all setup code from above is copied over, without most annotations
 
+Part 1. Rewrite readlines to store lines in an array supplied by main, rather than
+calling alloc to maintain storage.
+
+	Approach for this
+
+Part 2. How much faster is the program?
+
+
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAXLINES 5000    	// max number of lines to be sorted
+#define ALLOCSIZE 10000    // size of available space
+
+char *lineptr[MAXLINES]; 	// array of pointers, each element is pointer to a line's first char
+char allocbuf[ALLOCSIZE];  	// storage for readlines
+char *allocp = allocbuf;  	// next free position in allocbuf
+
+int readlines(char *lineptr[], int nlines, char allocbuf[], char *allocp, int allocsize);
+void writelines(char *lineptr[], int nlines);
+void qsort(char *lineptr[], int left, int right);
+
+// page 108, sort input lines: type last line, 'enter', then ctrl+d
+int main() {
+	int nlines; 	// number of input lines read
+
+	if ((nlines = readlines(lineptr, MAXLINES, allocbuf, allocp, ALLOCSIZE)) >= 0) {
+		qsort(lineptr, 0, nlines-1);
+		writelines(lineptr, nlines);
+		return 0;
+	} else {
+		printf("error: input too big to sort\n");
+		return 1;
+	}
+}
+
+#define MAXLEN 1000 	// max length of any input line
+int getaline(char *, int);
+// char *alloc(int);
+
+// modifies char *lineptr[], which is used elsewhere in program
+// change to make for 5-7: store lines in array supplied by main, NOT calling alloc
+int readlines(char *lineptr[], int maxlines, char line[], char *p, int size) {
+	int len, nlines;
+	//char *p, line[MAXLEN];
+
+	nlines = 0;
+	while ((len = getaline(line, MAXLEN)) > 0) {
+		// if (nlines >= maxlines || (p = alloc(len)) == NULL) {
+		if (nlines >= maxlines) {
+			printf("count of lines is over max lines");
+			return -1;
+		} 
+		if (allocbuf + size - allocp < len) {
+			printf("new line does not fit in array\n");
+			return -1;
+		} else {
+			printf("putting new line in lineptr\n");
+			allocp += len;
+			line[len-1] = '\0';  // delete newline
+			strcpy(p, line);  // 'p' gets contents of 'line'
+			lineptr[nlines++] = p; // put pointer to line into variable used throughout program
+		}
+	}
+	return nlines;
+}
+
+
+// page 101
+// #define ALLOCSIZE 10000    // size of available space
+
+// static char allocbuf[ALLOCSIZE];  // storage for alloc
+// static char *allocp = allocbuf;  // next free position
+
+char *alloc(int n) {    // return pointer to n characters
+	if (allocbuf + ALLOCSIZE - allocp >= n) {  // it fits
+		allocp += n;
+		return allocp - n;  // old p
+	} else {
+		return 0;
+	}
+}
+
+void qsort(char *v[], int left, int right) {
+	int i, last;
+	void swap(char *v[], int i, int j);
+
+	if (left >= right)  // do nothing if array contains fewer than 2 elements
+		return;
+	swap(v, left, (left + right)/2);  // move pivot (partition element) to v[0]
+	last = left;
+	for (i = left+1; i <= right; i++)  // partition
+		if (strcmp(v[i], v[left]) < 0)  // true if element 'i' is less than element 'left'
+			swap(v, ++last, i);
+	swap(v, left, last);  // restore partition element
+	qsort(v, left, last-1);
+	qsort(v, last+1, right);
+}
+
+void writelines(char *lineptr[], int nlines) {
+	printf("\nLines after sorting:\n");
+	while (nlines-- > 0)
+		printf("%s\n", *lineptr++); // print char array pointed to by next element in lineptr
+}
+
+void swap(char *v[], int i, int j) {
+	char *temp;
+
+	temp = v[i];
+	v[i] = v[j];
+	v[j] = temp;
+}
+
+// page 29
+int getaline(char s[], int lim) {
+	int c, i;
+
+	for (i=0; i<lim-1 && (c=getchar()) != EOF && c != '\n'; ++i)
+		s[i] = c;
+	if (c == '\n') {
+		s[i] = c;
+		++i;
+	}
+	s[i] = '\0';
+	return i;
+}
+*/
