@@ -4,9 +4,11 @@
 // pages 108-110 setup for 5-7
 
 /*
+*/
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define MAXLINES 5000    	// max number of lines to be sorted
 
@@ -23,11 +25,16 @@ void qsort(char *lineptr[], int left, int right);
 // to execute sorting: type last line, 'enter', then ctrl+d
 // page 108: sort input lines
 int main() {
+	clock_t start_time, end_time;
 	int nlines; 	// number of input lines read
 
 	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
+		start_time = clock();  // start timing after getting user input
 		qsort(lineptr, 0, nlines-1);
 		writelines(lineptr, nlines);
+		end_time = clock();
+		double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		printf("time to sort: %f\n", elapsed_time);
 		return 0;
 	} else {
 		printf("error: input too big to sort\n");
@@ -135,7 +142,7 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
-*/
+
 
 /********************************************************************************
 5-7
@@ -144,14 +151,23 @@ Note: all setup code from above is copied over, without most annotations
 Part 1. Rewrite readlines to store lines in an array supplied by main, rather than
 calling alloc to maintain storage.
 
-	Approach for this
+Part 2. How much faster is the program? It's similar. Strangely, seems go get a bit slower with repeated runs
+	Input used for comparison
+		parrot
+		gopher
+		zebra
+		ant
+		elephant
+		honeybadger
 
-Part 2. How much faster is the program?
+	Three runs of original: 0.000044, 0.000057, 0.000081
+	Three runs of revision: 0.000045, 0.000062, 0.000074
 
-*/
+
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define MAXLINES 5000    	// max number of lines to be sorted
 #define ALLOCSIZE 10000    // size of available space
@@ -166,11 +182,16 @@ void qsort(char *lineptr[], int left, int right);
 
 // page 108, sort input lines: type last line, 'enter', then ctrl+d
 int main() {
+	clock_t start_time, end_time;
 	int nlines; 	// number of input lines read
 
 	if ((nlines = readlines(lineptr, MAXLINES, allocbuf, allocp, ALLOCSIZE)) >= 0) {
+		start_time = clock();  // start timing after getting user input
 		qsort(lineptr, 0, nlines-1);
 		writelines(lineptr, nlines);
+		end_time = clock();
+		double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		printf("time to sort revision: %f\n", elapsed_time);
 		return 0;
 	} else {
 		printf("error: input too big to sort\n");
@@ -251,3 +272,4 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
+*/
