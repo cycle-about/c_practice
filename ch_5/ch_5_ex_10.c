@@ -33,6 +33,9 @@ Changes needed to it:
 		only check that whole string is a valid number
 	? do not think that getch and ungetch are needed, since not reading by individual chars
 
+Substeps to doing this
+	Get echo only working in the main for reverse Polish
+
 */
 
 #include <stdio.h>
@@ -45,21 +48,19 @@ int getop(char []);
 void push(double);
 double pop(void);
 
-// reverse Polish notation calculator, page 76
+// reverse Polish notation calculator
 int main(int argc, char *argv[]) {
-	// test of using a later external variable
-	//printf("stack pointer declared later: %d\n", sp);
-
 	int type;
 	double op2;
 	char s[MAXOP];
 
 	// while ((type = getop(s)) != EOF) {
 	while (--argc > 0) {
-		printf("%s%s", *argv, (argc > 1) ? " " : "");
-		printf("\n");
+		// printf("arg: %s\n", *++argv);
 		type = getop(*++argv);
-		switch (type) {
+		printf("type: %d\n", type);
+	}
+	/*	switch (type) {
 		case NUMBER:
 			push(atof(s));
 			break;
@@ -69,9 +70,9 @@ int main(int argc, char *argv[]) {
 		case '*':
 			push(pop() * pop());
 			break;
-		case '-': 	// order of operands matters
-			op2 = pop(); 		// most recent operand
-			push(pop() - op2);	// second most recent - most recent
+		case '-':
+			op2 = pop();
+			push(pop() - op2);
 			break;
 		case '/': 	// order of operands and value of op2 matter
 			op2 = pop();
@@ -86,8 +87,8 @@ int main(int argc, char *argv[]) {
 		default:
 			printf("error: unknown command %s\n", s);
 			break;
-		}
-	}
+		} 
+	} */
 	return 0;
 }
 
@@ -106,7 +107,8 @@ void push(double f) {
 		printf("error: stack full, can't push %g\n", f);
 }
 
-// pop and return top value from stack
+
+// pop: pop and return top value from stack
 double pop(void) {
 	if (sp > 0)
 		return val[--sp];
@@ -120,35 +122,30 @@ double pop(void) {
 
 #include <ctype.h>
 
-// int getch(void);
-// void ungetch(int);
+int getch(void);
+void ungetch(int);
 
-// get next operator or numeric operand
-int getop(char s[]) {
-	// int i, c;
-	int c;
+// getop: get next operator or numeric operand
+int getop(char *s) {
+	printf("arg in getop: %s\n", s);
+	int i, c;
 
-	//while ((s[0] = c = getch()) == ' ' || c == '\t')
-	//	;
-	//s[1] = '\0';
-	c = s[0];
+	while ((s[0] = c = getch()) == ' ' || c == '\t')
+		;
+	s[1] = '\0';
 	if (!isdigit(c) && c != '.')
 		return c; 		// not a number
-	else
-		// todo: check for a valid number
-		return NUMBER;
-
-	//i = 0;
-	// if (isdigit(c))    	// collect integer part
-	// 	while (isdigit(s[++i] = c = getch()))
+	i = 0;
+	if (isdigit(c))    	// collect integer part
+		while (isdigit(s[++i] = c = getch()))
 			;
-	// if (c == '.')
-	// 	while (isdigit(s[++i] = c = getch()))
+	if (c == '.')
+		while (isdigit(s[++i] = c = getch()))
 			;
-	// s[i] = '\0';
-	// if (c != EOF)
-	// 	ungetch(c);
-	// return NUMBER;
+	s[i] = '\0';
+	if (c != EOF)
+		ungetch(c);
+	return NUMBER;
 }
 
 

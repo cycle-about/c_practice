@@ -1,3 +1,13 @@
+chatGPT explanation of why calling function this way was causing segmentation fault:
+
+	int main() {
+		int *pmonth;
+		int *pday;
+		month_day(2022, 41, pmonth, pday);
+	}
+
+----------------------------------
+
 This C program is causing a segmentation fault because the variables pmonth and pday in the main() function are not initialized to valid memory addresses before they are passed to the month_day() function.
 
 In C, a segmentation fault occurs when a program attempts to access memory that it is not allowed to access, or when it tries to access memory that has not been allocated. In this case, the month_day() function is attempting to dereference the pointers pmonth and pday, which are pointing to uninitialized memory locations. This causes the program to crash with a segmentation fault.
