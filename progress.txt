@@ -18,3 +18,7 @@ TOTAL 									97
 Status at start of Winter Break 2022 (12/23/22)
 	Finished 61 of 97 = 62% done
 	Remaining exercises: 36
+
+Status on evening 12/31/22
+	Finished 65 of 97 = 67%
+	Remaining: 31
