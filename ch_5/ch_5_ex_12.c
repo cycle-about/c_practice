@@ -19,7 +19,7 @@ Changes needed in detab:
 	- read in two string args from terminal input
 	- assign 'n' to tabstop
 	- add a provision to do nothing until past index (m * n)
-*/
+
 
 // **************** PART 1 - ORIGINAL DETAB (ex 1-20) ****************
 // replace tabs with spaces
@@ -46,10 +46,10 @@ int main(int argc, char *argv[]) {
 	int startcol;
 
 	if (argc == 3) {
-		// increment to second item of args; then get its second char (ie remove the leading + or -)
-		// presumes presumes input after + or - is single char digit
-		tabstop = *++(*++argv);
-		startcol = *++(*++argv);
+		// increment to second item of args, a char *; then get value at its second char (ie remove the leading + or -)
+		// presumes input after + or - is single char digit
+		tabstop = *++(*++argv) - '0';  // get int value of char
+		startcol = *++(*++argv) - '0';
 
 	} else {
 		tabstop = TAB_STOP;
@@ -129,53 +129,73 @@ void add_space(char detabbed[], int start, int spaces) {
 		detabbed[start + i] = ' ';
 	}
 }
+*/
 
-/*
+
 // **************** PART 2 - ORIGINAL ENTAB (ex 1-21) ****************
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAXLINE 1000 // maximum chars in a line
 #define TAB_STOP 4   // default spaces in a tab
+#define START_COL 2  // default column to start tab stops
 #define TRUE 1
 #define FALSE 0
 
 int getaline(char line[], int maxline);
-void entab(char orig[], int len, char entabbed[], int tabstop);
+void entab(char orig[], int len, char entabbed[], int tabstop, int startcol);
 int handle_spaces(char to[], int spaces, int start, int tabstop);
 void add_char(char to[], char c, int num, int start);
 
+// example call: ./ch_5_ex_12.o -4 +2
 int main(int argc, char *argv[]) {
 	int len;    // current line length
 	char line[MAXLINE];    // current input line
 	char entabbed[MAXLINE]; // tab-stop-adjusted version of input line
 	int tabstop;
+	int startcol;
 
-	if (argc == 2) {
-		tabstop = atoi(argv[1]);
+	if (argc == 3) {
+		tabstop = *++(*++argv) - '0';  // get int value of char
+		startcol = *++(*++argv) - '0';
 	} else {
 		tabstop = TAB_STOP;
+		startcol = START_COL;
 	}
 
+	printf("tabstop %d, startcol %d\n", tabstop, startcol);
 	while ((len = getaline(line, MAXLINE)) > 0) {
-		entab(line, len, entabbed, tabstop);
+		entab(line, len, entabbed, tabstop, startcol);
 		printf("%s<>\n", entabbed);
 	}		
 	return 0;
 }
 
-// change tabs to next tab stop, and write into 'entabbed'
-void entab(char orig[], int len, char entabbed[], int tabstop) {
+// change spaces into tabs when enough in a row, and write into 'entabbed'
+void entab(char orig[], int len, char entabbed[], int tabstop, int startcol) {
 	int in_blanks; 		// boolean for whether in string of blanks
 	int i; 				// index in orig array
 	int j; 				// index in entabbed array
 	int spaces; 		// count of spaces in a row in orig array
 	int chars_added;
+	int index; 			// count of tabs+space distance for when to start tab stops
 
 	spaces = 0;
+	index = 0;
 	in_blanks = FALSE;
 	for (i = 0, j = 0; i <= len ; i++) {
+		// do not add tab stops until past index (m * n)
+		if (index < tabstop * startcol) {
+			entabbed[j] = orig[i];
+			j++;
+			if (orig[i] == '\t') {
+				index += tabstop;
+			} else {
+				index++;
+			}
+			continue;
+		}
+
 		// first blank after non-blank
 		if (orig[i] == ' ' && in_blanks == FALSE) {
 			in_blanks = TRUE;
@@ -237,4 +257,3 @@ int getaline(char s[], int lim) {
 	s[i] = '\0';
 	return i;
 }
-*/
