@@ -20,5 +20,5 @@ Status at start of Winter Break 2022 (12/23/22)
 	Remaining exercises: 36
 
 Status on evening 12/31/22
-	Finished 65 of 97 = 67%
-	Remaining: 31
+	Finished 66 of 97 = 68%
+	Remaining: 30
