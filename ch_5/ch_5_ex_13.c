@@ -15,14 +15,18 @@
 Substeps
 	/ 1. Get multiple lines from input, store in pointer array, and print them all
 		Starting point: ex 5-7, page 108 setup for qsort with pointers to char *
-	2. Add variable for the number of lines to be printed, from the end
-
+	/ 2. Add variable for the number of lines to be printed, from the end
+	/ 3. Get correct lines printing with 'tail' hardcoded
+	4. Assign tail from terminal input
 */
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define MAXLINES 5000    	// max number of lines that will be read
+#define TAIL 3 				// default count of end lines to print
 
 // char *lineptr[MAXLINES]: lineptr is an array of MAXLINES elements,
 //     each element of which is a pointer to a char
@@ -32,14 +36,26 @@ char *lineptr[MAXLINES]; 	// array of pointers, each element is pointer to a lin
 
 int readlines(char *lineptr[], int nlines);
 void writetail(char *lineptr[], int nlines, int tail);
+int valid(char *args);
 
 // to execute sorting: type last line, 'enter', then ctrl+d
+// assumes either zero or one arg, which must be an int
 // page 108: sort input lines
-int main() {
+int main(int argc, char *argv[]) {
 	int nlines; 	// number of input lines read
 	int tail;  // number of lines from the end to print
 
-	tail = 3;
+	if (argc == 2) {
+		char *arg = argv[1];
+		if (valid(arg) == 0) {
+			printf("Error: value for tail is not a number\n");
+			exit(1);
+		}
+		tail = atoi(arg);  // note: if done on chars, assigns tail to 0
+	} else {
+		tail = TAIL;
+	}
+	
 	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
 		writetail(lineptr, nlines, tail);
 		return 0;
@@ -47,6 +63,17 @@ int main() {
 		printf("error: input too big to sort\n");
 		return 1;
 	}
+}
+
+int valid(char *args) {
+	char *temp = args;
+	while (*temp != '\0') {
+		if (!isdigit(*temp)) {
+			return 0;  // not a valid integer
+		}
+		temp++;
+	}
+	return 1;  // is a valid integer
 }
 
 #define MAXLEN 1000 	// max length of any input line
@@ -84,6 +111,10 @@ int readlines(char *lineptr[], int maxlines) {
 
 // write tbe last 'tail' output lines in order they appear in 'lineptr'
 void writetail(char *lineptr[], int nlines, int tail) {
+	if (tail > nlines) {
+		printf("Error: too few lines\n");
+		return;
+	}
 	printf("\nLines echoed:\n");
 	for (int i = nlines-tail; i < nlines; i++) {
 		printf("%s\n", *(lineptr+i)); // print char array pointed to by next element in lineptr
