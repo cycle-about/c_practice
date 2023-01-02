@@ -150,13 +150,27 @@ void qsort_ex(int descending, void *lineptr[], int left, int right, int (*comp)(
 int numcmp(char *, char *);
 
 // sort input lines: default is lexicographically, but flag '-n' means sort numerically
+// flag -r means sort in reverse order
+// gcc -o ch_5_ex_14.o ch_5_ex_14.c && ./ch_5_ex_14.o -n -r
 int main(int argc, char *argv[]) {
 	int nlines;  		// number of input lines read
 	int numeric = 0;	// default is lex sort, NOT numeric
 	int descending = 0;  // default is ascending order, NOT descending
 
-	if (argc > 1 && strcmp(argv[1], "-n") == 0)
-		numeric = 1;
+	
+	if (argc > 1) {    // handle first arg
+		if (strcmp(argv[1], "-n") == 0)
+			numeric = 1;
+		else if (strcmp(argv[1], "-r") == 0)
+			descending = 1;
+	}
+	if (argc > 2) {    // handle second arg
+		if (strcmp(argv[2], "-n") == 0)
+			numeric = 1;
+		else if (strcmp(argv[2], "-r") == 0)
+			descending = 1;
+	}
+
 	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
 		// in qsort call: 'strcmp' and 'numcmp' are addresses of functions
 		// 'numcmp' defined below, 'strcmp' is in 'string' library
@@ -179,16 +193,18 @@ void qsort_ex(int descending, void *v[], int left, int right, int (*comp)(void *
 	int i, last;
 	void swap(void *v[], int, int);
 
-	if (!descending) {
-		if (left >= right) 		// do nothing if array contains fewer than 2 elements
-			return;
-	}
+	if (left >= right) 		// do nothing if array contains fewer than 2 elements
+		return;
 	
 	swap(v, left, (left +right)/2);
 	last = left;
 	for (i = left+1; i <= right; i++) {
 		if (!descending) {
-			if ((*comp)(v[i], v[left]) < 0) {  // todo handle conditional
+			if ((*comp)(v[i], v[left]) < 0) {  // ascending case
+				swap(v, ++last, i);
+			}
+		} else {
+			if ((*comp)(v[i], v[left]) > 0) {  // descending case
 				swap(v, ++last, i);
 			}
 		}
