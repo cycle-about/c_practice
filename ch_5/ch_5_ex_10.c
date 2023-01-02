@@ -22,23 +22,9 @@ int main(int argc, char *argv[]) {
 /********************************************************************************
 5-10 Write the program expr, which evaluates a reverse Polish expression from the
 command line, where each operator or operand is a separate argument. For example,
-
 	expr 2 3 4 + *
+evaluates: 2 * (3+4)
 
-evaluates 2 * (3+4)
-
-	(4-5) / (1+2)  -> 	4 5 - 1 2 + /
-
-Start from: original polish notation calculator, chapter 4, before ex 4-3
-Changes needed to it:
-	in getop(), numbers are NOT read one char at a time
-		only check that whole string is a valid number
-	? do not think that getch and ungetch are needed, since not reading by individual chars
-
-Substeps to doing this
-	Get echo only working in the main for reverse Polish
-
-*/
 
 #include <stdio.h>
 #include <stdlib.h>    	// for atof()
@@ -136,3 +122,4 @@ int getop(char *s) {
 		return NUMBER;
 	}
 }
+*/
