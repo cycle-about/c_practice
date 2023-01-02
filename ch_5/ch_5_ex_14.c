@@ -118,8 +118,19 @@ What to keep the same: numcmp and strcmp, since strcmp is system library,
 	and they must work the same
 
 Options for handling the two cases in qsort
-	- make a #define for the chars ">=" and "<=", and pass those from main
+	x make a #define (symbolic constant) for ">=" and "<=", and pass those from main
+		-> can these be passed as args? no
+	x make a char * for ">=" and "<=", and pass those from main
+		-> not clear how to turn the string back into part of an expression
+	x make an enum for ">=" and "<="
+		these ARE veriables, can be passed as args
+		But: values for enums can only be char or int
+		And, still issue of making it back to part of an expression
 	- make a separate function for qsort descending
+	- make separate comparator function for qsort to use for those clauses
+
+Note: currently both the comparison AND its opposite are both used in qsort
+	Maybe change one of the conditional statements so uses same one
 
 */
 
@@ -135,20 +146,21 @@ void writelines(char *lineptr[], int nlines);
 // qsort renamed to not overlap with stdlib function 'qsort'
 // 'comp' is pointer to a function with two pointer args (void *), and returns int
 // that last arg (comp) is pointer for which sorting function to use, numeric or lex
-void qsort_ex(void *lineptr[], int left, int right, int (*comp)(void *, void *));
+void qsort_ex(int descending, void *lineptr[], int left, int right, int (*comp)(void *, void *));
 int numcmp(char *, char *);
 
 // sort input lines: default is lexicographically, but flag '-n' means sort numerically
 int main(int argc, char *argv[]) {
 	int nlines;  		// number of input lines read
-	int numeric = 0;	// default is lex sort NOT numeric
+	int numeric = 0;	// default is lex sort, NOT numeric
+	int descending = 0;  // default is ascending order, NOT descending
 
 	if (argc > 1 && strcmp(argv[1], "-n") == 0)
 		numeric = 1;
 	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
 		// in qsort call: 'strcmp' and 'numcmp' are addresses of functions
 		// 'numcmp' defined below, 'strcmp' is in 'string' library
-		qsort_ex((void **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcmp));
+		qsort_ex(descending, (void **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcmp));
 		writelines(lineptr, nlines);
 		return 0;
 	} else {
@@ -163,20 +175,27 @@ int main(int argc, char *argv[]) {
 // comp 						-> pointer to a function
 // *comp 						-> the function
 // (*comp)(v[i], v[left]) 		-> call to the function made by qsort
-void qsort_ex(void *v[], int left, int right, int (*comp)(void *, void *)) {
+void qsort_ex(int descending, void *v[], int left, int right, int (*comp)(void *, void *)) {
 	int i, last;
 	void swap(void *v[], int, int);
 
-	if (left >= right) 		// do nothing if array contains fewer than 2 elements
-		return;
+	if (!descending) {
+		if (left >= right) 		// do nothing if array contains fewer than 2 elements
+			return;
+	}
+	
 	swap(v, left, (left +right)/2);
 	last = left;
-	for (i = left+1; i <= right; i++)
-		if ((*comp)(v[i], v[left]) < 0)
-			swap(v, ++last, i);
+	for (i = left+1; i <= right; i++) {
+		if (!descending) {
+			if ((*comp)(v[i], v[left]) < 0) {  // todo handle conditional
+				swap(v, ++last, i);
+			}
+		}
+	}
 	swap(v, left, last);
-	qsort_ex(v, left, last-1, comp);
-	qsort_ex(v, last+1, right, comp);
+	qsort_ex(descending, v, left, last-1, comp);
+	qsort_ex(descending, v, last+1, right, comp);
 }
 
 #include <stdlib.h>
