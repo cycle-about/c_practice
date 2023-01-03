@@ -132,7 +132,6 @@ Options for handling the two cases in qsort
 Note: currently both the comparison AND its opposite are both used in qsort
 	Maybe change one of the conditional statements so uses same one
 
-*/
 
 #include <stdio.h>
 #include <string.h>
@@ -237,10 +236,123 @@ void swap(void *v[], int i, int j) {
 	v[i] = v[j];
 	v[j] = temp;
 }
-
+*/
 
 /********************************************************************************
-Functions for line reading and writing used in both versions
+5-15 Add the option -f to fold upper and lower case together, so that case 
+distinctions are not made during sorting: for example, 'a' and 'A' compare as equal
+
+Where to handle this: only use when main is set to lex sorting
+
+
+*/
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAXLINES 5000 		// max number of lines to be sorted
+char *lineptr[MAXLINES]; 	// pointers to text lines
+
+int readlines(char *lineptr[], int nlines);
+int checkflag(char s[], int argc, char *argv[]);
+void writelines(char *lineptr[], int nlines);
+void qsort_ex(int descending, void *lineptr[], int left, int right, int (*comp)(void *, void *));
+int numcmp(char *, char *);
+
+// sort input lines: default is lexicographically, but flag '-n' means sort numerically
+// flag -r means sort in reverse order
+// gcc -o ch_5_ex_14.o ch_5_ex_14.c && ./ch_5_ex_14.o -n -r
+int main(int argc, char *argv[]) {
+	int nlines;  		// number of input lines read
+	int numeric = 0;	// default is lex sort, NOT numeric
+	int descending = 0;	// default is ascending order, NOT descending
+	int nocase = 0;   	// default lex sorting differentiates capitalization
+
+	numeric = checkflag("-n", argc, argv);
+	descending = checkflag("-r", argc, argv);
+	nocase = checkflag("-d", argc, argv);
+
+	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
+		// in qsort call: 'strcmp' and 'numcmp' are addresses of functions
+		// 'numcmp' defined below, 'strcmp' is in 'string' library
+		qsort_ex(descending, (void **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcmp));
+		writelines(lineptr, nlines);
+		return 0;
+	} else {
+		printf("input too big to sort\n");
+		return 1;
+	}
+}
+
+// returns 1 if provided string is in args array
+int checkflag(char s[], int argc, char *argv[]) {
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], s) == 0) {
+			printf("found: %s\n", s);
+			return 1;
+		}
+	}
+	printf("not found: %s\n", s);
+	return 0;
+}
+
+// sort v[left]...v[right] into increasing order
+// int (*comp)(void *, void *)  -> 'comp' is pointer to a function with two void * args, returns int
+
+// comp 						-> pointer to a function
+// *comp 						-> the function
+// (*comp)(v[i], v[left]) 		-> call to the function made by qsort
+void qsort_ex(int descending, void *v[], int left, int right, int (*comp)(void *, void *)) {
+	int i, last;
+	void swap(void *v[], int, int);
+
+	if (left >= right) 		// do nothing if array contains fewer than 2 elements
+		return;
+	
+	swap(v, left, (left +right)/2);
+	last = left;
+	for (i = left+1; i <= right; i++) {
+		if (!descending) {
+			if ((*comp)(v[i], v[left]) < 0) {  // ascending case
+				swap(v, ++last, i);
+			}
+		} else {
+			if ((*comp)(v[i], v[left]) > 0) {  // descending case
+				swap(v, ++last, i);
+			}
+		}
+	}
+	swap(v, left, last);
+	qsort_ex(descending, v, left, last-1, comp);
+	qsort_ex(descending, v, last+1, right, comp);
+}
+
+#include <stdlib.h>
+
+// compare s1 and s1 numerically
+int numcmp(char *s1, char *s2) {
+	double v1, v2;
+
+	v1 = atof(s1);
+	v2 = atof(s2);
+	if (v1 < v2)
+		return -1;
+	else if (v1 > v2)
+		return 1;
+	else
+		return 0;
+}
+
+void swap(void *v[], int i, int j) {
+	void *temp;
+
+	temp = v[i];
+	v[i] = v[j];
+	v[j] = temp;
+}
+
+/********************************************************************************
+Functions for line reading and writing used in all versions
 from pages 108-110, in setup for 5-7
 */
 
