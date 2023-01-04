@@ -291,10 +291,10 @@ int main(int argc, char *argv[]) {
 		
 		// MESSY FOR NOW
 		if (!numeric && nocase) {
-			printf("lex and nocase\n");
+			printf("\nUsing qsort_nocase\n");
 			qsort_nocase(reverse, (void **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcmp));
 		} else {
-			printf("numeric or with case\n");
+			printf("\nUsing original qsort\n");
 			qsort_ex(reverse, (void **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcmp));
 		}
 		writelines(lineptr, nlines);
@@ -322,21 +322,25 @@ int checkflag(char s[], int argc, char *argv[]) {
 // *comp 						-> the function
 // (*comp)(v[i], v[left]) 		-> call to the function made by qsort
 void qsort_ex(int reverse, void *v[], int left, int right, int (*comp)(void *, void *)) {
-	int i, last;
+	int i, last, compared;
 	void swap(void *v[], int, int);
 
 	if (left >= right) 		// do nothing if array contains fewer than 2 elements
 		return;
 	
-	swap(v, left, (left+right)/2);  // make a new 'pivot': in first loop left is 0
+	swap(v, left, (left+right)/2);  // make a new 'pivot': swap index 0 and midpoint
 	last = left;
+	printf("\nleft: %s\n", (char *) v[left]);
+	
 	for (i = left+1; i <= right; i++) {
+		printf("i: %s\n", (char *) v[i]);
+		compared = (*comp)(v[i], v[left]);
 		if (!reverse) { 	// ascending order
-			if ((*comp)(v[i], v[left]) < 0) {
+			if (compared < 0) {
 				swap(v, ++last, i);
 			}
 		} else { 			// reverse order
-			if ((*comp)(v[i], v[left]) > 0) {
+			if (compared > 0) {
 				swap(v, ++last, i);
 			}
 		}
@@ -346,10 +350,18 @@ void qsort_ex(int reverse, void *v[], int left, int right, int (*comp)(void *, v
 	qsort_ex(reverse, v, last+1, right, comp);
 }
 
+#include <stdlib.h>
+
+void intolower(const char *str, char dest[]);
+
 // for use only with lexicographic sorting, ignoring case
 void qsort_nocase(int reverse, void *v[], int left, int right, int (*comp)(void *, void *)) {
-	int i, last;
+	int i, last, compared;
 	void swap(void *v[], int, int);
+	char leftlower[100];
+	char ilower[100];
+	char *leftptr;
+	char *iptr;
 
 	if (left >= right) 		// do nothing if array contains fewer than 2 elements
 		return;
@@ -357,29 +369,51 @@ void qsort_nocase(int reverse, void *v[], int left, int right, int (*comp)(void 
 	swap(v, left, (left+right)/2);  // make a new 'pivot': in first loop left is 0
 	last = left;
 	
-	// get left into all lower case
-	printf("v[left]: %s\n", (char *) v[left]);
-	char *leftlower = **v[left];
+	// get string at left in all lower case
+	printf("left orig: %s\n", (char *) v[left]);
+	intolower((char *) v[left], leftlower);  // put lower-case version of v[left] into leftlower
+	printf("left lower arr: %s\n", leftlower);
+	leftptr = leftlower;
+	printf("left lower ptr: %s\n", leftptr);
 	
 	for (i = left+1; i <= right; i++) {
 		
-		// get version of i into all lower case
-		printf("v[i]: %s\n", (char *) v[i]);
+		// get string at i in all lower case
+		printf("i: %s\n", (char *) v[i]);
+		intolower((char *) v[i], ilower);
+		printf("ilower arr: %s\n", ilower);
+		iptr = ilower;
+		printf("ilower ptr: %s\n", iptr);
+
+		compared = (*comp)(iptr, leftptr);  // compare values at pointers to lower-case array
 		
-		// compare the lowercase versions, but swap original pointers
+		// compare the lowercase versions, and swap array locations
 		if (!reverse) { 	// ascending order
-			if ((*comp)(v[i], v[left]) < 0) {
+			if (compared < 0) {
 				swap(v, ++last, i);
 			}
 		} else { 			// reverse order
-			if ((*comp)(v[i], v[left]) > 0) {
+			if (compared > 0) {
 				swap(v, ++last, i);
 			}
 		}
+		
 	}
 	swap(v, left, last);
 	qsort_ex(reverse, v, left, last-1, comp);
 	qsort_ex(reverse, v, last+1, right, comp);
+}
+
+#include <ctype.h>
+
+// put to-lower-case chars at pointer 'str' into array 'dest'
+void intolower(const char *str, char dest[]) {
+	int i;
+	char *strlow;
+	for (i = 0; i < strlen(str); i++) {
+		dest[i] = tolower(str[i]);
+	}
+	dest[i] = '\0';
 }
 
 #include <stdlib.h>
