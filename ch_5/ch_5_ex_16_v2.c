@@ -1,16 +1,23 @@
-// gcc -o ch_5_ex_16_v2.o ch_5_ex_16_v2.c
+// gcc -o ch_5_ex_16_v2.o ch_5_ex_16_v2.c && ./ch_5_ex_16_v2.o
 
 /********************************************************************************
-5-16 (page 121) Add the -d ("directory order") option, which makes comparisons only on letters, 
+5-16 Add the -d ("directory order") option, which makes comparisons only on letters, 
 numbers, and blanks. Make sure it works in conjunction with -f.
+
+[Adding -f sorts ignoring case, and was ex 5-15. Ex 5-14 was sorting in reverse order]
 
 Decision to resume: start from base case, add -d, and only then add back -f
 Base to use: sort program page 119, retype
 
-New test inputs to use
-
-
-
+Decisions
+	For now, do not include -f
+	What is most probable place to change so it compares only letters, numbers, blanks
+		Where do the actual char comparisons happen: strcomp and numcmp
+			Those though not promising place to edit since are shared
+		Upstream option, think used in other questions: modify the char * compared
+			Do that before passing to qsort
+				Pointers to original text lines: char *lineptr[MAXLINES]
+				Pointers to modified text lines: char *modptr[MAXLINES]
 */
 
 // page 119, original sort program
@@ -19,7 +26,7 @@ New test inputs to use
 
 #define MAXLINES 5000     // max number of lines to be sorted
 
-char *lineptr[MAXLINES];  // pointers to text lines
+char *lineptr[MAXLINES];  // pointers to orginal text lines
 
 int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
@@ -38,6 +45,7 @@ int main(int argc, char *argv[]) {
 	if (argc > 1 && strcomp(argv[1], "-n") == 0) {
 		numeric = 1;
 	}
+
 	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
 		qsort((void  **) lineptr, 0, nlines-1, (int (*)(void*,void*))(numeric ? numcmp : strcomp));
 		writelines(lineptr, nlines);
@@ -53,7 +61,7 @@ void qsort(void *v[], int left, int right, int (*comp)(void *, void *)) {
 	int i, last;
 	void swap(void *v[], int, int);
 
-	if (left >= right) {  // do nothing if array cointains fewer than 2 elements
+	if (left >= right) {  // do nothing if array contains fewer than 2 elements
 		return;
 	}
 	swap(v, left, (left+right)/2);
@@ -70,10 +78,10 @@ void qsort(void *v[], int left, int right, int (*comp)(void *, void *)) {
 
 // return <0 if s<t, 0 if s==t, >0 if s>t (page 106)
 int strcomp(char *s, char *t) {
-	for ( ; *s == *t; s++, t++)
+	for ( ; *s == *t; s++, t++)  // iterate over char *, until *s and *t do not match, or *s is end of string
 		if (*s == '\0')
 			return 0;
-	return *s - *t;
+	return *s - *t;  // subtract chars at first position where s and t disagree
 }
 
 // compare s1 and s2 numerically
@@ -159,6 +167,7 @@ char *alloc(int n) {
 
 // (page 109)
 void writelines(char *lineptr[], int nlines) {
+	printf("\nResult:\n");
 	while (nlines-- > 0)
 		printf("%s\n", *lineptr++);
 }
